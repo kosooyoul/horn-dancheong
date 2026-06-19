@@ -1,0 +1,127 @@
+{
+  "name": "Object Definitions", 
+  "description": "바닥 위에 배치되는 오브젝트 정의 (0x00FF00 부분)",
+  "version": "1.0",
+  "objects": [
+    {
+      "id": 0,
+      "name": "None",
+      "description": "오브젝트 없음",
+      "colorHex": "#000000",
+      "isBlocking": false,
+      "isInteractable": false,
+      "height": 0,
+      "prefabPath": ""
+    },
+    {
+      "id": 1,
+      "name": "Rock",
+      "description": "바위",
+      "colorHex": "#708090",
+      "isBlocking": true,
+      "isInteractable": false,
+      "height": 1,
+      "prefabPath": "Prefabs/Objects/Rock"
+    },
+    {
+      "id": 2,
+      "name": "Tree",
+      "description": "나무",
+      "colorHex": "#228B22",
+      "isBlocking": true,
+      "isInteractable": false,
+      "height": 2,
+      "prefabPath": "Prefabs/Objects/Tree"
+    },
+    {
+      "id": 3,
+      "name": "Bush",
+      "description": "덤불",
+      "colorHex": "#32CD32",
+      "isBlocking": false,
+      "isInteractable": false,
+      "height": 0.5,
+      "prefabPath": "Prefabs/Objects/Bush"
+    },
+    {
+      "id": 4,
+      "name": "Chest",
+      "description": "보물상자",
+      "colorHex": "#DAA520",
+      "isBlocking": true,
+      "isInteractable": true,
+      "height": 1,
+      "prefabPath": "Prefabs/Objects/Chest"
+    },
+    {
+      "id": 5,
+      "name": "Barrel",
+      "description": "배럴",
+      "colorHex": "#8B4513",
+      "isBlocking": true,
+      "isInteractable": true,
+      "height": 1,
+      "prefabPath": "Prefabs/Objects/Barrel"
+    },
+    {
+      "id": 6,
+      "name": "Pillar",
+      "description": "기둥",
+      "colorHex": "#BC8F8F",
+      "isBlocking": true,
+      "isInteractable": false,
+      "height": 3,
+      "prefabPath": "Prefabs/Objects/Pillar"
+    },
+    {
+      "id": 7,
+      "name": "Statue",
+      "description": "조각상",
+      "colorHex": "#D3D3D3",
+      "isBlocking": true,
+      "isInteractable": false,
+      "height": 2,
+      "prefabPath": "Prefabs/Objects/Statue"
+    },
+    {
+      "id": 8,
+      "name": "Crystal",
+      "description": "크리스탈",
+      "colorHex": "#9370DB",
+      "isBlocking": false,
+      "isInteractable": true,
+      "height": 1.5,
+      "prefabPath": "Prefabs/Objects/Crystal"
+    },
+    {
+      "id": 9,
+      "name": "Torch",
+      "description": "횃불",
+      "colorHex": "#FF6347",
+      "isBlocking": false,
+      "isInteractable": false,
+      "height": 2,
+      "prefabPath": "Prefabs/Objects/Torch"
+    },
+    {
+      "id": 10,
+      "name": "SpawnPoint",
+      "description": "스폰 지점",
+      "colorHex": "#00FFFF",
+      "isBlocking": false,
+      "isInteractable": false,
+      "height": 0,
+      "prefabPath": "Prefabs/Objects/SpawnPoint"
+    },
+    {
+      "id": 11,
+      "name": "Portal",
+      "description": "포탈",
+      "colorHex": "#FF00FF",
+      "isBlocking": false,
+      "isInteractable": true,
+      "height": 0.1,
+      "prefabPath": "Prefabs/Objects/Portal"
+    }
+  ]
+}

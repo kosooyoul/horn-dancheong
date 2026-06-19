@@ -1,0 +1,31 @@
+{
+  "name": "Ally Definitions",
+  "description": "아군 유닛 종류 정의 (allySpawns의 id로 참조)",
+  "version": "1.0",
+  "units": [
+    {
+      "id": 1,
+      "name": "Warrior",
+      "description": "근접 전사",
+      "colorHex": "#3366FF",
+      "prefabPath": "",
+      "defaultStats": { "agility": 5, "spirit": 3, "guard": 9, "luck": 4, "mov": 4 }
+    },
+    {
+      "id": 2,
+      "name": "Archer",
+      "description": "원거리 궁수",
+      "colorHex": "#33CCFF",
+      "prefabPath": "",
+      "defaultStats": { "agility": 8, "spirit": 6, "guard": 4, "luck": 6, "mov": 5 }
+    },
+    {
+      "id": 3,
+      "name": "Healer",
+      "description": "회복 지원",
+      "colorHex": "#66FF99",
+      "prefabPath": "",
+      "defaultStats": { "agility": 6, "spirit": 9, "guard": 4, "luck": 5, "mov": 4 }
+    }
+  ]
+}
