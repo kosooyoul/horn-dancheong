@@ -15,7 +15,7 @@ public class BattleCameraFollow : MonoBehaviour
 
     [Header("카메라 구도 (위에서 내려다보기)")]
     [Tooltip("대상 기준 오프셋(월드 좌표). y가 높이, z가 거리. 높이와 거리(z 절댓값)가 같으면 정확히 45°.")]
-    private Vector3 cameraOffset = new Vector3(0f, 4f, -4f);
+    private Vector3 cameraOffset = new Vector3(0f, 12f, -12f);
 
     [Tooltip("카메라 회전(오일러 각). X 45°면 대각선 45° 내려다보기, 90°면 수직 탑다운.")]
     private Vector3 cameraEulerAngles = new Vector3(45f, 0f, 0f);
