@@ -15,8 +15,8 @@ namespace KD
         public GameObject effectPrefab;
 
         [Header("장착 조건")]
-        [Tooltip("이 스킬을 장착할 수 있는 직군 목록. 비어있으면 전 직군 장착 가능")]
-        public UnitRole[] allowedRoles;
+        [Tooltip("이 스킬을 장착할 수 있는 무기 타입. 비어있으면 전 무기 장착 가능")]
+        public WeaponType[] allowedWeaponTypes;
 
         [Header("타겟")]
         public TargetType targetType;
@@ -26,6 +26,8 @@ namespace KD
         public GridPatternData targetPattern;
 
         [Header("비용 & 쿨타임")]
+        [Tooltip("사용 시 소모하는 AP. BattleActionConfig.MaxAP = 100 기준\n기본 공격: 25~35 / 강한 스킬: 45~60 / 광역: 50~70")]
+        public int apCost = 30;
         [Tooltip("사용 후 재사용까지 걸리는 턴 수. 0이면 쿨타임 없음")]
         public int cooldown = 1;
 
@@ -50,6 +52,7 @@ namespace KD
             if (targetPattern == null)
                 Debug.LogWarning($"[{name}] targetPattern이 없습니다. GridPatternData를 할당하세요.", this);
 
+            apCost           = Mathf.Clamp(apCost, 1, 100);
             cooldown         = Mathf.Max(0, cooldown);
             baseValue        = Mathf.Max(0, baseValue);
             spiritMultiplier = Mathf.Max(0f, spiritMultiplier);
