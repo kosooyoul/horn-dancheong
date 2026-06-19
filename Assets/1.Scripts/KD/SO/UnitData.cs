@@ -15,12 +15,18 @@ namespace KD
         public GameObject prefab;
 
         [Header("직군 & 속성")]
-        public UnitRole role;
+        public UnitRole    role;
         public UnitAttribute attribute;
+
+        [Header("무기")]
+        [Tooltip("무기 종류에 따라 장착 가능한 교체 스킬이 결정됨")]
+        public WeaponType weaponType;
 
         [Header("이동 방식")]
         [Tooltip("이동 형태를 결정. 이동 거리는 agility 스탯으로 계산됨")]
         public MovementType movementType = MovementType.Cardinal;
+        [Tooltip("이동 1회 소모 AP (거리 무관, 이동을 선택하면 이 값이 차감됨)")]
+        public int moveAPCost = 30;
 
         [Header("기본 스탯")]
         public UnitBaseStats baseStats;
@@ -29,9 +35,7 @@ namespace KD
         public SkillData uniqueSkill1;
         public SkillData uniqueSkill2;
 
-        [Header("교체 가능 스킬 후보 목록")]
-        [Tooltip("직군에 맞는 스킬만 넣을 것. 전투 시작 전 1개를 선택해 장착")]
-        public SkillData[] availableOptionalSkills;
+        // 교체 가능 스킬 후보 목록은 SkillDatabase에서 weaponType으로 필터링
 
 #if UNITY_EDITOR
         private void OnValidate()

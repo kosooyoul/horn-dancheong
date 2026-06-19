@@ -9,40 +9,62 @@ namespace KD
     public class BattleUnit
     {
         // ── 고정 데이터 참조 (읽기 전용) ────────────────────────────────
-        public UnitData Data { get; private set; }
+        public UnitData Data   { get; private set; }
+        public int      TeamId { get; private set; } // 0 = 플레이어, 1 = 적
         public UnitDerivedStats Stats { get; private set; }
 
         // ── 가변 상태 ────────────────────────────────────────────────────
-        public int CurrentHP { get; private set; }
+        public int CurrentHP      { get; private set; }
+        public int MaxAP          { get; private set; }
+        public int CurrentAP      { get; private set; }
         public Vector2Int CurrentTilePos { get; private set; }
         public bool IsAlive => CurrentHP > 0;
+        public bool IsDead  => CurrentHP <= 0;
 
         // 장착된 교체 스킬 (null이면 미장착)
         private SkillData _equippedOptionalSkill;
+        public  SkillData EquippedOptionalSkill => _equippedOptionalSkill;
 
         // 스킬별 남은 쿨타임 <skillId, remainingCooldown>
         private readonly Dictionary<string, int> _skillCooldowns = new Dictionary<string, int>();
 
         // ── 초기화 ───────────────────────────────────────────────────────
-        public BattleUnit(UnitData data, Vector2Int startTilePos)
+        // teamId: 0 = 플레이어 팀, 1 = 적 팀
+        // optionalSkill: OwnedUnit.equippedOptionalSkill 전달 (null이면 미장착)
+        public BattleUnit(UnitData data, int teamId, Vector2Int startTilePos, SkillData optionalSkill = null)
         {
-            Data             = data;
-            Stats            = StatCalculator.Calculate(data.baseStats);
-            CurrentHP        = Stats.maxHP;
-            CurrentTilePos   = startTilePos;
+            Data           = data;
+            TeamId         = teamId;
+            Stats          = StatCalculator.Calculate(data.baseStats);
+            CurrentHP      = Stats.maxHP;
+            CurrentTilePos = startTilePos;
+            MaxAP          = BattleActionConfig.MaxAP;
+            CurrentAP      = BattleActionConfig.MaxAP;
+
+            if (optionalSkill != null)
+                TryEquipOptionalSkill(optionalSkill);
         }
 
         // ── 스킬 관련 ────────────────────────────────────────────────────
 
         public bool TryEquipOptionalSkill(SkillData skill)
         {
-            if (!SkillEquipValidator.CanEquip(Data.role, skill))
+            if (!SkillEquipValidator.CanEquip(Data.weaponType, skill))
             {
-                Debug.LogWarning($"[BattleUnit] {Data.unitName}({Data.role})은 '{skill.skillName}'을 장착할 수 없습니다.");
+                Debug.LogWarning($"[BattleUnit] {Data.unitName}({Data.weaponType})은 '{skill.skillName}'을 장착할 수 없습니다.");
                 return false;
             }
             _equippedOptionalSkill = skill;
             return true;
+        }
+
+        // 이 유닛이 해당 스킬을 보유하고 있는지 (쿨타임/AP 무관)
+        public bool HasSkill(SkillData skill)
+        {
+            if (skill == null) return false;
+            return skill == Data.uniqueSkill1
+                || skill == Data.uniqueSkill2
+                || skill == _equippedOptionalSkill;
         }
 
         // 쿨타임이 0인 스킬 목록 반환 — UI 하이라이트, 선택 가능 스킬 표시에 사용
@@ -106,6 +128,39 @@ namespace KD
         public void MoveTo(Vector2Int targetPos)
         {
             CurrentTilePos = targetPos;
+        }
+
+        // ── AP 시스템 ─────────────────────────────────────────────────────
+
+        public bool HasEnoughAP(int cost) => CurrentAP >= cost;
+
+        public bool TrySpendAP(int cost)
+        {
+            if (!HasEnoughAP(cost))
+            {
+                Debug.LogWarning($"[BattleUnit] {Data.unitName} AP 부족 (필요: {cost}, 현재: {CurrentAP})");
+                return false;
+            }
+            CurrentAP -= cost;
+            return true;
+        }
+
+        public void RecoverAP(int amount)
+        {
+            CurrentAP = Mathf.Min(MaxAP, CurrentAP + amount);
+        }
+
+        // 전투 시작 시 1회 호출 — 차례마다 호출하면 Wait() 의미 없어짐
+        public void ResetAP()
+        {
+            CurrentAP = MaxAP;
+        }
+
+        // 대기 선택 시 호출 — 행동하지 않고 AP 회복
+        public void Wait()
+        {
+            RecoverAP(BattleActionConfig.WaitAPRecovery);
+            Debug.Log($"[BattleUnit] {Data.unitName} 대기 → AP {CurrentAP}/{MaxAP}");
         }
     }
 }
