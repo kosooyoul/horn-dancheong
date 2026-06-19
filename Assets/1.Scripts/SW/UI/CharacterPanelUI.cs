@@ -20,6 +20,30 @@ namespace HornDancheong.Seongwoo.UI
         public string CharacterId { get; private set; }
         public int Initiative { get; private set; }
 
+        private CanvasGroup _canvasGroup;
+
+        private void Awake()
+        {
+            _canvasGroup = GetComponent<CanvasGroup>();
+            if (_canvasGroup == null)
+            {
+                _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+        }
+
+        public void SetAlpha(float alpha)
+        {
+            if (_canvasGroup != null)
+            {
+                _canvasGroup.alpha = alpha;
+            }
+        }
+
+        public void SetScale(float scale)
+        {
+            transform.localScale = new Vector3(scale, scale, 1f);
+        }
+
         /// <summary>
         /// 캐릭터 정보를 바탕으로 패널의 초기 정보를 설정합니다.
         /// </summary>
@@ -27,6 +51,8 @@ namespace HornDancheong.Seongwoo.UI
         {
             CharacterId = data.Id;
             Initiative = data.Initiative;
+            SetAlpha(1f); // 기본 불투명
+            SetScale(1f); // 기본 크기
             
             if (nameText != null)
             {

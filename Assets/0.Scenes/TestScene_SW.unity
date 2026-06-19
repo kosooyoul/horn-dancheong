@@ -309,7 +309,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 400, y: -500}
+  m_SizeDelta: {x: 400, y: -400}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &335641433
 MonoBehaviour:
@@ -1694,8 +1694,6 @@ GameObject:
   - component: {fileID: 1586336387}
   - component: {fileID: 1586336390}
   - component: {fileID: 1586336389}
-  - component: {fileID: 1586336388}
-  - component: {fileID: 1586336392}
   - component: {fileID: 1586336391}
   m_Layer: 5
   m_Name: Panel_ContentHolder
@@ -1718,37 +1716,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 335641430}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 400, y: 0}
+  m_SizeDelta: {x: 400, y: 580}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1586336388
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1586336386}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
-  m_Padding:
-    m_Left: 10
-    m_Right: 10
-    m_Top: 10
-    m_Bottom: 10
-  m_ChildAlignment: 1
-  m_Spacing: 10
-  m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!114 &1586336389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1800,20 +1772,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HornDancheong.Seongwoo.UI.InitiativeManager
   _characterPanelPrefab: {fileID: 7900339172040633575, guid: 02852b927ba1c4645a7b6f073903f9c2, type: 3}
---- !u!114 &1586336392
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1586336386}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
-  m_HorizontalFit: 0
-  m_VerticalFit: 1
+  _panelHeight: 90
+  _spacing: 10
+  _animationDuration: 0.35
+  _slideDistance: 200
 --- !u!1 &1622055405
 GameObject:
   m_ObjectHideFlags: 0
