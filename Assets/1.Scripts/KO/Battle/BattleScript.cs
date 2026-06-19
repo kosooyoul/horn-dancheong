@@ -180,6 +180,8 @@ public class BattleScript : MonoBehaviour
     [SerializeField] private Color allyColor = new Color(0.2f, 0.4f, 1f);
     [Tooltip("적군 마커 색상")]
     [SerializeField] private Color enemyColor = new Color(1f, 0.2f, 0.2f);
+    [Tooltip("유닛이 한 칸 이동할 때의 보간 속도 (월드 단위/초)")]
+    [SerializeField] private float unitMoveSpeed = 6f;
     
     [Header("Fallback Map Layout (JSON 비활성화 시 사용)")]
     [SerializeField] private int[,] fallbackMapLayout = new int[10, 10] 
@@ -957,10 +959,20 @@ public class BattleScript : MonoBehaviour
 
         // 마커 월드 위치 갱신 — y(높이)는 기존 값을 유지해 박스/프리팹 모두 자연스럽게 이동
         Vector3 world = GridToWorld(target.x, target.y);
-        Vector3 markerPosition = unit.marker.transform.position;
-        markerPosition.x = world.x;
-        markerPosition.z = world.z;
-        unit.marker.transform.position = markerPosition;
+        Vector3 markerTarget = unit.marker.transform.position;
+        markerTarget.x = world.x;
+        markerTarget.z = world.z;
+
+        // UnitMover가 있으면 부드럽게 보간 이동, 없으면 즉시 이동
+        UnitMover mover = unit.marker.GetComponent<UnitMover>();
+        if (mover != null)
+        {
+            mover.MoveTo(markerTarget);
+        }
+        else
+        {
+            unit.marker.transform.position = markerTarget;
+        }
 
         Debug.Log($"[BattleScript] {unit.DisplayName} 이동 → ({target.x}, {target.y})");
         return true;
@@ -1003,6 +1015,12 @@ public class BattleScript : MonoBehaviour
         Vector3 worldPosition = GridToWorld(grid.x, grid.y);
 
         GameObject marker = CreateUnitVisual(worldPosition, isEnemy, definition);
+
+        // 부드러운 이동을 위한 무버 컴포넌트 부착 (초기 위치는 즉시 스냅)
+        UnitMover mover = marker.GetComponent<UnitMover>();
+        if (mover == null) mover = marker.AddComponent<UnitMover>();
+        mover.SetMoveSpeed(unitMoveSpeed);
+        mover.SnapTo(marker.transform.position);
 
         string prefix = isEnemy ? "Enemy" : "Ally";
         string unitName = definition != null && !string.IsNullOrWhiteSpace(definition.name)
