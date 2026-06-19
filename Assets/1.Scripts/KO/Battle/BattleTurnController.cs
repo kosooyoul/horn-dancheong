@@ -13,6 +13,8 @@ public class BattleTurnController : MonoBehaviour
     [Header("행동 순서 GUI")]
     [SerializeField] private Vector2 turnOrderPanelPosition = new Vector2(10f, 300f);
     [SerializeField] private float turnOrderPanelWidth = 260f;
+    [Tooltip("앞으로 표시할 예상 행동 순서 개수")]
+    [SerializeField] private int turnOrderPreviewCount = 12;
 
     private BattleUnitEntry lastReportedUnit;
 
@@ -104,17 +106,18 @@ public class BattleTurnController : MonoBehaviour
         GUILayout.EndArea();
     }
 
-    // 행동 순서를 2D GUI 목록으로 표시 — 현재 턴 유닛은 강조
+    // 앞으로의 행동 순서를 2D GUI 목록으로 표시 — 첫 번째(현재 차례)는 강조.
+    // 민첩이 높은 유닛은 짧은 구간에서 여러 번 등장한다(틱 게이지 모델).
     private void DrawTurnOrderPanel()
     {
-        IReadOnlyList<BattleUnitEntry> order = battleScript.GetTurnOrder();
-        BattleUnitEntry current = battleScript.GetCurrentTurnUnit();
+        int previewCount = Mathf.Max(1, turnOrderPreviewCount);
+        IReadOnlyList<BattleUnitEntry> order = battleScript.PeekTurnOrder(previewCount);
 
         float panelHeight = 60f + order.Count * 22f;
         var area = new Rect(turnOrderPanelPosition.x, turnOrderPanelPosition.y, turnOrderPanelWidth, panelHeight);
 
         GUILayout.BeginArea(area, GUI.skin.box);
-        GUILayout.Label("<b>행동 순서 (민첩순)</b>", RichLabelStyle());
+        GUILayout.Label("<b>행동 순서 (민첩 빈도순)</b>", RichLabelStyle());
 
         if (order.Count == 0)
         {
@@ -125,10 +128,13 @@ public class BattleTurnController : MonoBehaviour
             for (int i = 0; i < order.Count; i++)
             {
                 BattleUnitEntry unit = order[i];
-                bool isCurrent = ReferenceEquals(unit, current);
+                bool isCurrent = i == 0;
                 string faction = unit.isEnemy ? "적" : "아군";
                 string marker = isCurrent ? "▶ " : "   ";
-                string line = $"{marker}{i + 1}. [{faction}] {unit.DisplayName}  (민첩 {unit.Agility})";
+                string moveInfo = isCurrent
+                    ? $"이동 {battleScript.GetCurrentTurnMovesRemaining()}/{unit.MoveRange}"
+                    : $"이동 {unit.MoveRange}";
+                string line = $"{marker}{i + 1}. [{faction}] {unit.DisplayName}  (민첩 {unit.Agility}, {moveInfo})";
 
                 GUILayout.Label(line, EntryStyle(isCurrent, unit.isEnemy));
             }

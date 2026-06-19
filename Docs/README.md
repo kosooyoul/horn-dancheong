@@ -39,10 +39,11 @@
 
 ## 🔧 개발자 가이드
 
+- [전투 시스템 스펙](Systems/BattleSystem.md)
 - [BattleScript API](API/BattleScript.md)
 - [맵 제작 가이드](Guides/MapCreation.md)
 - [성능 최적화](Guides/Performance.md)
 
 ---
 **최종 업데이트:** 2026-06-20  
-**버전:** 1.1.0
+**버전:** 1.2.0

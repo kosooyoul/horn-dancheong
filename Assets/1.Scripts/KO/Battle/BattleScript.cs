@@ -131,6 +131,14 @@ public class BattleUnitEntry
     public Vector2Int grid;          // 현재 위치
     public bool isEnemy;             // true면 적군, false면 아군
 
+    // ── 틱 게이지(행동 빈도) 모델용 런타임 상태 ──
+    // 행동 후 다음 행동까지의 대기시간 — 민첩에 반비례(민첩이 높을수록 자주 행동)
+    public double actionDelay;
+    // 다음 행동이 예정된 가상 시각 — 이 값이 가장 작은 유닛이 다음 차례
+    public double nextActionTime;
+    // 동시각 동점 시 안정적 정렬을 위한 등록 순서
+    public int registrationOrder;
+
     public BattleUnitEntry(GameObject marker, UnitDefinition definition, Vector2Int grid, bool isEnemy)
     {
         this.marker = marker;
@@ -213,10 +221,18 @@ public class BattleScript : MonoBehaviour
     private List<Vector2Int> allySpawnSlots;
     private Dictionary<Vector2Int, GameObject> occupiedTiles;
 
-    // 행동 순서 계산용 — 배치된 모든 유닛과 이니셔티브 정렬 결과
+    // 행동 순서 계산용 — 배치된 모든 유닛과 행동에 참가하는 유닛 목록
     private List<BattleUnitEntry> battleUnits;
-    private List<BattleUnitEntry> turnOrder;
-    private int currentTurnIndex;
+    private List<BattleUnitEntry> turnOrder;   // 민첩>0 인 행동 참가 유닛 (정렬X, 게이지로 차례 결정)
+    private BattleUnitEntry currentTurnUnit;    // 현재 차례 유닛
+
+    // 틱 게이지 공통 상수 — delay = TickScale / 민첩. 클수록 정수 나눗셈 오차가 작다.
+    private const double TickScale = 100000.0;
+    // nextActionTime 이 이 값을 넘으면 전체를 빼서 부동소수 누적/오버플로를 방지
+    private const double TimeNormalizeThreshold = 1e9;
+
+    // 현재 턴 유닛의 턴 시작 위치(원점) — mov 이동 범위는 이 위치를 기준으로 계산
+    private Vector2Int currentTurnOrigin;
 
     void Start()
     {
@@ -653,7 +669,7 @@ public class BattleScript : MonoBehaviour
         occupiedTiles = new Dictionary<Vector2Int, GameObject>();
         battleUnits = new List<BattleUnitEntry>();
         turnOrder = new List<BattleUnitEntry>();
-        currentTurnIndex = 0;
+        currentTurnUnit = null;
 
         PlaceEnemies();
         RegisterAllySpawnSlots();
@@ -715,23 +731,75 @@ public class BattleScript : MonoBehaviour
 
     // ── 행동 순서 (이니셔티브) ────────────────────────────────────────
 
-    // 배치된 모든 유닛을 민첩성(이니셔티브) 내림차순으로 정렬해 행동 순서를 만든다.
-    // 동점이면 운(luck)으로 보정, 그래도 같으면 등록 순서를 유지(안정 정렬).
+    // 민첩(>0)인 모든 유닛을 틱 게이지 모델로 행동 대기열에 등록한다.
+    // 각 유닛은 행동 후 delay(=TickScale/민첩)만큼 기다렸다 다시 행동하므로,
+    // 행동 빈도가 민첩에 비례한다. (민첩 8:6:2 → 행동 횟수 4:3:1)
     private void BuildTurnOrder()
     {
+        turnOrder = new List<BattleUnitEntry>();
+        currentTurnUnit = null;
+
         if (battleUnits == null)
         {
-            turnOrder = new List<BattleUnitEntry>();
             return;
         }
 
-        // OrderByDescending은 안정 정렬이므로 동점일 때 등록 순서가 유지됨
-        turnOrder = battleUnits
-            .OrderByDescending(unit => unit.Initiative)
-            .ToList();
-        currentTurnIndex = 0;
+        int order = 0;
+        foreach (BattleUnitEntry unit in battleUnits)
+        {
+            // 민첩 0(빈 슬롯/행동 불가)은 영원히 차례가 오지 않으므로 제외
+            if (unit.Agility <= 0) continue;
+
+            unit.actionDelay = TickScale / unit.Agility;
+            unit.nextActionTime = unit.actionDelay; // 첫 행동 예정 시각
+            unit.registrationOrder = order++;
+            turnOrder.Add(unit);
+        }
+
+        currentTurnUnit = PickNextActor();
+        ResetCurrentTurnMovement();
 
         LogTurnOrder();
+    }
+
+    // 다음에 행동할(=nextActionTime이 가장 빠른) 유닛을 고른다.
+    // 동시각이면 이니셔티브 높은 쪽, 그래도 같으면 등록 순서가 빠른 쪽.
+    private BattleUnitEntry PickNextActor()
+    {
+        BattleUnitEntry best = null;
+        if (turnOrder == null) return null;
+
+        foreach (BattleUnitEntry unit in turnOrder)
+        {
+            if (best == null || IsEarlier(unit, best)) best = unit;
+        }
+        return best;
+    }
+
+    private static bool IsEarlier(BattleUnitEntry a, BattleUnitEntry b)
+    {
+        if (a.nextActionTime != b.nextActionTime) return a.nextActionTime < b.nextActionTime;
+        if (a.Initiative != b.Initiative) return a.Initiative > b.Initiative;
+        return a.registrationOrder < b.registrationOrder;
+    }
+
+    // nextActionTime이 무한정 커지는 것을 막기 위해 최솟값을 0 기준으로 당긴다.
+    private void NormalizeTimesIfNeeded()
+    {
+        if (turnOrder == null || turnOrder.Count == 0) return;
+
+        double min = double.MaxValue;
+        foreach (BattleUnitEntry unit in turnOrder)
+        {
+            if (unit.nextActionTime < min) min = unit.nextActionTime;
+        }
+
+        if (min < TimeNormalizeThreshold) return;
+
+        foreach (BattleUnitEntry unit in turnOrder)
+        {
+            unit.nextActionTime -= min;
+        }
     }
 
     private void LogTurnOrder()
@@ -743,40 +811,109 @@ public class BattleScript : MonoBehaviour
         }
 
         var lines = new List<string>();
-        for (int i = 0; i < turnOrder.Count; i++)
+        foreach (BattleUnitEntry unit in turnOrder)
         {
-            BattleUnitEntry unit = turnOrder[i];
             string faction = unit.isEnemy ? "적" : "아군";
-            lines.Add($"{i + 1}. [{faction}] {unit.DisplayName} (민첩 {unit.Agility}, 운 {unit.Luck}, 이니셔티브 {unit.Initiative})");
+            lines.Add($"- [{faction}] {unit.DisplayName} (민첩 {unit.Agility}, 운 {unit.Luck}, delay {unit.actionDelay:F0})");
         }
 
-        Debug.Log($"[BattleScript] 행동 순서 ({turnOrder.Count}체):\n{string.Join("\n", lines)}");
+        // 미래 행동 순서 미리보기 — 참가 수의 약 2배만큼 표시
+        var preview = PeekTurnOrder(turnOrder.Count * 2);
+        var previewNames = preview.Select(u => u.DisplayName);
+
+        Debug.Log($"[BattleScript] 행동 참가 {turnOrder.Count}체:\n{string.Join("\n", lines)}\n예상 순서: {string.Join(" → ", previewNames)}");
     }
 
-    // 외부에서 행동 순서를 조회 (민첩성 내림차순)
+    // 외부에서 행동 참가 유닛 목록을 조회 (정렬 순서는 보장하지 않음)
     public IReadOnlyList<BattleUnitEntry> GetTurnOrder()
     {
         return turnOrder ?? new List<BattleUnitEntry>();
     }
 
-    // 현재 턴 유닛 — 행동 순서가 비어 있으면 null
-    public BattleUnitEntry GetCurrentTurnUnit()
+    // 현재 상태를 바꾸지 않고 앞으로의 행동 순서 count개를 시뮬레이션해 반환한다.
+    // result[0]은 현재 차례 유닛과 같다.
+    public List<BattleUnitEntry> PeekTurnOrder(int count)
     {
-        if (turnOrder == null || turnOrder.Count == 0) return null;
-        return turnOrder[currentTurnIndex % turnOrder.Count];
+        var result = new List<BattleUnitEntry>();
+        if (turnOrder == null || turnOrder.Count == 0 || count <= 0) return result;
+
+        // 실제 nextActionTime을 건드리지 않도록 복사본으로 시뮬레이션
+        int n = turnOrder.Count;
+        var simTime = new double[n];
+        for (int i = 0; i < n; i++) simTime[i] = turnOrder[i].nextActionTime;
+
+        for (int step = 0; step < count; step++)
+        {
+            int bestIdx = 0;
+            for (int i = 1; i < n; i++)
+            {
+                if (IsEarlierSim(simTime, i, bestIdx)) bestIdx = i;
+            }
+
+            result.Add(turnOrder[bestIdx]);
+            simTime[bestIdx] += turnOrder[bestIdx].actionDelay; // 다음 행동 재예약
+        }
+
+        return result;
     }
 
-    // 다음 턴으로 진행하고 그 유닛을 반환 (간단한 라운드 순환)
+    private bool IsEarlierSim(double[] simTime, int i, int j)
+    {
+        if (simTime[i] != simTime[j]) return simTime[i] < simTime[j];
+        BattleUnitEntry a = turnOrder[i];
+        BattleUnitEntry b = turnOrder[j];
+        if (a.Initiative != b.Initiative) return a.Initiative > b.Initiative;
+        return a.registrationOrder < b.registrationOrder;
+    }
+
+    // 현재 턴 유닛 — 참가 유닛이 없으면 null
+    public BattleUnitEntry GetCurrentTurnUnit()
+    {
+        return currentTurnUnit;
+    }
+
+    // 현재 유닛의 행동을 마치고 다음 차례 유닛을 반환한다.
+    // 방금 행동한 유닛은 delay만큼 뒤로 재예약된다.
     public BattleUnitEntry AdvanceTurn()
     {
         if (turnOrder == null || turnOrder.Count == 0) return null;
-        currentTurnIndex = (currentTurnIndex + 1) % turnOrder.Count;
-        return turnOrder[currentTurnIndex];
+
+        if (currentTurnUnit != null)
+        {
+            currentTurnUnit.nextActionTime += currentTurnUnit.actionDelay;
+        }
+
+        NormalizeTimesIfNeeded();
+        currentTurnUnit = PickNextActor();
+        ResetCurrentTurnMovement();
+        return currentTurnUnit;
+    }
+
+    // 현재 턴 유닛의 이동 원점을 현재 위치로 초기화 (턴 시작/전환 시 호출)
+    private void ResetCurrentTurnMovement()
+    {
+        BattleUnitEntry unit = GetCurrentTurnUnit();
+        currentTurnOrigin = unit != null ? unit.grid : Vector2Int.zero;
+    }
+
+    // 현재 턴 유닛이 원점에서 추가로 더 멀어질 수 있는 칸 수 (mov - 원점까지의 거리)
+    public int GetCurrentTurnMovesRemaining()
+    {
+        BattleUnitEntry unit = GetCurrentTurnUnit();
+        if (unit == null) return 0;
+        return Mathf.Max(0, unit.MoveRange - ManhattanDistance(unit.grid, currentTurnOrigin));
+    }
+
+    // 두 그리드 좌표 사이의 맨해튼 거리 (상하좌우 이동 기준 칸 수)
+    private static int ManhattanDistance(Vector2Int a, Vector2Int b)
+    {
+        return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
     }
 
     // ── 유닛 이동 ────────────────────────────────────────────────────
 
     // 현재 턴 유닛을 지정 방향으로 한 칸 이동시킨다. 성공하면 true.
+    // 턴 시작 위치(원점)에서 mov 칸을 벗어나는 이동은 허용하지 않는다.
     public bool TryMoveCurrentUnit(Vector2Int direction)
     {
         BattleUnitEntry unit = GetCurrentTurnUnit();
@@ -786,7 +923,14 @@ public class BattleScript : MonoBehaviour
             return false;
         }
 
-        return MoveUnit(unit, unit.grid + direction);
+        Vector2Int target = unit.grid + direction;
+        if (ManhattanDistance(target, currentTurnOrigin) > unit.MoveRange)
+        {
+            Debug.Log($"[BattleScript] {unit.DisplayName}의 이동 범위를 벗어납니다 (이동력 {unit.MoveRange}, 원점 ({currentTurnOrigin.x}, {currentTurnOrigin.y})).");
+            return false;
+        }
+
+        return MoveUnit(unit, target);
     }
 
     // 유닛을 목표 칸으로 이동 — 맵 범위/이동 가능/빈 칸 여부를 검증
@@ -972,7 +1116,7 @@ public class BattleScript : MonoBehaviour
         occupiedTiles?.Clear();
         battleUnits?.Clear();
         turnOrder?.Clear();
-        currentTurnIndex = 0;
+        currentTurnUnit = null;
     }
 
     // 특정 위치의 바닥 큐브 가져오기

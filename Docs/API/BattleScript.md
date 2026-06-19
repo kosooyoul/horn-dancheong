@@ -223,6 +223,7 @@ public bool TryMoveCurrentUnit(Vector2Int direction)
 ```
 - **매개변수**: `direction` - 이동 방향 (예: `Vector2Int.up`)
 - **반환값**: 이동 성공 여부
+- **이동력 제한**: 턴 시작 위치(원점)로부터 맨해튼 거리가 `mov`를 초과하는 칸으로는 이동하지 않고 `false` 반환. 범위 내에서는 앞뒤로 자유롭게 움직일 수 있음(예산이 누적 차감되지 않음)
 
 #### `MoveUnit(BattleUnitEntry unit, Vector2Int target)`
 유닛을 목표 칸으로 이동시킵니다.
@@ -231,7 +232,14 @@ public bool MoveUnit(BattleUnitEntry unit, Vector2Int target)
 ```
 - **검증**: 맵 범위, 이동 가능 여부(`IsWalkable`), 타일 점유 여부
 - **반환값**: 이동 성공 여부
-- **참고**: 현재 구현은 한 칸 이동만 처리하며, `mov`(이동 거리) 제한은 아직 적용하지 않습니다. `BattleUnitEntry.MoveRange`로 값만 노출됩니다.
+- **참고**: 한 칸 이동만 처리합니다. 이동력 차감은 `TryMoveCurrentUnit`에서 처리되므로, 이 메서드를 직접 호출하면 이동력 예산을 소모하지 않습니다
+
+#### `GetCurrentTurnMovesRemaining()`
+현재 턴 유닛이 원점에서 추가로 더 멀어질 수 있는 칸 수를 반환합니다.
+```csharp
+public int GetCurrentTurnMovesRemaining()
+```
+- **반환값**: `mov - (현재 위치에서 원점까지의 맨해튼 거리)`. 턴 시작/전환(`BuildTurnOrder`, `AdvanceTurn`) 시 원점이 현재 위치로 리셋됨
 
 ## 🔒 비공개 메서드 (Private Methods)
 
