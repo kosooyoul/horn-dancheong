@@ -1,0 +1,31 @@
+{
+  "name": "Enemy Definitions",
+  "description": "적 유닛 종류 정의 (enemySpawns의 id로 참조)",
+  "version": "1.0",
+  "units": [
+    {
+      "id": 1,
+      "name": "Goblin",
+      "description": "기본 근접 적",
+      "colorHex": "#FF3333",
+      "prefabPath": "",
+      "defaultStats": { "agility": 5, "spirit": 3, "guard": 5, "luck": 3, "mov": 5 }
+    },
+    {
+      "id": 2,
+      "name": "Orc",
+      "description": "강한 근접 적",
+      "colorHex": "#CC0000",
+      "prefabPath": "",
+      "defaultStats": { "agility": 4, "spirit": 4, "guard": 9, "luck": 3, "mov": 3 }
+    },
+    {
+      "id": 3,
+      "name": "Boss",
+      "description": "보스 유닛",
+      "colorHex": "#990033",
+      "prefabPath": "",
+      "defaultStats": { "agility": 7, "spirit": 8, "guard": 12, "luck": 6, "mov": 4 }
+    }
+  ]
+}

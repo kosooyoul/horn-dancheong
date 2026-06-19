@@ -21,10 +21,10 @@ MonoBehaviour:
   attribute: 0
   movementType: 0
   baseStats:
-    agility: 0
-    spirit: 0
-    guard: 0
-    luck: 0
+    agility: 1
+    spirit: 1
+    guard: 1
+    luck: 1
   uniqueSkill1: {fileID: 0}
   uniqueSkill2: {fileID: 0}
   availableOptionalSkills: []

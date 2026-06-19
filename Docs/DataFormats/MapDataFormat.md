@@ -18,8 +18,8 @@
   "height": number,
   "tiles": [number],
   "tileTypes": [TileTypeInfo],
-  "mapChipExamples": MapChipExamples,
-  "placedObjects": PlacedObjects
+  "allySpawns": [UnitPlacement],
+  "enemySpawns": [EnemyPlacement]
 }
 ```
 
@@ -59,34 +59,33 @@
 ```
 - **설명**: 기존 타일 타입 정의 (하위 호환용)
 
-#### mapChipExamples (문서용)
+#### allySpawns (아군 스폰 슬롯)
 ```json
 {
-  "description": "string",
-  "examples": [
-    {
-      "value": number,
-      "description": "string", 
-      "breakdown": "string"
-    }
-  ]
+  "x": number,
+  "y": number,
+  "id": number
 }
 ```
+- **설명**: 아군이 배치될 수 있는 스폰 슬롯
+- **필드**:
+  - `x, y`: 그리드 좌표
+  - `id`: `ALLYS.json`의 유닛 정의 id. **0 이하이면 플레이어가 채울 빈 슬롯**
+- **동작**: `id > 0`이면 시작 시 해당 유닛을 자동 배치, 빈 슬롯은 런타임에 `PlaceAllyAtSlot()`으로 채움
 
-#### placedObjects (문서용)
+#### enemySpawns (적 스폰)
 ```json
 {
-  "description": "string",
-  "objects": [
-    {
-      "name": "string",
-      "id": number,
-      "locations": "string",
-      "purpose": "string"
-    }
-  ]
+  "x": number,
+  "y": number,
+  "id": number
 }
 ```
+- **설명**: 맵에 고정 배치되는 적 유닛
+- **필드**:
+  - `x, y`: 그리드 좌표
+  - `id`: `ENEMIES.json`의 유닛 정의 id
+- **동작**: 맵 로딩 직후 해당 좌표에 적 유닛을 즉시 배치
 
 ## 🔢 맵 칩 번호 규칙
 
@@ -201,4 +200,5 @@ public static (int tileId, int objectId) SplitMapChip(int mapChip)
 **관련 문서:**
 - [타일 정의 포맷](TileDefinition.md)
 - [오브젝트 정의 포맷](ObjectDefinition.md)
+- [유닛 정의 포맷](UnitDefinition.md)
 - [맵 시스템 스펙](../Systems/MapSystem.md)

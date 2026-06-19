@@ -153,6 +153,10 @@ MonoBehaviour:
   mapFolderPath: Assets/1.Scripts/KO/Battle/MapData/
   defaultMapName: 001
   loadFromJSON: 1
+  autoFillAllySpawns: 1
+  unitMarkerSize: {x: 0.6, y: 1, z: 0.6}
+  allyColor: {r: 0.2, g: 0.4, b: 1, a: 1}
+  enemyColor: {r: 1, g: 0.2, b: 0.2, a: 1}
 --- !u!4 &52228812
 Transform:
   m_ObjectHideFlags: 0
@@ -161,8 +165,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 52228810}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.12293, y: -0, z: -7.69997}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.12292999, y: 0, z: -7.69997}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -307,6 +311,7 @@ GameObject:
   - component: {fileID: 960289333}
   - component: {fileID: 960289332}
   - component: {fileID: 960289331}
+  - component: {fileID: 960289335}
   m_Layer: 0
   m_Name: _GuidePlane
   m_TagString: Untagged
@@ -408,6 +413,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &960289335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 960289330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1027859ff72c144849cda53977df5e51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleTurnController
+  battleScript: {fileID: 52228811}
+  turnOrderPanelPosition: {x: 10, y: 300}
+  turnOrderPanelWidth: 260
 --- !u!1 &1029839481
 GameObject:
   m_ObjectHideFlags: 0
@@ -551,5 +571,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 1029839484}
   - {fileID: 818491964}
-  - {fileID: 52228812}
   - {fileID: 960289334}
+  - {fileID: 52228812}

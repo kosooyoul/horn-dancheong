@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KD.GridPatternData
   patternId: 
   patternName: 
-  description: 
   directionMode: 0
   directionSet: 0
   includeOrigin: 0

@@ -53,7 +53,7 @@
       "name": "Water",
       "description": "물",
       "colorHex": "#4682B4",
-      "isWalkable": false,
+      "isWalkable": true,
       "isTransparent": true,
       "movementCost": 0
     },
@@ -62,7 +62,7 @@
       "name": "Lava",
       "description": "용암",
       "colorHex": "#FF4500",
-      "isWalkable": false,
+      "isWalkable": true,
       "isTransparent": true,
       "movementCost": 0
     },

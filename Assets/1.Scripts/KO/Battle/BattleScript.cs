@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 [System.Serializable]
 public class MapData
@@ -11,6 +12,26 @@ public class MapData
     public int height;
     public int[] tiles; // 1차원 배열로 저장 (row-major order) - 32비트 값으로 타일+오브젝트 정보 포함
     public TileTypeInfo[] tileTypes;
+    public UnitPlacement[] allySpawns;   // 아군이 배치될 수 있는 빈 스폰 슬롯
+    public EnemyPlacement[] enemySpawns; // 맵에 고정 배치되는 적 유닛
+}
+
+// 아군 스폰 슬롯 정의 — id가 0 이하면 플레이어가 채울 빈 슬롯
+[System.Serializable]
+public class UnitPlacement
+{
+    public int x;
+    public int y;
+    public int id; // ALLYS.json의 유닛 정의 id. 0 이하면 빈 슬롯
+}
+
+// 적 유닛 배치 정의 — id로 ENEMIES.json의 유닛 정의를 참조
+[System.Serializable]
+public class EnemyPlacement
+{
+    public int x;
+    public int y;
+    public int id; // ENEMIES.json의 유닛 정의 id
 }
 
 [System.Serializable]
@@ -56,6 +77,38 @@ public class ObjectCollection
     public ObjectInfo[] objects;
 }
 
+// 유닛 기본 스탯 — KD.UnitBaseStats와 동일한 4개 원시 스탯 (추후 StatCalculator로 매핑)
+[System.Serializable]
+public class UnitDefaultStats
+{
+    public int agility; // 민첩 — 행동 순서, 회피율
+    public int spirit;  // 영력 — 스킬 데미지 및 회복량
+    public int guard;   // 방어 — 최대 체력 및 피해 감소
+    public int luck;    // 운 — 치명타/회피 확률
+    public int mov;     // 이동 — 한 턴에 이동 가능한 기본 칸 수
+}
+
+// 아군/적군 유닛 종류 정의 (ALLYS.json / ENEMIES.json 공용)
+[System.Serializable]
+public class UnitDefinition
+{
+    public int id;
+    public string name;
+    public string description;
+    public string colorHex;   // 박스 마커 색상 (#RRGGBB)
+    public string prefabPath; // Resources 프리팹 경로 (비우면 박스 사용)
+    public UnitDefaultStats defaultStats; // 기본 스탯
+}
+
+[System.Serializable]
+public class UnitDefinitionCollection
+{
+    public string name;
+    public string description;
+    public string version;
+    public UnitDefinition[] units;
+}
+
 [System.Serializable]
 public class TileTypeInfo
 {
@@ -70,6 +123,35 @@ public class MapCollection
     public MapData[] maps;
 }
 
+// 전투에 참가한 유닛의 런타임 정보 — 행동 순서(이니셔티브) 계산에 사용
+public class BattleUnitEntry
+{
+    public GameObject marker;        // 화면에 표시되는 유닛 마커
+    public UnitDefinition definition; // ALLYS.json / ENEMIES.json 정의 (빈 슬롯이면 null)
+    public Vector2Int grid;          // 현재 위치
+    public bool isEnemy;             // true면 적군, false면 아군
+
+    public BattleUnitEntry(GameObject marker, UnitDefinition definition, Vector2Int grid, bool isEnemy)
+    {
+        this.marker = marker;
+        this.definition = definition;
+        this.grid = grid;
+        this.isEnemy = isEnemy;
+    }
+
+    // 빈 슬롯(정의 없음)은 스탯을 0으로 취급
+    public int Agility => definition != null && definition.defaultStats != null ? definition.defaultStats.agility : 0;
+    public int Luck => definition != null && definition.defaultStats != null ? definition.defaultStats.luck : 0;
+    public int MoveRange => definition != null && definition.defaultStats != null ? definition.defaultStats.mov : 0;
+
+    // 행동 순서 점수 — KD.StatCalculator와 동일한 공식(민첩 우선, 운으로 동점 보정)
+    public int Initiative => Agility * 10 + Luck;
+
+    public string DisplayName => definition != null && !string.IsNullOrWhiteSpace(definition.name)
+        ? definition.name
+        : "Unit";
+}
+
 public class BattleScript : MonoBehaviour
 {
     [Header("Battle Map Settings")]
@@ -80,6 +162,16 @@ public class BattleScript : MonoBehaviour
     [SerializeField] private string mapFolderPath = "Assets/1.Scripts/KO/Battle/MapData/";
     [SerializeField] private string defaultMapName = "basic_10x10";
     [SerializeField] private bool loadFromJSON = true;
+    
+    [Header("Unit Placement")]
+    [Tooltip("켜면 비어 있는 아군 스폰 슬롯에도 시작 시 자동으로 박스를 올림 (테스트용)")]
+    [SerializeField] private bool autoFillAllySpawns = true;
+    [Tooltip("유닛 박스 마커 크기")]
+    [SerializeField] private Vector3 unitMarkerSize = new Vector3(0.6f, 1f, 0.6f);
+    [Tooltip("아군 마커 색상")]
+    [SerializeField] private Color allyColor = new Color(0.2f, 0.4f, 1f);
+    [Tooltip("적군 마커 색상")]
+    [SerializeField] private Color enemyColor = new Color(1f, 0.2f, 0.2f);
     
     [Header("Fallback Map Layout (JSON 비활성화 시 사용)")]
     [SerializeField] private int[,] fallbackMapLayout = new int[10, 10] 
@@ -109,12 +201,71 @@ public class BattleScript : MonoBehaviour
     // 새로운 맵 칩 시스템
     private Dictionary<int, TileInfo> tileDefinitions;
     private Dictionary<int, ObjectInfo> objectDefinitions;
+    
+    // 유닛 종류 정의 (ALLYS.json / ENEMIES.json)
+    private Dictionary<int, UnitDefinition> allyDefinitions;
+    private Dictionary<int, UnitDefinition> enemyDefinitions;
+    
+    // 유닛 배치 런타임 상태
+    private Transform unitParent;
+    private List<GameObject> enemyUnits;
+    private List<GameObject> allyUnits;
+    private List<Vector2Int> allySpawnSlots;
+    private Dictionary<Vector2Int, GameObject> occupiedTiles;
+
+    // 행동 순서 계산용 — 배치된 모든 유닛과 이니셔티브 정렬 결과
+    private List<BattleUnitEntry> battleUnits;
+    private List<BattleUnitEntry> turnOrder;
+    private int currentTurnIndex;
 
     void Start()
     {
         LoadTileAndObjectDefinitions();
+        LoadUnitDefinitions();
         LoadMapData();
         CreateBattleMap();
+        PlaceUnits();
+    }
+
+    // ALLYS.json / ENEMIES.json에서 유닛 종류 정의 로딩
+    private void LoadUnitDefinitions()
+    {
+        allyDefinitions = LoadUnitDefinitionFile("ALLYS.json");
+        enemyDefinitions = LoadUnitDefinitionFile("ENEMIES.json");
+    }
+
+    private Dictionary<int, UnitDefinition> LoadUnitDefinitionFile(string fileName)
+    {
+        var definitions = new Dictionary<int, UnitDefinition>();
+        string filePath = Path.Combine(mapFolderPath, fileName);
+
+        if (!File.Exists(filePath))
+        {
+            Debug.LogWarning($"[BattleScript] 유닛 정의 파일을 찾을 수 없습니다: {filePath}");
+            return definitions;
+        }
+
+        try
+        {
+            string json = File.ReadAllText(filePath);
+            UnitDefinitionCollection collection = JsonUtility.FromJson<UnitDefinitionCollection>(json);
+
+            if (collection != null && collection.units != null)
+            {
+                foreach (UnitDefinition unit in collection.units)
+                {
+                    definitions[unit.id] = unit;
+                }
+            }
+
+            Debug.Log($"[BattleScript] {fileName} 로딩 완료: {definitions.Count}개");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[BattleScript] {fileName} 로딩 실패: {e.Message}");
+        }
+
+        return definitions;
     }
 
     private void LoadTileAndObjectDefinitions()
@@ -485,6 +636,345 @@ public class BattleScript : MonoBehaviour
         }
     }
 
+    // ── 유닛 배치 ────────────────────────────────────────────────────
+
+    // 맵 생성 직후 호출 — 적은 즉시 배치하고, 아군은 빈 스폰 슬롯만 등록
+    private void PlaceUnits()
+    {
+        DestroyUnits();
+
+        GameObject unitMapObject = new GameObject("UnitMap");
+        unitParent = unitMapObject.transform;
+        unitParent.SetParent(transform);
+
+        enemyUnits = new List<GameObject>();
+        allyUnits = new List<GameObject>();
+        allySpawnSlots = new List<Vector2Int>();
+        occupiedTiles = new Dictionary<Vector2Int, GameObject>();
+        battleUnits = new List<BattleUnitEntry>();
+        turnOrder = new List<BattleUnitEntry>();
+        currentTurnIndex = 0;
+
+        PlaceEnemies();
+        RegisterAllySpawnSlots();
+        BuildTurnOrder();
+    }
+
+    private void PlaceEnemies()
+    {
+        if (currentMapData == null || currentMapData.enemySpawns == null) return;
+
+        foreach (EnemyPlacement placement in currentMapData.enemySpawns)
+        {
+            if (!CanPlaceUnitAt(placement.x, placement.y, "적 스폰")) continue;
+
+            UnitDefinition definition = GetEnemyDefinition(placement.id);
+            if (definition == null)
+            {
+                Debug.LogWarning($"[BattleScript] 적 id {placement.id}에 대한 정의를 ENEMIES.json에서 찾을 수 없습니다.");
+                continue;
+            }
+
+            Vector2Int grid = new Vector2Int(placement.x, placement.y);
+            GameObject marker = SpawnUnitMarker(grid, true, definition);
+            enemyUnits.Add(marker);
+        }
+
+        Debug.Log($"[BattleScript] 적 {enemyUnits.Count}체 배치 완료");
+    }
+
+    private void RegisterAllySpawnSlots()
+    {
+        if (currentMapData == null || currentMapData.allySpawns == null) return;
+
+        foreach (UnitPlacement placement in currentMapData.allySpawns)
+        {
+            if (!CanPlaceUnitAt(placement.x, placement.y, "아군 스폰 슬롯")) continue;
+
+            Vector2Int slot = new Vector2Int(placement.x, placement.y);
+            allySpawnSlots.Add(slot);
+
+            bool hasUnit = placement.id > 0;
+
+            // id가 지정됐거나 자동 채우기가 켜져 있으면 시작 시 박스 배치
+            if (!hasUnit && !autoFillAllySpawns) continue;
+
+            UnitDefinition definition = hasUnit ? GetAllyDefinition(placement.id) : null;
+            if (hasUnit && definition == null)
+            {
+                Debug.LogWarning($"[BattleScript] 아군 id {placement.id}에 대한 정의를 ALLYS.json에서 찾을 수 없습니다.");
+                continue;
+            }
+
+            GameObject marker = SpawnUnitMarker(slot, false, definition);
+            allyUnits.Add(marker);
+        }
+
+        Debug.Log($"[BattleScript] 아군 스폰 슬롯 {allySpawnSlots.Count}개 등록 (자동 배치 {allyUnits.Count}체)");
+    }
+
+    // ── 행동 순서 (이니셔티브) ────────────────────────────────────────
+
+    // 배치된 모든 유닛을 민첩성(이니셔티브) 내림차순으로 정렬해 행동 순서를 만든다.
+    // 동점이면 운(luck)으로 보정, 그래도 같으면 등록 순서를 유지(안정 정렬).
+    private void BuildTurnOrder()
+    {
+        if (battleUnits == null)
+        {
+            turnOrder = new List<BattleUnitEntry>();
+            return;
+        }
+
+        // OrderByDescending은 안정 정렬이므로 동점일 때 등록 순서가 유지됨
+        turnOrder = battleUnits
+            .OrderByDescending(unit => unit.Initiative)
+            .ToList();
+        currentTurnIndex = 0;
+
+        LogTurnOrder();
+    }
+
+    private void LogTurnOrder()
+    {
+        if (turnOrder == null || turnOrder.Count == 0)
+        {
+            Debug.Log("[BattleScript] 행동 순서: 참가 유닛 없음");
+            return;
+        }
+
+        var lines = new List<string>();
+        for (int i = 0; i < turnOrder.Count; i++)
+        {
+            BattleUnitEntry unit = turnOrder[i];
+            string faction = unit.isEnemy ? "적" : "아군";
+            lines.Add($"{i + 1}. [{faction}] {unit.DisplayName} (민첩 {unit.Agility}, 운 {unit.Luck}, 이니셔티브 {unit.Initiative})");
+        }
+
+        Debug.Log($"[BattleScript] 행동 순서 ({turnOrder.Count}체):\n{string.Join("\n", lines)}");
+    }
+
+    // 외부에서 행동 순서를 조회 (민첩성 내림차순)
+    public IReadOnlyList<BattleUnitEntry> GetTurnOrder()
+    {
+        return turnOrder ?? new List<BattleUnitEntry>();
+    }
+
+    // 현재 턴 유닛 — 행동 순서가 비어 있으면 null
+    public BattleUnitEntry GetCurrentTurnUnit()
+    {
+        if (turnOrder == null || turnOrder.Count == 0) return null;
+        return turnOrder[currentTurnIndex % turnOrder.Count];
+    }
+
+    // 다음 턴으로 진행하고 그 유닛을 반환 (간단한 라운드 순환)
+    public BattleUnitEntry AdvanceTurn()
+    {
+        if (turnOrder == null || turnOrder.Count == 0) return null;
+        currentTurnIndex = (currentTurnIndex + 1) % turnOrder.Count;
+        return turnOrder[currentTurnIndex];
+    }
+
+    // ── 유닛 이동 ────────────────────────────────────────────────────
+
+    // 현재 턴 유닛을 지정 방향으로 한 칸 이동시킨다. 성공하면 true.
+    public bool TryMoveCurrentUnit(Vector2Int direction)
+    {
+        BattleUnitEntry unit = GetCurrentTurnUnit();
+        if (unit == null)
+        {
+            Debug.LogWarning("[BattleScript] 이동할 현재 턴 유닛이 없습니다.");
+            return false;
+        }
+
+        return MoveUnit(unit, unit.grid + direction);
+    }
+
+    // 유닛을 목표 칸으로 이동 — 맵 범위/이동 가능/빈 칸 여부를 검증
+    public bool MoveUnit(BattleUnitEntry unit, Vector2Int target)
+    {
+        if (unit == null || unit.marker == null) return false;
+
+        if (!IsWalkable(target.x, target.y))
+        {
+            Debug.LogWarning($"[BattleScript] ({target.x}, {target.y})로 이동할 수 없습니다 (장애물 또는 맵 밖).");
+            return false;
+        }
+
+        if (IsTileOccupied(target))
+        {
+            Debug.LogWarning($"[BattleScript] ({target.x}, {target.y})에는 이미 다른 유닛이 있습니다.");
+            return false;
+        }
+
+        // 점유 정보 갱신
+        occupiedTiles.Remove(unit.grid);
+        occupiedTiles[target] = unit.marker;
+        unit.grid = target;
+
+        // 마커 월드 위치 갱신 — y(높이)는 기존 값을 유지해 박스/프리팹 모두 자연스럽게 이동
+        Vector3 world = GridToWorld(target.x, target.y);
+        Vector3 markerPosition = unit.marker.transform.position;
+        markerPosition.x = world.x;
+        markerPosition.z = world.z;
+        unit.marker.transform.position = markerPosition;
+
+        Debug.Log($"[BattleScript] {unit.DisplayName} 이동 → ({target.x}, {target.y})");
+        return true;
+    }
+
+    // 유닛을 배치할 수 있는 칸인지 검사 — 맵 범위 + 장애물(이동 불가) 여부 확인
+    private bool CanPlaceUnitAt(int x, int z, string context)
+    {
+        if (!IsValidPosition(x, z))
+        {
+            Debug.LogWarning($"[BattleScript] {context} 위치가 맵 범위를 벗어남: ({x}, {z})");
+            return false;
+        }
+
+        if (!IsWalkable(x, z))
+        {
+            Debug.LogWarning($"[BattleScript] {context} 위치에 장애물이 있어 배치를 건너뜁니다: ({x}, {z})");
+            return false;
+        }
+
+        return true;
+    }
+
+    // 유닛 정의 조회
+    public UnitDefinition GetAllyDefinition(int id)
+    {
+        if (allyDefinitions != null && allyDefinitions.TryGetValue(id, out UnitDefinition def)) return def;
+        return null;
+    }
+
+    public UnitDefinition GetEnemyDefinition(int id)
+    {
+        if (enemyDefinitions != null && enemyDefinitions.TryGetValue(id, out UnitDefinition def)) return def;
+        return null;
+    }
+
+    // 좌표에 유닛 마커 생성 — definition이 있으면 정의 색상/이름/프리팹 사용, 없으면 기본 박스
+    private GameObject SpawnUnitMarker(Vector2Int grid, bool isEnemy, UnitDefinition definition)
+    {
+        Vector3 worldPosition = GridToWorld(grid.x, grid.y);
+
+        GameObject marker = CreateUnitVisual(worldPosition, isEnemy, definition);
+
+        string prefix = isEnemy ? "Enemy" : "Ally";
+        string unitName = definition != null && !string.IsNullOrWhiteSpace(definition.name)
+            ? definition.name
+            : "Unit";
+        marker.name = $"{prefix}_{unitName}_{grid.x}_{grid.y}";
+
+        occupiedTiles[grid] = marker;
+        battleUnits.Add(new BattleUnitEntry(marker, definition, grid, isEnemy));
+        return marker;
+    }
+
+    private GameObject CreateUnitVisual(Vector3 worldPosition, bool isEnemy, UnitDefinition definition)
+    {
+        // 프리팹 경로가 지정돼 있으면 우선 로딩 시도
+        if (definition != null && !string.IsNullOrEmpty(definition.prefabPath))
+        {
+            GameObject prefab = Resources.Load<GameObject>(definition.prefabPath);
+            if (prefab != null)
+            {
+                return Instantiate(prefab, worldPosition, Quaternion.identity, unitParent);
+            }
+            Debug.LogWarning($"[BattleScript] 유닛 프리팹을 찾을 수 없어 박스로 대체합니다: {definition.prefabPath}");
+        }
+
+        // 기본 박스 마커
+        GameObject box = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        box.transform.SetParent(unitParent);
+        box.transform.localScale = unitMarkerSize;
+
+        Vector3 boxPosition = worldPosition;
+        boxPosition.y += unitMarkerSize.y * 0.5f; // 바닥 위에 올림
+        box.transform.position = boxPosition;
+
+        Renderer renderer = box.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            renderer.material.color = ResolveUnitColor(isEnemy, definition);
+        }
+
+        return box;
+    }
+
+    private Color ResolveUnitColor(bool isEnemy, UnitDefinition definition)
+    {
+        if (definition != null && !string.IsNullOrWhiteSpace(definition.colorHex)
+            && ColorUtility.TryParseHtmlString(definition.colorHex, out Color color))
+        {
+            return color;
+        }
+        return isEnemy ? enemyColor : allyColor;
+    }
+
+    // 플레이어가 빈 아군 슬롯에 유닛을 배치할 때 호출 — ALLYS.json의 id 참조
+    public GameObject PlaceAllyAtSlot(Vector2Int slot, int allyId)
+    {
+        if (!allySpawnSlots.Contains(slot))
+        {
+            Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})는 아군 스폰 슬롯이 아닙니다.");
+            return null;
+        }
+
+        if (!IsWalkable(slot.x, slot.y))
+        {
+            Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})에 장애물이 있어 배치할 수 없습니다.");
+            return null;
+        }
+
+        if (IsTileOccupied(slot))
+        {
+            Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})에는 이미 유닛이 있습니다.");
+            return null;
+        }
+
+        UnitDefinition definition = GetAllyDefinition(allyId);
+        if (definition == null)
+        {
+            Debug.LogWarning($"[BattleScript] 아군 id {allyId}에 대한 정의를 ALLYS.json에서 찾을 수 없습니다.");
+            return null;
+        }
+
+        GameObject marker = SpawnUnitMarker(slot, false, definition);
+        allyUnits.Add(marker);
+
+        // 새 유닛이 합류했으므로 행동 순서 재계산
+        BuildTurnOrder();
+        return marker;
+    }
+
+    // 해당 타일에 유닛이 존재하는지 확인
+    public bool IsTileOccupied(Vector2Int tilePos)
+    {
+        return occupiedTiles != null && occupiedTiles.ContainsKey(tilePos);
+    }
+
+    public IReadOnlyList<GameObject> GetEnemyUnits() => enemyUnits;
+    public IReadOnlyList<GameObject> GetAllyUnits() => allyUnits;
+    public IReadOnlyList<Vector2Int> GetAllySpawnSlots() => allySpawnSlots;
+
+    private void DestroyUnits()
+    {
+        if (unitParent != null)
+        {
+            DestroyImmediate(unitParent.gameObject);
+            unitParent = null;
+        }
+
+        enemyUnits?.Clear();
+        allyUnits?.Clear();
+        allySpawnSlots?.Clear();
+        occupiedTiles?.Clear();
+        battleUnits?.Clear();
+        turnOrder?.Clear();
+        currentTurnIndex = 0;
+    }
+
     // 특정 위치의 바닥 큐브 가져오기
     public GameObject GetFloorCube(int x, int z)
     {
@@ -616,6 +1106,7 @@ public class BattleScript : MonoBehaviour
         if (LoadMapFromJSON(mapName))
         {
             CreateBattleMap();
+            PlaceUnits();
             return true;
         }
         
@@ -668,5 +1159,7 @@ public class BattleScript : MonoBehaviour
         {
             DestroyImmediate(objectMapParent.gameObject);
         }
+
+        DestroyUnits();
     }
 }

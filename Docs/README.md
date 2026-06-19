@@ -9,9 +9,10 @@
 - `BattleSystem.md` - 전투 시스템 스펙
 
 ### 2. 데이터 포맷 (DataFormats/)
-- `MapDataFormat.md` - 맵 데이터 JSON 포맷
+- `MapDataFormat.md` - 맵 데이터 JSON 포맷 (유닛 스폰 포함)
 - `TileDefinition.md` - 타일 정의 포맷
 - `ObjectDefinition.md` - 오브젝트 정의 포맷
+- `UnitDefinition.md` - 유닛 정의 포맷 (ALLYS.json / ENEMIES.json)
 
 ### 3. API 레퍼런스 (API/)
 - `BattleScript.md` - BattleScript 클래스 API
@@ -33,7 +34,8 @@
 
 1. [맵 시스템 개요](Systems/MapSystem.md)
 2. [맵 데이터 포맷](DataFormats/MapDataFormat.md)  
-3. [샘플 맵 둘러보기](Examples/SampleMaps.md)
+3. [유닛 정의 포맷](DataFormats/UnitDefinition.md)
+4. [샘플 맵 둘러보기](Examples/SampleMaps.md)
 
 ## 🔧 개발자 가이드
 
@@ -43,4 +45,4 @@
 
 ---
 **최종 업데이트:** 2026-06-20  
-**버전:** 1.0.0
+**버전:** 1.1.0
