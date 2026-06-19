@@ -151,7 +151,7 @@ MonoBehaviour:
   floorCubePrefab: {fileID: 0}
   cubeSpacing: 1
   mapFolderPath: Assets/1.Scripts/KO/Battle/MapData/
-  defaultMapName: cross_pattern
+  defaultMapName: 001
   loadFromJSON: 1
 --- !u!4 &52228812
 Transform:
