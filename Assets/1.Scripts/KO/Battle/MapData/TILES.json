@@ -1,0 +1,97 @@
+{
+  "name": "Tile Definitions",
+  "description": "바닥 타일 종류 정의 (0x0000FF 부분)",
+  "version": "1.0",
+  "tiles": [
+    {
+      "id": 0,
+      "name": "Empty",
+      "description": "빈 공간",
+      "colorHex": "#000000",
+      "isWalkable": false,
+      "isTransparent": true,
+      "movementCost": 0
+    },
+    {
+      "id": 1,
+      "name": "Floor",
+      "description": "기본 바닥",
+      "colorHex": "#E6E6FA",
+      "isWalkable": true,
+      "isTransparent": true,
+      "movementCost": 1
+    },
+    {
+      "id": 2,
+      "name": "Grass",
+      "description": "잔디 바닥",
+      "colorHex": "#90EE90",
+      "isWalkable": true,
+      "isTransparent": true,
+      "movementCost": 1
+    },
+    {
+      "id": 3,
+      "name": "Stone",
+      "description": "돌바닥",
+      "colorHex": "#A9A9A9",
+      "isWalkable": true,
+      "isTransparent": true,
+      "movementCost": 1
+    },
+    {
+      "id": 4,
+      "name": "Sand",
+      "description": "모래 바닥",
+      "colorHex": "#F4A460",
+      "isWalkable": true,
+      "isTransparent": true,
+      "movementCost": 2
+    },
+    {
+      "id": 5,
+      "name": "Water",
+      "description": "물",
+      "colorHex": "#4682B4",
+      "isWalkable": false,
+      "isTransparent": true,
+      "movementCost": 0
+    },
+    {
+      "id": 6,
+      "name": "Lava",
+      "description": "용암",
+      "colorHex": "#FF4500",
+      "isWalkable": false,
+      "isTransparent": true,
+      "movementCost": 0
+    },
+    {
+      "id": 7,
+      "name": "Ice",
+      "description": "얼음 바닥",
+      "colorHex": "#87CEEB",
+      "isWalkable": true,
+      "isTransparent": true,
+      "movementCost": 1
+    },
+    {
+      "id": 8,
+      "name": "Mud",
+      "description": "진흙 바닥",
+      "colorHex": "#8B4513",
+      "isWalkable": true,
+      "isTransparent": true,
+      "movementCost": 3
+    },
+    {
+      "id": 255,
+      "name": "Wall",
+      "description": "벽",
+      "colorHex": "#696969",
+      "isWalkable": false,
+      "isTransparent": false,
+      "movementCost": 0
+    }
+  ]
+}
