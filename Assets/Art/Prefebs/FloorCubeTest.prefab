@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &3524589421705389157
+--- !u!1 &903407966688344664
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,49 +8,49 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 7835436201506259284}
-  - component: {fileID: 7334274379533138208}
-  - component: {fileID: 78345165108001044}
-  - component: {fileID: 628882343537244537}
-  - component: {fileID: 73321493920315300}
-  - component: {fileID: 1001233686271357078}
+  - component: {fileID: 9101845488831468460}
+  - component: {fileID: 6513880423714924309}
+  - component: {fileID: 4633035298221258072}
+  - component: {fileID: 8925913470189992419}
+  - component: {fileID: 7498877750991691258}
+  - component: {fileID: 8328796050936823569}
   m_Layer: 0
-  m_Name: FloorCube
+  m_Name: FloorCubeTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &7835436201506259284
+--- !u!4 &9101845488831468460
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3524589421705389157}
+  m_GameObject: {fileID: 903407966688344664}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -2.075}
+  m_LocalPosition: {x: 0.02317, y: -0, z: -7.63298}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &7334274379533138208
+--- !u!33 &6513880423714924309
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3524589421705389157}
+  m_GameObject: {fileID: 903407966688344664}
   m_Mesh: {fileID: -5495902117074765545, guid: 40d3dcbd5c1d0ef4d8bfd3613a4dd162, type: 3}
---- !u!23 &78345165108001044
+--- !u!23 &4633035298221258072
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3524589421705389157}
+  m_GameObject: {fileID: 903407966688344664}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -94,24 +94,24 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &628882343537244537
+--- !u!114 &8925913470189992419
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3524589421705389157}
+  m_GameObject: {fileID: 903407966688344664}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5e521c2dec27afa4fb500b1675e87af8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FloorCubeVisual
-  stater: {fileID: 73321493920315300}
-  targetRenderer: {fileID: 78345165108001044}
+  stater: {fileID: 7498877750991691258}
+  targetRenderer: {fileID: 4633035298221258072}
   transitionTime: 0.3
   safeData:
-    BaseColor: {r: 0.23529412, g: 0.60784316, b: 0.56078434, a: 1}
-    TextureColor: {r: 0.5700605, g: 0.90188676, b: 0.8599719, a: 1}
+    BaseColor: {r: 0.6014331, g: 0.23529412, b: 0.60784316, a: 1}
+    TextureColor: {r: 0.8889545, g: 0.5686275, b: 0.9019608, a: 1}
     Intensity: 0
     OneHotMaskIndex: 0
   dangerSData:
@@ -134,28 +134,28 @@ MonoBehaviour:
     TextureColor: {r: 0.9607843, g: 0.94509804, b: 0.9098039, a: 1}
     Intensity: 0
     OneHotMaskIndex: 0
---- !u!114 &73321493920315300
+--- !u!114 &7498877750991691258
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3524589421705389157}
+  m_GameObject: {fileID: 903407966688344664}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3020cdddf696d9a4da37bdbbe4d52e50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FloorCubeStater
---- !u!114 &1001233686271357078
+--- !u!114 &8328796050936823569
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3524589421705389157}
+  m_GameObject: {fileID: 903407966688344664}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd69bffe1ddfb2349b387a4f4d039e1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FloorCubeTester
-  stater: {fileID: 73321493920315300}
+  stater: {fileID: 7498877750991691258}

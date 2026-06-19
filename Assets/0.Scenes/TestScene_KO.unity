@@ -157,6 +157,7 @@ MonoBehaviour:
   unitMarkerSize: {x: 0.6, y: 1, z: 0.6}
   allyColor: {r: 0.2, g: 0.4, b: 1, a: 1}
   enemyColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  unitMoveSpeed: 6
 --- !u!4 &52228812
 Transform:
   m_ObjectHideFlags: 0
