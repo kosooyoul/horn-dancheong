@@ -26,14 +26,23 @@ namespace KD
             this.unitData   = unitData;
         }
 
-        // 교체 스킬 장착 — 무기 타입 검증 포함
-        public bool EquipOptionalSkill(SkillData skill)
+        // 교체 스킬 장착
+        // database를 넘기면 "DB 등록 여부 + 무기 타입 호환" 모두 검사
+        // database가 null이면 무기 타입 호환만 검사 (직접 호출용 fallback)
+        public bool EquipOptionalSkill(SkillData skill, SkillDatabase database = null)
         {
-            if (!SkillEquipValidator.CanEquip(unitData.weaponType, skill))
+            if (skill == null) return false;
+
+            bool canEquip = database != null
+                ? database.CanEquip(this, skill)
+                : SkillEquipValidator.CanEquip(unitData.weaponType, skill);
+
+            if (!canEquip)
             {
                 Debug.LogWarning($"[OwnedUnit] {unitData.unitName}({unitData.weaponType})은 '{skill.skillName}'을 장착할 수 없습니다.");
                 return false;
             }
+
             equippedOptionalSkill = skill;
             return true;
         }

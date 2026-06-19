@@ -19,12 +19,13 @@ MonoBehaviour:
   prefab: {fileID: 0}
   role: 0
   attribute: 0
+  weaponType: 0
   movementType: 0
+  moveAPCost: 30
   baseStats:
-    agility: 0
-    spirit: 0
-    guard: 0
-    luck: 0
+    agility: 10
+    spirit: 10
+    guard: 10
+    luck: 10
   uniqueSkill1: {fileID: 0}
   uniqueSkill2: {fileID: 0}
-  availableOptionalSkills: []

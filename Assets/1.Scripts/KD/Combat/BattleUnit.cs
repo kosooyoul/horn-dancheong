@@ -19,9 +19,11 @@ namespace KD
         public int CurrentAP      { get; private set; }
         public Vector2Int CurrentTilePos { get; private set; }
         public bool IsAlive => CurrentHP > 0;
+        public bool IsDead  => CurrentHP <= 0;
 
         // 장착된 교체 스킬 (null이면 미장착)
         private SkillData _equippedOptionalSkill;
+        public  SkillData EquippedOptionalSkill => _equippedOptionalSkill;
 
         // 스킬별 남은 쿨타임 <skillId, remainingCooldown>
         private readonly Dictionary<string, int> _skillCooldowns = new Dictionary<string, int>();
@@ -54,6 +56,15 @@ namespace KD
             }
             _equippedOptionalSkill = skill;
             return true;
+        }
+
+        // 이 유닛이 해당 스킬을 보유하고 있는지 (쿨타임/AP 무관)
+        public bool HasSkill(SkillData skill)
+        {
+            if (skill == null) return false;
+            return skill == Data.uniqueSkill1
+                || skill == Data.uniqueSkill2
+                || skill == _equippedOptionalSkill;
         }
 
         // 쿨타임이 0인 스킬 목록 반환 — UI 하이라이트, 선택 가능 스킬 표시에 사용

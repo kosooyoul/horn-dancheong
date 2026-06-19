@@ -17,9 +17,10 @@ MonoBehaviour:
   description: 
   icon: {fileID: 0}
   effectPrefab: {fileID: 0}
-  allowedRoles: 
+  allowedWeaponTypes: 00000000
   targetType: 0
   targetPattern: {fileID: 0}
+  apCost: 30
   cooldown: 1
   effectType: 0
   attribute: 0

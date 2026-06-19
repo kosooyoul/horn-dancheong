@@ -42,6 +42,32 @@ namespace KD
             return result;
         }
 
+        // 배치 페이즈 확정 결과(DeploymentPlacement 목록)로 플레이어 BattleUnit 생성
+        public List<BattleUnit> CreatePlayerBattleUnits(IReadOnlyList<DeploymentPlacement> placements)
+        {
+            var result = new List<BattleUnit>();
+
+            foreach (DeploymentPlacement placement in placements)
+            {
+                if (placement?.ownedUnit?.unitData == null)
+                {
+                    Debug.LogWarning("[BattleSetup] placement에 유효한 unitData가 없습니다. 건너뜁니다.");
+                    continue;
+                }
+
+                var battleUnit = new BattleUnit(
+                    data:          placement.ownedUnit.unitData,
+                    teamId:        0,
+                    startTilePos:  placement.tilePos,
+                    optionalSkill: placement.ownedUnit.equippedOptionalSkill
+                );
+
+                result.Add(battleUnit);
+            }
+
+            return result;
+        }
+
         // 적 유닛 생성 (UnitData를 직접 받는 단순 버전)
         public List<BattleUnit> CreateEnemyBattleUnits(
             List<UnitData> enemyDataList,

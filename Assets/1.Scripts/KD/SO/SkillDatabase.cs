@@ -25,22 +25,17 @@ namespace KD
             return result;
         }
 
-        // BattleUnit에서 바로 쓸 수 있는 오버로드
-        public List<SkillData> GetSkillsFor(BattleUnit unit)
-            => GetSkillsFor(unit.Data.weaponType);
+        // OwnedUnit 오버로드
+        public List<SkillData> GetSkillsFor(OwnedUnit unit)
+            => GetSkillsFor(unit.unitData.weaponType);
 
-#if UNITY_EDITOR
-        private void OnValidate()
+        // 해당 스킬이 이 데이터베이스에 등록되어 있고, 유닛 무기 타입과도 호환되는지 검사
+        public bool CanEquip(OwnedUnit unit, SkillData skill)
         {
-            for (int i = optionalSkills.Count - 1; i >= 0; i--)
-            {
-                if (optionalSkills[i] == null)
-                {
-                    optionalSkills.RemoveAt(i);
-                    UnityEngine.Debug.LogWarning($"[SkillDatabase] null 항목을 제거했습니다.", this);
-                }
-            }
+            if (unit == null || skill == null) return false;
+            if (!optionalSkills.Contains(skill)) return false;
+            return SkillEquipValidator.CanEquip(unit.unitData.weaponType, skill);
         }
-#endif
+
     }
 }
