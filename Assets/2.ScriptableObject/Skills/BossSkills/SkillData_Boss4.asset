@@ -31,10 +31,10 @@ MonoBehaviour:
   castVfxPrefab: {fileID: 0}
   projectilePrefab: {fileID: 0}
   impactVfxPrefab: {fileID: 0}
-  areaVfxPrefab: {fileID: 1377279482138388, guid: 653866134638b354ca265558d783dd1d, type: 3}
+  areaVfxPrefab: {fileID: 2965222256817593503, guid: a164e676dbbd6e54587237e619372c98, type: 3}
   castSfx: {fileID: 0}
   projectileSfx: {fileID: 0}
-  impactSfx: {fileID: 0}
+  impactSfx: {fileID: 8300000, guid: 4f0095e23fa1377419ee8a6b4b9c0e73, type: 3}
   castDelay: 0
   impactDelay: 0
   endDelay: 0.3

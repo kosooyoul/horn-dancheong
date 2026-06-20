@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -29,6 +30,7 @@ namespace KD
         [SerializeField] private List<UnitData>         enemyUnitDatas      = new List<UnitData>();
         [SerializeField] private List<Vector2Int>        enemyStartPositions = new List<Vector2Int>();
         [SerializeField] private List<EnemyPatternData>  enemyPatterns       = new List<EnemyPatternData>();
+        [SerializeField] private float                   enemyTurnDelay      = 2f;
 
         // ── 런타임 상태 ───────────────────────────────────────────────────
 
@@ -245,10 +247,16 @@ namespace KD
             }
             else
             {
-                // 적 턴 — "한 턴 전 예고" 방식
+                // 적 턴 — 딜레이 후 실행
                 currentPhase = BattlePhase.EnemyPhase;
-                RunEnemyTurn(current);
+                StartCoroutine(RunEnemyTurnDelayed(current));
             }
+        }
+
+        private IEnumerator RunEnemyTurnDelayed(BattleUnit enemy)
+        {
+            yield return new WaitForSeconds(enemyTurnDelay);
+            RunEnemyTurn(enemy);
         }
 
         // ── 적 턴 처리 ────────────────────────────────────────────────────
@@ -320,6 +328,11 @@ namespace KD
                 EnemyIntent intent = intentControllers[i].CurrentIntent;
                 if (intent == null) continue;
                 if (intent.caster == null || intent.caster.IsDead) continue;
+
+                // RandomUnitTracking: 렌더링 시마다 추적 유닛의 현재 위치로 갱신
+                if (intent.trackedUnit != null && !intent.trackedUnit.IsDead)
+                    intent.warningTiles = new List<Vector2Int> { intent.trackedUnit.CurrentTilePos };
+
                 if (intent.warningTiles == null || intent.warningTiles.Count == 0) continue;
 
                 gridManager.AddDangerTiles(intent.warningTiles, intent.dangerLevel);
@@ -406,6 +419,9 @@ namespace KD
         {
             if (!TryGetMoveOption(tile, out MoveOption move)) { Debug.Log("[TacticalBattleManager] 이동 가능 타일 아님"); return; }
             if (!gridManager.TryMoveUnit(selectedUnit, move)) { Debug.Log("[TacticalBattleManager] 이동 실패");          return; }
+
+            // RandomUnitTracking 경고 타일이 이동한 유닛을 즉시 따라가도록 갱신
+            RefreshEnemyTelegraphs();
 
             Debug.Log($"[TacticalBattleManager] 이동 완료 → {tile}");
             EndCurrentTurn();
