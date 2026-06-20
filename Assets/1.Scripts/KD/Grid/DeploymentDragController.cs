@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace KD
 {
@@ -35,7 +36,7 @@ namespace KD
 
         private void HandlePickup()
         {
-            if (!Input.GetMouseButtonDown(0)) return;
+            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return;
             if (!TryGetTileUnderMouse(out Vector2Int tile)) return;
 
             OwnedUnit unit = gridManager.GetGhostUnitAt(tile);
@@ -50,7 +51,7 @@ namespace KD
             if (TryGetTileUnderMouse(out Vector2Int hovered))
                 gridManager.SetUnitGhost(_dragging, hovered);
 
-            if (!Input.GetMouseButtonUp(0)) return;
+            if (Mouse.current == null || !Mouse.current.leftButton.wasReleasedThisFrame) return;
 
             bool placed = false;
             if (TryGetTileUnderMouse(out Vector2Int dropTile) && CanDrop(dropTile))
@@ -73,7 +74,8 @@ namespace KD
 
         private bool TryGetTileUnderMouse(out Vector2Int tile)
         {
-            Ray ray = battleCamera.ScreenPointToRay(Input.mousePosition);
+            Vector2 mousePos = Mouse.current?.position.ReadValue() ?? Vector2.zero;
+            Ray ray = battleCamera.ScreenPointToRay(mousePos);
             if (GroundPlane.Raycast(ray, out float dist))
             {
                 tile = gridManager.WorldToGrid(ray.GetPoint(dist));
