@@ -10,7 +10,7 @@ namespace HornDancheong.Seongwoo.UI
         Panel_Dialogue,
         Panel_CombatInteraction,
         Panel_InitiativeTrack,
-        Panel_Settings_Deprecated,
+        Panel_Batch,
         Panel_EscMenu,
         Panel_BossHP
     }
