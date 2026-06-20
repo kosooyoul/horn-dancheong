@@ -16,6 +16,8 @@ MonoBehaviour:
   - DialogueIndex: 1
     CharacterName: 
     DialogueText: 49373
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
@@ -25,6 +27,8 @@ MonoBehaviour:
     CharacterName: 
     DialogueText: "\uB9C8\uACE0\uC758 \uD718\uD558 \uD558\uC5D0 \uC788\uB294 \uAD50\uC721
       \uAE30\uAD00 \uBCBD\uB780 145\uAE30\uC0DD\uC758 \uC785\uD559\uC774 \uB05D\uB0AC\uB2E4."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
@@ -33,6 +37,8 @@ MonoBehaviour:
   - DialogueIndex: 3
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uC785\uD559\uC2DD\uC774 \uB4DC\uB514\uC5B4 \uB05D\uB0AC\uAD6C\uBA3C."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -43,6 +49,8 @@ MonoBehaviour:
     DialogueText: "\uBE44\uB85D \uD6C4\uCC9C\uC801\uC774\uAE34 \uD558\uC9C0\uB9CC
       \uC601\uB825\uC744 \uC798 \uB2E4\uB904\uC11C \uAF2D \uC801\uC1A1\uC5D0 \uB4E4\uC5B4\uAC00\uACE0
       \uB9D0\uAC70\uC57C."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -52,6 +60,8 @@ MonoBehaviour:
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "(\uC606\uC5D0 \uC9C0\uB098\uAC00\uB294 \uC724\uC194\uD558\uB97C
       \uBCF4\uBA74\uC11C \uB2EC\uB824\uAC04\uB2E4.)"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -61,6 +71,8 @@ MonoBehaviour:
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uC5B4\uC774 \uAC70\uAE30 \uB108 \uC601\uB825\uC774 \uC88B\uC544
       \uBCF4\uC778\uB2E4."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -69,6 +81,8 @@ MonoBehaviour:
   - DialogueIndex: 7
     CharacterName: "\uC724\uC194\uD558"
     DialogueText: ...
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: solha.png
@@ -77,6 +91,8 @@ MonoBehaviour:
   - DialogueIndex: 8
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uC65C \uB300\uB2F5\uC744 \uC548\uD574? \uAFC0\uBA39\uC740 \uBC99\uC5B4\uB9AC\uC57C?"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -86,6 +102,8 @@ MonoBehaviour:
     CharacterName: "\uC724\uC194\uD558"
     DialogueText: "\uCD08\uBA74\uBD80\uD130 \uADF8\uB807\uAC8C \uB2EC\uB824\uB4DC\uBA74
       \uB204\uAC00 \uC88B\uC544\uD574."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: solha.png
@@ -95,6 +113,8 @@ MonoBehaviour:
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uBB50 \uADF8\uB7F4\uC218\uB3C4 \uC788\uB294\uAC70\uC9C0 \uC815\uC5C6\uAC8C
       \uC65C\uADF8\uB798~"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -103,6 +123,8 @@ MonoBehaviour:
   - DialogueIndex: 11
     CharacterName: "\uC724\uC194\uD558"
     DialogueText: "\uCC38\uB098"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: solha.png
@@ -112,6 +134,8 @@ MonoBehaviour:
     CharacterName: 
     DialogueText: "\uADF8\uB807\uAC8C \uC2DC\uAC04\uC774 \uD758\uB7EC 2035\uB144
       6\uC6D4 21\uC77C"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
@@ -121,6 +145,8 @@ MonoBehaviour:
     CharacterName: 
     DialogueText: "\uD604\uB3C4\uC724\uACFC \uC724\uC194\uD558\uB294 \uBCBD\uB780\uC5D0\uC11C
       \uCCAB \uACAC\uD559\uC744 \uAC00\uAC8C \uB41C\uB2E4."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
@@ -130,6 +156,8 @@ MonoBehaviour:
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uB4DC\uB514\uC5B4 \uCCAB \uACAC\uD559\uC744 \uAC00\uAC8C \uB418\uB2E4\uB2C8!
       \uAE30\uB300\uAC00 \uB3FC!"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -138,6 +166,8 @@ MonoBehaviour:
   - DialogueIndex: 15
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uC194\uD558, \uB108\uB3C4 \uAE30\uB300 \uB418\uC9C0?"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -146,6 +176,8 @@ MonoBehaviour:
   - DialogueIndex: 16
     CharacterName: "\uC724\uC194\uD558"
     DialogueText: "\uBB50... \uC870\uAE08\uC740?"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: solha.png
@@ -154,6 +186,8 @@ MonoBehaviour:
   - DialogueIndex: 17
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uC6B0\uB9AC\uC758 \uBA58\uD1A0\uB294 \uB204\uAD6C\uC77C\uB824\uB098~"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -164,6 +198,8 @@ MonoBehaviour:
     DialogueText: "(\uBA40\uB9AC\uC11C \uAC78\uC5B4\uC624\uB294 \uC18C\uB9AC\uAC00
       \uB4E4\uB9AC\uBA74\uC11C \uD604\uB3C4\uC724, \uC724\uC194\uD558 \uCABD\uC73C\uB85C
       \uB2E4\uAC00\uAC04\uB2E4.)"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
@@ -173,6 +209,8 @@ MonoBehaviour:
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uC548\uB155? \uBC18\uAC00\uC6CC. \uB09C \uB108\uB124\uB4E4\uC758
       \uBA58\uD1A0 \uC2E0\uC720\uD558\uC57C"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -182,6 +220,8 @@ MonoBehaviour:
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uACAC\uD559\uC740 \uACBD\uBCF5\uAD81\uC774\uB2C8\uAE4C \uC798
       \uB530\uB77C\uC640"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -191,6 +231,8 @@ MonoBehaviour:
     CharacterName: 
     DialogueText: "(\uACBD\uBCF5\uAD81 \uBC29\uD5A5\uC73C\uB85C \uBC1C\uAC78\uC74C\uC744
       \uC62E\uAE34 \uD6C4)"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
@@ -200,6 +242,8 @@ MonoBehaviour:
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uC664\uCF00 \uB290\uB824~ \uB0B4 \uD398\uC774\uC2A4\uC5D0 \uB9D0\uB9AC\uC9C0
       \uC54A\uB3C4\uB85D \uC798 \uB530\uB77C\uC640."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -208,6 +252,8 @@ MonoBehaviour:
   - DialogueIndex: 23
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uB4A4\uCCD0\uC9C0\uBA74 \uBC14\uB85C \uB099\uC624 \uB418\uB294\uAC70\uC57C~"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -216,6 +262,8 @@ MonoBehaviour:
   - DialogueIndex: 24
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uBA58\uD1A0\uAC00 \uBB34\uC2A8 \uC800\uB7F0 \uD0DC\uB3C4\uC57C."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -225,6 +273,8 @@ MonoBehaviour:
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uB3C4\uC724, \uD6C4\uCC9C\uC801\uC778 \uC8FC\uC81C \uB9D0\uC774
       \uB9CE\uB2E4?"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -233,6 +283,8 @@ MonoBehaviour:
   - DialogueIndex: 26
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uBB50? \uBA58\uD1A0 \uB108 \uB9D0 \uB2E4\uD588\uC5B4?"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -242,6 +294,8 @@ MonoBehaviour:
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uC606\uC5D0 \uB124 \uCE5C\uAD6C \uC194\uD558\uB294 \uC120\uCC9C\uC801\uC73C\uB85C
       \uC601\uB825\uC744 \uAC00\uC84C\uB2E4\uB294\uB370~"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -250,6 +304,8 @@ MonoBehaviour:
   - DialogueIndex: 28
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uC774\uAC8C \uBCF4\uC790\uBCF4\uC790 \uD558\uB2C8\uAE4C."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -260,6 +316,8 @@ MonoBehaviour:
     DialogueText: "(\uD604\uB3C4\uC724\uC774 \uC2E0\uC720\uD558 \uBA58\uD1A0\uC5D0\uAC8C
       \uC8FC\uBA39\uC744 \uD718\uB458\uB800\uC73C\uB098 \uAC00\uBCCD\uAC8C \uD53C\uD55C
       \uD6C4)"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
@@ -270,6 +328,8 @@ MonoBehaviour:
     DialogueText: "\uB3C4\uC724\uC774 \uBA58\uD1A0 \uB9CC\uB09C \uCCAB\uB0A0\uBD80\uD130
       \uC8FC\uBA39\uC9C8\uC774\uB098 \uD574\uB300\uACE0 \uC544\uC8FC \uBC84\uB987\uC774
       \uC88B\uC544?"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -280,6 +340,8 @@ MonoBehaviour:
     DialogueText: "\uB3C4\uC724\uC774 \uC801\uC1A1\uAC00\uAE30 \uC2EB\uAD6C\uB098?
       \uB0B4\uAC00 \uB9D0 \uC798\uD558\uBA74 \uBCBD\uB780 \uC878\uC5C5 \uBABB\uD0A4\uAE30\uAC8C
       \uD574\uC11C \uC601\uC6D0\uD788 \uC801\uC1A1 \uBABB\uAC08\uD0E0\uB370"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -288,6 +350,8 @@ MonoBehaviour:
   - DialogueIndex: 32
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uC73C... \uB0B4\uAC00 \uD55C\uBC88\uB9CC \uCC38\uB294\uB2E4."
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
@@ -297,6 +361,8 @@ MonoBehaviour:
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uC73C\uC774\uAD6C. \uBE68\uB9AC \uACBD\uBCF5\uAD81\uC774\uB098
       \uAC00\uC790"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -306,6 +372,8 @@ MonoBehaviour:
     CharacterName: 
     DialogueText: "(\uADF8\uB7EC\uC790 \uC0AC\uB78C\uB4E4\uC774 \uC18C\uB9AC\uC9C0\uB974\uBA74\uC11C
       \uB3C4\uB9DD\uCE58\uB294 \uAD11\uACBD\uC744 \uBCF4\uAC8C \uB418\uB294\uB370)"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
@@ -315,6 +383,8 @@ MonoBehaviour:
     CharacterName: "\uC724\uC194\uD558"
     DialogueText: "\uBB50\uC57C \uC0AC\uB78C\uB4E4\uC774 \uAC11\uC790\uAE30 \uB2E4
       \uB3C4\uB9DD\uAC00"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: solha.png
@@ -324,6 +394,8 @@ MonoBehaviour:
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uC544\uBB34\uB798\uB3C4 \uC694\uAD34\uB098 \uADC0\uC2E0\uC774
       \uB098\uD0C0\uB09C \uBAA8\uC591\uC774\uC57C"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -333,6 +405,8 @@ MonoBehaviour:
     CharacterName: "\uC2E0\uC720\uD558"
     DialogueText: "\uACBD\uBCF5\uAD81 \uAC00\uB294 \uAE38\uC744 \uB9C9\uC558\uC73C\uB2C8
       \uBB34\uCC14\uB7EC\uC918\uC57C\uACA0\uC9C0?"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -342,6 +416,8 @@ MonoBehaviour:
     CharacterName: "\uD604\uB3C4\uC724"
     DialogueText: "\uCCAB \uACAC\uD559\uBD80\uD130 \uC2E4\uC2B5\uC774\uB77C\uB2C8
       \uAE30\uB300\uB418\uB294\uB370?"
+    PlaySFX: 
+    PlayBGM: 
     LeftPortrait: doyun.png
     CenterPortrait: 
     RightPortrait: 
