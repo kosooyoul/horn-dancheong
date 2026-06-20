@@ -17,9 +17,6 @@ public class MapData
     //   비트  8~15 (0x00FF00) : 오브젝트 id → OBJECTS.json (0이면 오브젝트 없음)
     //   비트 16~23 (0xFF0000) : 예약(미사용)
     public int[] tiles;
-
-    public UnitPlacement[] allySpawns;   // 아군이 배치될 수 있는 빈 스폰 슬롯
-    public EnemyPlacement[] enemySpawns; // 맵에 고정 배치되는 적 유닛
 }
 
 // 아군 스폰 슬롯 정의 — id가 0 이하면 플레이어가 채울 빈 슬롯
@@ -250,8 +247,9 @@ public class BattleScript : MonoBehaviour
         LoadTileAndObjectDefinitions();
         LoadUnitDefinitions();
         LoadMapData();
+
         CreateBattleMap();
-        if (!mapOnlyMode) PlaceUnits();
+            PlaceUnits();
     }
 
     // ALLYS.json / ENEMIES.json에서 유닛 종류 정의 로딩
@@ -634,62 +632,62 @@ public class BattleScript : MonoBehaviour
         occupiedTiles = new Dictionary<Vector2Int, GameObject>();
         battleUnits = new List<BattleUnitEntry>();
 
-        PlaceEnemies();
-        RegisterAllySpawnSlots();
+
+        // PlaceEnemies();
+        // PlaceAllys();
     }
 
-    private void PlaceEnemies()
-    {
-        if (currentMapData == null || currentMapData.enemySpawns == null) return;
+    // private void PlaceEnemies()
+    // {
 
-        foreach (EnemyPlacement placement in currentMapData.enemySpawns)
-        {
-            if (!CanPlaceUnitAt(placement.x, placement.y, "적 스폰")) continue;
+    //     foreach (EnemyPlacement placement in currentMapData.enemySpawns)
+    //     {
+    //         if (!CanPlaceUnitAt(placement.x, placement.y, "적 스폰")) continue;
 
-            UnitDefinition definition = GetEnemyDefinition(placement.id);
-            if (definition == null)
-            {
-                Debug.LogWarning($"[BattleScript] 적 id {placement.id}에 대한 정의를 ENEMIES.json에서 찾을 수 없습니다.");
-                continue;
-            }
+    //         UnitDefinition definition = GetEnemyDefinition(placement.id);
+    //         if (definition == null)
+    //         {
+    //             Debug.LogWarning($"[BattleScript] 적 id {placement.id}에 대한 정의를 ENEMIES.json에서 찾을 수 없습니다.");
+    //             continue;
+    //         }
 
-            Vector2Int grid = new Vector2Int(placement.x, placement.y);
-            GameObject marker = SpawnUnitMarker(grid, true, definition);
-            enemyUnits.Add(marker);
-        }
+    //         Vector2Int grid = new Vector2Int(placement.x, placement.y);
+    //         GameObject marker = SpawnUnitMarker(grid, true, definition);
+    //         enemyUnits.Add(marker);
+    //     }
 
-        Debug.Log($"[BattleScript] 적 {enemyUnits.Count}체 배치 완료");
-    }
+    //     Debug.Log($"[BattleScript] 적 {enemyUnits.Count}체 배치 완료");
+    // }
 
-    private void RegisterAllySpawnSlots()
-    {
-        if (currentMapData == null || currentMapData.allySpawns == null) return;
+    // private void PlaceAllys()
+    // {
+    //     if (currentMapData == null || currentMapData.allySpawns == null) return;
 
-        foreach (UnitPlacement placement in currentMapData.allySpawns)
-        {
-            if (!CanPlaceUnitAt(placement.x, placement.y, "아군 스폰 슬롯")) continue;
+    //     foreach (UnitPlacement placement in currentMapData.allySpawns)
+    //     {
+    //         if (!CanPlaceUnitAt(placement.x, placement.y, "아군 스폰 슬롯")) continue;
 
-            Vector2Int slot = new Vector2Int(placement.x, placement.y);
-            allySpawnSlots.Add(slot);
+    //         Vector2Int slot = new Vector2Int(placement.x, placement.y);
+    //         allySpawnSlots.Add(slot);
 
-            bool hasUnit = placement.id > 0;
+    //         bool hasUnit = placement.id > 0;
 
-            // id가 지정됐거나 자동 채우기가 켜져 있으면 시작 시 박스 배치
-            if (!hasUnit && !autoFillAllySpawns) continue;
+    //         // id가 지정됐거나 자동 채우기가 켜져 있으면 시작 시 박스 배치
+    //         if (!hasUnit && !autoFillAllySpawns) continue;
 
-            UnitDefinition definition = hasUnit ? GetAllyDefinition(placement.id) : null;
-            if (hasUnit && definition == null)
-            {
-                Debug.LogWarning($"[BattleScript] 아군 id {placement.id}에 대한 정의를 ALLYS.json에서 찾을 수 없습니다.");
-                continue;
-            }
+    //         UnitDefinition definition = hasUnit ? GetAllyDefinition(placement.id) : null;
+    //         if (hasUnit && definition == null)
+    //         {
+    //             Debug.LogWarning($"[BattleScript] 아군 id {placement.id}에 대한 정의를 ALLYS.json에서 찾을 수 없습니다.");
+    //             continue;
+    //         }
 
-            GameObject marker = SpawnUnitMarker(slot, false, definition);
-            allyUnits.Add(marker);
-        }
+    //         GameObject marker = SpawnUnitMarker(slot, false, definition);
+    //         allyUnits.Add(marker);
+    //     }
 
-        Debug.Log($"[BattleScript] 아군 스폰 슬롯 {allySpawnSlots.Count}개 등록 (자동 배치 {allyUnits.Count}체)");
-    }
+    //     Debug.Log($"[BattleScript] 아군 스폰 슬롯 {allySpawnSlots.Count}개 등록 (자동 배치 {allyUnits.Count}체)");
+    // }
 
     // 두 그리드 좌표 사이의 맨해튼 거리 (상하좌우 이동 기준 칸 수)
     private static int ManhattanDistance(Vector2Int a, Vector2Int b)
