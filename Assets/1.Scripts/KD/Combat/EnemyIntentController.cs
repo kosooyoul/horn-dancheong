@@ -111,13 +111,24 @@ namespace KD
             return currentIntent;
         }
 
-        // 예고 타일 위에 있는 플레이어 유닛에 스킬 실행
-        public void ExecuteCurrentIntent(IReadOnlyList<BattleUnit> playerUnits = null)
+        // 실행 데이터를 수집한다 — 피해는 적용하지 않고 대상 유닛 목록만 반환. currentIntent를 소거.
+        // SkillActionRunner(VFX 포함)로 라우팅할 때 사용. 반환값이 false면 인텐트가 없었음.
+        public bool TryGetExecuteData(
+            IReadOnlyList<BattleUnit> playerUnits,
+            out BattleUnit            caster,
+            out List<BattleUnit>      targets,
+            out List<Vector2Int>      tiles,
+            out SkillData             skill)
         {
-            if (currentIntent == null) return;
+            caster  = null;
+            targets = null;
+            tiles   = null;
+            skill   = null;
 
-            BattleUnit caster = currentIntent.caster;
-            SkillData  skill  = currentIntent.skill;
+            if (currentIntent == null) return false;
+
+            caster = currentIntent.caster;
+            skill  = currentIntent.skill;
 
             List<Vector2Int> executeTiles = currentIntent.warningTiles;
 
@@ -139,21 +150,32 @@ namespace KD
                     gridManager.IsValidTile,
                     null);
             }
-            // Fixed: warningTiles 그대로 사용 (재계산 없음)
+
+            tiles   = executeTiles;
+            targets = new List<BattleUnit>();
 
             foreach (Vector2Int tile in executeTiles)
             {
                 BattleUnit unitOnTile = gridManager.GetUnitAt(tile);
                 if (unitOnTile == null || unitOnTile.IsDead) continue;
                 if (unitOnTile.TeamId == caster.TeamId)      continue;
-
-                SkillExecutor.Execute(caster, unitOnTile, skill);
+                targets.Add(unitOnTile);
             }
 
-            // 바닥 위험 표시 정리는 매니저가 일괄 처리한다 (RefreshEnemyTelegraphs).
             currentIntent = null;
+            return true;
+        }
 
-            Debug.Log($"[EnemyIntentController] {caster.Data.unitName} → {skill.skillName} 실행 완료");
+        // SkillActionRunner가 없을 때 폴백 — VFX 없이 직접 피해 적용
+        public void ExecuteCurrentIntent(IReadOnlyList<BattleUnit> playerUnits = null)
+        {
+            if (!TryGetExecuteData(playerUnits, out BattleUnit caster, out List<BattleUnit> targets, out _, out SkillData skill))
+                return;
+
+            foreach (BattleUnit target in targets)
+                SkillExecutor.Execute(caster, target, skill);
+
+            Debug.Log($"[EnemyIntentController] {caster.Data.unitName} → {skill.skillName} 실행 완료 (VFX 없음)");
         }
 
         private static SafetyType DangerLevelFromTileCount(int count)

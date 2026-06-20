@@ -278,8 +278,26 @@ namespace KD
 
             // 1. 지난 턴 예고 실행 (없으면 — 예: 첫 턴 — 건너뜀)
             if (controller.CurrentIntent != null)
-                controller.ExecuteCurrentIntent(playerUnits);
+            {
+                if (skillActionRunner != null
+                    && controller.TryGetExecuteData(playerUnits, out BattleUnit caster, out List<BattleUnit> targets, out List<Vector2Int> tiles, out SkillData skill))
+                {
+                    // VFX + 피해: 완료 콜백에서 턴 후처리
+                    skillActionRunner.StartUseSkill(caster, targets, tiles, skill,
+                        () => ContinueEnemyTurn(enemy, idx));
+                    return;
+                }
 
+                // SkillActionRunner 없음 — VFX 없이 직접 실행
+                controller.ExecuteCurrentIntent(playerUnits);
+            }
+
+            ContinueEnemyTurn(enemy, idx);
+        }
+
+        // VFX 완료 후 (또는 첫 턴 / 폴백 경로) 예고 준비 및 턴 종료
+        private void ContinueEnemyTurn(BattleUnit enemy, int idx)
+        {
             // 마지막 플레이어를 처치했으면 새 예고 없이 전투 종료
             if (CheckBattleEnd())
             {
@@ -288,6 +306,7 @@ namespace KD
             }
 
             // 2. 다음 턴을 위한 새 예고 준비 (이번 턴엔 타격 안 함)
+            EnemyIntentController controller = intentControllers[idx];
             EnemyPatternData pattern = idx < enemyPatterns.Count ? enemyPatterns[idx] : null;
             controller.PrepareNextIntent(enemy, pattern, playerUnits);
 
