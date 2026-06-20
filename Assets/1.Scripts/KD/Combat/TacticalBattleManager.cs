@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -28,6 +29,9 @@ namespace KD
         [SerializeField] private List<UnitData>         enemyUnitDatas      = new List<UnitData>();
         [SerializeField] private List<Vector2Int>        enemyStartPositions = new List<Vector2Int>();
         [SerializeField] private List<EnemyPatternData>  enemyPatterns       = new List<EnemyPatternData>();
+
+        [Tooltip("적 턴에 공격 범위(예고 타일)를 보여준 뒤 실제 타격까지의 대기 시간(초)")]
+        [SerializeField] private float enemyTelegraphDelay = 0.8f;
 
         // ── 런타임 상태 ───────────────────────────────────────────────────
 
@@ -128,7 +132,7 @@ namespace KD
                 enemyUnits.Add(unit);
                 allUnits.Add(unit);
                 gridManager.PlaceUnit(unit, unit.CurrentTilePos);
-                intentControllers.Add(new EnemyIntentController(gridManager));
+                intentControllers.Add(new EnemyIntentController(gridManager, combatGridQuery));
             }
         }
 
@@ -244,13 +248,45 @@ namespace KD
             }
             else
             {
-                // 적 턴
+                // 적 턴 — 예고(공격 범위 표시) → 대상 회전 → 대기 → 타격
                 currentPhase = BattlePhase.EnemyPhase;
-                PrepareEnemyTurn(current);
-                // TODO: 전투 담당자 — 예고 연출 후 ExecuteEnemyTurn() 호출
-                // MVP: 즉시 실행
-                ExecuteEnemyTurn();
+                StartCoroutine(EnemyTurnRoutine(current));
             }
+        }
+
+        // 적 1체의 턴 연출: 공격 범위를 보여주고 대상 쪽으로 회전한 뒤,
+        // enemyTelegraphDelay 만큼 대기하고 실제 타격을 실행한다.
+        private IEnumerator EnemyTurnRoutine(BattleUnit enemy)
+        {
+            PrepareEnemyTurn(enemy);
+
+            EnemyIntent intent = CurrentEnemyIntent;
+            if (intent != null && intent.warningTiles.Count > 0)
+            {
+                // 공격 대상(예고 타일 중심) 쪽으로 회전
+                gridManager.RotateUnitTowardsTile(enemy, GetWarningCenterTile(intent.warningTiles));
+
+                // 공격 범위를 잠시 보여준 뒤 타격
+                if (enemyTelegraphDelay > 0f)
+                    yield return new WaitForSeconds(enemyTelegraphDelay);
+            }
+
+            ExecuteEnemyTurn();
+        }
+
+        // 예고 타일들의 중심(평균) 타일 — 적이 바라볼 방향 기준
+        private static Vector2Int GetWarningCenterTile(List<Vector2Int> tiles)
+        {
+            int sumX = 0;
+            int sumY = 0;
+            for (int i = 0; i < tiles.Count; i++)
+            {
+                sumX += tiles[i].x;
+                sumY += tiles[i].y;
+            }
+            return new Vector2Int(
+                Mathf.RoundToInt((float)sumX / tiles.Count),
+                Mathf.RoundToInt((float)sumY / tiles.Count));
         }
 
         // ── 적 턴 API ─────────────────────────────────────────────────────
@@ -262,7 +298,7 @@ namespace KD
             if (idx < 0) return;
 
             EnemyPatternData pattern = idx < enemyPatterns.Count ? enemyPatterns[idx] : null;
-            intentControllers[idx].PrepareNextIntent(enemy, pattern);
+            intentControllers[idx].PrepareNextIntent(enemy, pattern, playerUnits);
         }
 
         /// <summary>적 예고 실행 — 경고 타일 위 플레이어 유닛 타격 후 턴 종료.</summary>
@@ -272,8 +308,16 @@ namespace KD
             if (current == null || current.TeamId != 1) return;
 
             int idx = enemyUnits.IndexOf(current);
-            if (idx >= 0)
+            if (idx >= 0 && intentControllers[idx].CurrentIntent != null)
+            {
+                // 시전 가능한 행동이 있으면 실행
                 intentControllers[idx].ExecuteCurrentIntent();
+            }
+            else
+            {
+                // 행동 불가(쿨타임/AP 부족) → 대기하며 AP 회복 (플레이어 Wait과 동일한 자원 모델)
+                current.Wait();
+            }
 
             EndCurrentTurn();
         }
@@ -308,7 +352,7 @@ namespace KD
             Debug.Log($"[TacticalBattleManager] 스킬 모드: {skill.skillName}");
         }
 
-        /// <summary>마우스가 타일 위에 올라갈 때 호출 — 스킬 범위 갱신.</summary>
+        /// <summary>마우스가 타일 위에 올라갈 때 호출 — 스킬 범위 갱신 및 회전 미리보기.</summary>
         public void UpdateHoveredTile(Vector2Int hoveredTile)
         {
             if (currentPhase      != BattlePhase.PlayerPhase) return;
@@ -316,6 +360,12 @@ namespace KD
             if (selectedUnit == null || selectedSkill == null) return;
 
             skillRangePreview.Show(selectedUnit, selectedSkill, hoveredTile);
+            
+            // 마우스 호버 시 미리 회전 방향 보여주기 (Self 타겟 제외)
+            if (selectedSkill.targetType != TargetType.Self)
+            {
+                gridManager.RotateUnitTowardsTile(selectedUnit, hoveredTile);
+            }
         }
 
         /// <summary>타일 클릭 — 이동 또는 스킬 발동.</summary>
@@ -341,6 +391,8 @@ namespace KD
         }
 
         /// <summary>현재 행동 모드를 취소하고 None 상태로 돌아간다. 이동/스킬 하이라이트를 제거한다.</summary>
+        // 일반 전투씬에서는 취소 메뉴가 필요없으므로 주석 처리
+        /*
         public void CancelCurrentAction()
         {
             if (currentPhase != BattlePhase.PlayerPhase) return;
@@ -351,6 +403,7 @@ namespace KD
             gridManager.ClearHighlight();
             Debug.Log("[TacticalBattleManager] 행동 취소");
         }
+        */
 
         // ── 이동·스킬 내부 로직 ──────────────────────────────────────────
 
@@ -441,7 +494,9 @@ namespace KD
 
         private void EndCurrentTurn()
         {
-            selectedUnit?.OnTurnEnd();
+            // 방금 행동을 마친 유닛(플레이어/적 모두)의 쿨타임을 감소시킨다.
+            // 적 턴에는 selectedUnit이 null이므로 CurrentTurnUnit을 기준으로 호출해야 한다.
+            CurrentTurnUnit?.OnTurnEnd();
 
             selectedUnit      = null;
             selectedSkill     = null;
