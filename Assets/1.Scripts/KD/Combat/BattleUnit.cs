@@ -96,6 +96,7 @@ namespace KD
             if (skill == null) return false;
             return skill == Data.uniqueSkill1
                 || skill == Data.uniqueSkill2
+                || skill == Data.uniqueSkill3
                 || skill == _equippedOptionalSkill;
         }
 
@@ -105,6 +106,7 @@ namespace KD
             var usable = new List<SkillData>();
             TryAddIfReady(usable, Data.uniqueSkill1);
             TryAddIfReady(usable, Data.uniqueSkill2);
+            TryAddIfReady(usable, Data.uniqueSkill3);
             TryAddIfReady(usable, _equippedOptionalSkill);
             return usable;
         }

@@ -34,6 +34,7 @@ namespace KD
         [Header("고유 스킬 (교체 불가)")]
         public SkillData uniqueSkill1;
         public SkillData uniqueSkill2;
+        public SkillData uniqueSkill3;
 
         // 교체 가능 스킬 후보 목록은 SkillDatabase에서 weaponType으로 필터링
 
@@ -49,7 +50,7 @@ namespace KD
             if (prefab == null)
                 Debug.LogWarning($"[{name}] prefab이 없습니다.", this);
 
-            if (uniqueSkill1 == null || uniqueSkill2 == null)
+            if (uniqueSkill1 == null || uniqueSkill2 == null || uniqueSkill3 == null)
                 Debug.LogWarning($"[{name}] 고유 스킬이 설정되지 않았습니다.", this);
         }
 #endif

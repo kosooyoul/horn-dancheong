@@ -75,6 +75,7 @@
 //                 var list = new System.Collections.Generic.List<SkillData>();
 //                 if (_unit.Data.uniqueSkill1 != null) list.Add(_unit.Data.uniqueSkill1);
 //                 if (_unit.Data.uniqueSkill2 != null) list.Add(_unit.Data.uniqueSkill2);
+//                 if (_unit.Data.uniqueSkill3 != null) list.Add(_unit.Data.uniqueSkill3);
 //                 if (_unit.EquippedOptionalSkill != null) list.Add(_unit.EquippedOptionalSkill);
 //                 return list;
 //             }
