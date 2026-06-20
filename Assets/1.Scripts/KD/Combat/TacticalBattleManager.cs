@@ -297,6 +297,18 @@ namespace KD
             EndCurrentTurn();
         }
 
+        /// <summary>현재 행동 모드를 취소하고 None 상태로 돌아간다. 이동/스킬 하이라이트를 제거한다.</summary>
+        public void CancelCurrentAction()
+        {
+            if (currentPhase != BattlePhase.PlayerPhase) return;
+            currentActionMode = BattleActionMode.None;
+            selectedSkill     = null;
+            currentMoveOptions.Clear();
+            skillRangePreview.Clear();
+            gridManager.ClearHighlight();
+            Debug.Log("[TacticalBattleManager] 행동 취소");
+        }
+
         // ── 이동·스킬 내부 로직 ──────────────────────────────────────────
 
         private void TryMoveSelectedUnit(Vector2Int tile)
