@@ -25,10 +25,17 @@ namespace KD
         [Tooltip("이 행동에 사용할 스킬 (데미지/힐 효과 참조)\n모든 타입에서 skill.targetPattern을 범위로 사용")]
         public SkillData skill;
 
-        // [Tooltip("true: targetTiles를 맵 절대 좌표로 사용 (고정 예고 AoE)\nfalse: 스킬의 targetPattern을 시전자 기준으로 계산")]
-        // public bool useAbsoluteTiles = true;
+        [Tooltip("타일 결정 방식")]
+        public EnemyPatternStepType stepType = EnemyPatternStepType.Fixed;
 
-        [Tooltip("예고 및 타격 대상 타일 목록 (맵 절대 좌표). 여기 있는 플레이어 유닛이 피해를 받음")]
-        public List<Vector2Int> targetTiles = new List<Vector2Int>();
+        [Tooltip("Fixed 전용 — 패턴을 펼칠 방향 (x=오른쪽, y=앞). 기본값 (0,1) = 정북\n예고 시점에 고정되며 이후 변하지 않음")]
+        public Vector2Int fixedForward = Vector2Int.up;
+    }
+
+    public enum EnemyPatternStepType
+    {
+        Fixed,             // Inspector 지정 절대 타일 — 플레이어 이동 무관
+        Tracking,          // 실행 직전 가장 가까운 플레이어 방향으로 패턴 재계산
+        RandomUnitTracking,// 경고 시점에 랜덤 플레이어 1명 지정 → 실행 직전 그 유닛의 현재 위치 1칸 타격
     }
 }
