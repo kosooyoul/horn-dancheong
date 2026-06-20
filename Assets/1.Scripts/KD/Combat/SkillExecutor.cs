@@ -3,8 +3,9 @@ using UnityEngine;
 namespace KD
 {
     // 스킬 실행 단일 진입점
-    // 광역 스킬(AllAllies, AllEnemies): BattleManager가 대상 목록을 수집 후 Execute를 반복 호출
+    // 광역 스킬: BattleManager가 GridPatternResolver로 범위 내 대상 목록을 수집 후 Execute를 반복 호출
     // SkillExecutor 자체는 항상 단일 대상만 처리
+    // AP 소모 및 쿨타임 적용은 Execute 내부에서 자동 처리
     public static class SkillExecutor
     {
         // 전투 담당자는 이 함수 하나만 호출하면 됨
@@ -15,6 +16,7 @@ namespace KD
                 return false;
 
             ExecuteEffect(caster, target, skill);
+            caster.TrySpendAP(skill.apCost);
 
             if (skill.cooldown > 0)
                 caster.SetCooldown(skill.skillId, skill.cooldown);
@@ -39,6 +41,11 @@ namespace KD
             if (caster.GetCooldown(skill.skillId) > 0)
             {
                 Debug.Log($"[SkillExecutor] '{skill.skillName}' 쿨타임 중 ({caster.GetCooldown(skill.skillId)}턴 남음)");
+                return false;
+            }
+            if (!caster.HasEnoughAP(skill.apCost))
+            {
+                Debug.Log($"[SkillExecutor] '{skill.skillName}' AP 부족 (필요: {skill.apCost}, 현재: {caster.CurrentAP})");
                 return false;
             }
             if (skill.targetType != TargetType.Self && (target == null || !target.IsAlive))

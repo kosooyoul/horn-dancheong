@@ -1,12 +1,22 @@
 namespace KD
 {
-    // 유닛 직군 — 장착 가능한 교체 스킬과 전투 역할을 결정
+    // 유닛 직군 — 전투 역할 (UI 표시, 스탯 보너스 등에 활용)
     public enum UnitRole
     {
-        Dealer,     // 공격 특화, 집행
-        Tanker,     // 방어 특화, 금군
-        Supporter,  // HP 회복, 의관
-        Healer      // 버프/디버프, 사관
+        Dealer,     // 공격 특화
+        Tanker,     // 방어 특화
+        Supporter,  // 버프/디버프/위치 보조
+        Healer      // HP 회복/보호막/상태이상 해제
+    }
+
+    // 무기 종류 — 장착 가능한 교체 스킬을 결정
+    // 같은 WeaponType을 가진 유닛은 동일한 스킬 풀을 공유
+    public enum WeaponType
+    {
+        Sword,  // 검 — 근접 물리
+        Bow,    // 궁 — 원거리 물리
+        Staff,  // 장 — 마법/버프
+        Book    // 책 — 회복/보조
     }
 
     // 유닛 속성 — AttributeCalculator에서 상성 배율 계산에 사용
@@ -19,27 +29,28 @@ namespace KD
         Black       // 흑 계열
     }
 
-    // 유닛 이동 방식 — GridManager에서 이동 가능 타일 계산 시 사용
-    // 이동 거리(moveRange)는 민첩 스탯으로 결정, 이동 방식만 여기서 정의
+    // 유닛 이동 방식 — MovementRangeCalculator에서 이동 가능 타일 계산 시 사용
+    // 이동 거리(moveRange)는 agility 스탯으로 결정, 이동 방식만 여기서 정의
     public enum MovementType
     {
-        Cardinal,       // 상하좌우 4방향 이동 (기본)
-        EightDir,       // 8방향 이동 (대각 포함)
+        Cardinal,       // 상하좌우 BFS 이동 (기본)
+        EightDir,       // 8방향 BFS 이동 (대각 포함)
         KnightJump,     // L자 점프 (장애물 무시, 체스 나이트)
         Teleport,       // 범위 내 자유 이동 (장애물 무시)
         Charge,         // 직선 돌진 (막힐 때까지)
-        DiagonalOnly    // 대각선 방향만 (체스 비숍)
+        DiagonalOnly    // 대각선 BFS 이동 (체스 비숍)
     }
 
     // 스킬 타겟 타입 — SkillExecutor에서 타겟 선택 로직 분기에 사용
+    // 광역 여부는 TargetType이 아니라 GridPatternData로 처리한다
+    // 예: Enemy + around_8 패턴 = 주변 8칸 적 전체 타격
     public enum TargetType
     {
         Enemy,      // 적 유닛
         Ally,       // 아군 유닛
         Self,       // 자기 자신
-        AllAllies,  // 아군 전체
-        AllEnemies, // 적군 전체
-        Any         // 아군/적군 모두
+        AnyUnit,    // 아군/적군 모두
+        Tile        // 특정 타일 선택 (유닛 없어도 사용 가능)
     }
 
     // 스킬 효과 타입 — SkillExecutor.ExecuteEffect()에서 분기에 사용
@@ -53,7 +64,7 @@ namespace KD
     }
 
     // 패턴 방향 모드 — GridPatternData에서 사용 (스킬 범위 전용)
-    // UseSelectedDirection : 플레이어가 선택한 방향 기준으로만 패턴 생성
+    // UseSelectedDirection : DirectionSet으로 마우스 방향을 스냅해 단일 방향으로 패턴 생성
     // AllDirections        : DirectionSet에 따라 여러 방향으로 패턴 자동 반복
     public enum PatternDirectionMode
     {
@@ -61,7 +72,9 @@ namespace KD
         AllDirections
     }
 
-    // 방향 집합 — PatternDirectionMode.AllDirections일 때 반복 방향 결정
+    // 방향 집합
+    // UseSelectedDirection 일 때: 마우스 방향을 어느 방향 집합으로 스냅할지 결정
+    // AllDirections 일 때: 패턴을 몇 방향으로 반복할지 결정
     public enum DirectionSet
     {
         Cardinal4,      // 상, 하, 좌, 우

@@ -180,6 +180,8 @@ public class BattleScript : MonoBehaviour
     [SerializeField] private Color allyColor = new Color(0.2f, 0.4f, 1f);
     [Tooltip("적군 마커 색상")]
     [SerializeField] private Color enemyColor = new Color(1f, 0.2f, 0.2f);
+    [Tooltip("유닛이 한 칸 이동할 때의 보간 속도 (월드 단위/초)")]
+    [SerializeField] private float unitMoveSpeed = 6f;
     
     [Header("Fallback Map Layout (JSON 비활성화 시 사용)")]
     [SerializeField] private int[,] fallbackMapLayout = new int[10, 10] 
@@ -896,6 +898,12 @@ public class BattleScript : MonoBehaviour
         currentTurnOrigin = unit != null ? unit.grid : Vector2Int.zero;
     }
 
+    // 현재 턴 유닛의 이동 원점(턴 시작 위치) — 이동 취소 시 복귀 지점으로 사용
+    public Vector2Int GetCurrentTurnOrigin()
+    {
+        return currentTurnOrigin;
+    }
+
     // 현재 턴 유닛이 원점에서 추가로 더 멀어질 수 있는 칸 수 (mov - 원점까지의 거리)
     public int GetCurrentTurnMovesRemaining()
     {
@@ -934,7 +942,8 @@ public class BattleScript : MonoBehaviour
     }
 
     // 유닛을 목표 칸으로 이동 — 맵 범위/이동 가능/빈 칸 여부를 검증
-    public bool MoveUnit(BattleUnitEntry unit, Vector2Int target)
+    // instant=true면 보간 없이 즉시 위치를 맞춘다 (행동 메뉴 취소 복귀 등).
+    public bool MoveUnit(BattleUnitEntry unit, Vector2Int target, bool instant = false)
     {
         if (unit == null || unit.marker == null) return false;
 
@@ -957,12 +966,123 @@ public class BattleScript : MonoBehaviour
 
         // 마커 월드 위치 갱신 — y(높이)는 기존 값을 유지해 박스/프리팹 모두 자연스럽게 이동
         Vector3 world = GridToWorld(target.x, target.y);
-        Vector3 markerPosition = unit.marker.transform.position;
-        markerPosition.x = world.x;
-        markerPosition.z = world.z;
-        unit.marker.transform.position = markerPosition;
+        Vector3 markerTarget = unit.marker.transform.position;
+        markerTarget.x = world.x;
+        markerTarget.z = world.z;
+
+        // UnitMover가 있으면 보간/즉시 이동, 없으면 transform을 직접 갱신
+        UnitMover mover = unit.marker.GetComponent<UnitMover>();
+        if (mover != null)
+        {
+            if (instant)
+            {
+                mover.SnapTo(markerTarget);
+            }
+            else
+            {
+                mover.MoveTo(markerTarget);
+            }
+        }
+        else
+        {
+            unit.marker.transform.position = markerTarget;
+        }
 
         Debug.Log($"[BattleScript] {unit.DisplayName} 이동 → ({target.x}, {target.y})");
+        return true;
+    }
+
+    // ── 도달 가능 영역 / 경로 (마우스 이동·이동 범위 표시용) ────────────
+
+    // 상하좌우 4방향 (대각선 이동 없음 — 키보드 이동과 동일 규칙)
+    private static readonly Vector2Int[] MoveDirections =
+    {
+        Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
+    };
+
+    // 현재 위치에서 BFS로 도달 가능한 칸과 경로(부모 맵)를 계산한다.
+    // 키보드 한 칸 이동과 동일한 제약을 따른다:
+    //  - 턴 시작 원점에서 맨해튼 거리 MoveRange 이내
+    //  - 걷기 가능(IsWalkable) + 다른 유닛이 없는(IsTileOccupied) 칸만 통과
+    // 반환 맵의 key 집합이 도달 가능한 칸이며, value는 그 칸으로 오기 직전 칸이다.
+    // 시작 칸(unit.grid)은 맵에 포함되지 않는다.
+    private Dictionary<Vector2Int, Vector2Int> ComputeReachable(BattleUnitEntry unit)
+    {
+        var cameFrom = new Dictionary<Vector2Int, Vector2Int>();
+        if (unit == null) return cameFrom;
+
+        int budget = unit.MoveRange;
+        if (budget <= 0) return cameFrom;
+
+        Vector2Int start = unit.grid;
+        var visited = new HashSet<Vector2Int> { start };
+        var queue = new Queue<Vector2Int>();
+        queue.Enqueue(start);
+
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+            foreach (Vector2Int dir in MoveDirections)
+            {
+                Vector2Int next = current + dir;
+                if (visited.Contains(next)) continue;
+                if (ManhattanDistance(next, currentTurnOrigin) > budget) continue;
+                if (!IsWalkable(next.x, next.y)) continue;
+                if (IsTileOccupied(next)) continue;
+
+                visited.Add(next);
+                cameFrom[next] = current;
+                queue.Enqueue(next);
+            }
+        }
+
+        return cameFrom;
+    }
+
+    // 현재 턴 유닛이 이번에 이동할 수 있는 모든 칸 목록 (이동 범위 표시용)
+    public List<Vector2Int> GetReachableTilesForCurrentUnit()
+    {
+        BattleUnitEntry unit = GetCurrentTurnUnit();
+        if (unit == null) return new List<Vector2Int>();
+        return new List<Vector2Int>(ComputeReachable(unit).Keys);
+    }
+
+    // 현재 턴 유닛을 목표 칸까지 경로를 따라 이동시킨다 (마우스 클릭 이동용).
+    // 도달 불가능한 칸이면 이동하지 않고 false를 반환한다.
+    public bool MoveCurrentUnitTo(Vector2Int target)
+    {
+        BattleUnitEntry unit = GetCurrentTurnUnit();
+        if (unit == null)
+        {
+            Debug.LogWarning("[BattleScript] 이동할 현재 턴 유닛이 없습니다.");
+            return false;
+        }
+
+        if (target == unit.grid) return false;
+
+        Dictionary<Vector2Int, Vector2Int> cameFrom = ComputeReachable(unit);
+        if (!cameFrom.ContainsKey(target))
+        {
+            Debug.Log($"[BattleScript] ({target.x}, {target.y})로는 이동할 수 없습니다 (범위 밖이거나 막혀 있음).");
+            return false;
+        }
+
+        // 목표에서 시작 칸까지 부모를 거슬러 올라가 경로를 복원
+        var path = new List<Vector2Int>();
+        Vector2Int step = target;
+        while (step != unit.grid)
+        {
+            path.Add(step);
+            step = cameFrom[step];
+        }
+        path.Reverse();
+
+        // 경로 칸을 차례대로 이동 — UnitMover 큐가 부드럽게 이어 처리한다
+        foreach (Vector2Int tile in path)
+        {
+            if (!MoveUnit(unit, tile)) break;
+        }
+
         return true;
     }
 
@@ -1003,6 +1123,12 @@ public class BattleScript : MonoBehaviour
         Vector3 worldPosition = GridToWorld(grid.x, grid.y);
 
         GameObject marker = CreateUnitVisual(worldPosition, isEnemy, definition);
+
+        // 부드러운 이동을 위한 무버 컴포넌트 부착 (초기 위치는 즉시 스냅)
+        UnitMover mover = marker.GetComponent<UnitMover>();
+        if (mover == null) mover = marker.AddComponent<UnitMover>();
+        mover.SetMoveSpeed(unitMoveSpeed);
+        mover.SnapTo(marker.transform.position);
 
         string prefix = isEnemy ? "Enemy" : "Ally";
         string unitName = definition != null && !string.IsNullOrWhiteSpace(definition.name)

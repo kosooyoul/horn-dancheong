@@ -82,18 +82,24 @@ namespace KD
             Vector2Int dir = NormalizeDir(ray.localDirection);
             if (dir == Vector2Int.zero) return;
 
+            Debug.Log($"[ResolveRay] origin={origin}, forward={forward}, dir={dir}, min={ray.minDistance}, max={ray.maxDistance}");
+
             for (int d = ray.minDistance; d <= ray.maxDistance; d++)
             {
                 Vector2Int localOffset = ray.startLocalOffset + dir * d;
-                Vector2Int worldPos = LocalToWorld(origin, forward, localOffset);
+                Vector2Int worldPos    = LocalToWorld(origin, forward, localOffset);
 
-                if (isValidTile != null && !isValidTile(worldPos))
+                bool valid   = isValidTile   == null || isValidTile(worldPos);
+                bool blocked = isBlockedTile != null && isBlockedTile(worldPos);
+
+                Debug.Log($"[ResolveRay] d={d}, local={localOffset}, world={worldPos}, valid={valid}, blocked={blocked}");
+
+                if (!valid)
                 {
                     if (ray.stopOnBlocked) break;
                     continue;
                 }
-
-                if (isBlockedTile != null && isBlockedTile(worldPos))
+                if (blocked)
                 {
                     if (ray.stopOnBlocked) break;
                     continue;
