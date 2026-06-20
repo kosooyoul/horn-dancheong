@@ -19,6 +19,9 @@ namespace HornDancheong.Seongwoo.UI
         [Header("UI Panel Reference")]
         [SerializeField] private GameObject panelDialogue;
 
+        [Header("Background Image")]
+        [SerializeField] private Image backgroundImage;
+
         [Header("Portrait Images")]
         [SerializeField] private Image portraitLeft;
         [SerializeField] private Image portraitCenter;
@@ -113,6 +116,9 @@ namespace HornDancheong.Seongwoo.UI
             UpdatePortrait(portraitLeft, _currentItem.LeftPortrait);
             UpdatePortrait(portraitCenter, _currentItem.CenterPortrait);
             UpdatePortrait(portraitRight, _currentItem.RightPortrait);
+
+            // 3. 백그라운드 이미지 설정
+            UpdateBackground(_currentItem.BackgroundImage);
         }
 
         /// <summary>
@@ -131,6 +137,10 @@ namespace HornDancheong.Seongwoo.UI
             Sprite sprite = LoadPortraitSprite(portraitFilename);
             if (sprite != null)
             {
+                if (portraitImage.gameObject.activeSelf && portraitImage.sprite == sprite)
+                {
+                    return;
+                }
                 portraitImage.sprite = sprite;
                 portraitImage.gameObject.SetActive(true);
             }
@@ -193,6 +203,101 @@ namespace HornDancheong.Seongwoo.UI
         }
 
         /// <summary>
+        /// 백그라운드 이미지 컴포넌트에 스프라이트를 할당하고 활성화 상태를 제어합니다.
+        /// </summary>
+        private void UpdateBackground(string backgroundFilename)
+        {
+            if (backgroundImage == null) return;
+
+            if (string.IsNullOrEmpty(backgroundFilename))
+            {
+                backgroundImage.gameObject.SetActive(false);
+                return;
+            }
+
+            Sprite sprite = LoadBackgroundSprite(backgroundFilename);
+            if (sprite != null)
+            {
+                if (backgroundImage.gameObject.activeSelf && backgroundImage.sprite == sprite)
+                {
+                    return;
+                }
+                backgroundImage.sprite = sprite;
+                backgroundImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                backgroundImage.gameObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Assets/Resources/Background/ 폴더 등 리소스 폴더로부터 백그라운드 스프라이트를 동적 로드합니다.
+        /// 파일 확장자가 포함된 경우 제거하여 로드합니다.
+        /// </summary>
+        private Sprite LoadBackgroundSprite(string filename)
+        {
+            if (string.IsNullOrEmpty(filename)) return null;
+
+            string resourceName = filename;
+            int dotIndex = resourceName.LastIndexOf('.');
+            if (dotIndex > 0)
+            {
+                resourceName = resourceName.Substring(0, dotIndex);
+            }
+
+            // 1. 단일 스프라이트 로드 시도 (Background/ 폴더)
+            Sprite sprite = Resources.Load<Sprite>("Background/" + resourceName);
+            
+            // 2. 만약 Multiple Sprite (스프라이트 시트)로 설정된 경우 Resources.LoadAll을 사용해야 함
+            if (sprite == null)
+            {
+                Sprite[] sprites = Resources.LoadAll<Sprite>("Background/" + resourceName);
+                if (sprites != null && sprites.Length > 0)
+                {
+                    sprite = sprites[0];
+                }
+            }
+
+            // 3. Fallback: typo가 있는 폴더 "Backgroud/" 로드 시도
+            if (sprite == null)
+            {
+                sprite = Resources.Load<Sprite>("Backgroud/" + resourceName);
+            }
+            if (sprite == null)
+            {
+                Sprite[] sprites = Resources.LoadAll<Sprite>("Backgroud/" + resourceName);
+                if (sprites != null && sprites.Length > 0)
+                {
+                    sprite = sprites[0];
+                }
+            }
+
+            // 4. Fallback: Resources 폴더 최상위 단일 스프라이트 로드 시도
+            if (sprite == null)
+            {
+                sprite = Resources.Load<Sprite>(resourceName);
+            }
+
+            // 5. Fallback: Resources 폴더 최상위 Multiple Sprite 로드 시도
+            if (sprite == null)
+            {
+                Sprite[] sprites = Resources.LoadAll<Sprite>(resourceName);
+                if (sprites != null && sprites.Length > 0)
+                {
+                    sprite = sprites[0];
+                }
+            }
+
+            if (sprite == null)
+            {
+                Debug.LogWarning($"[DialogueDisplayer] 백그라운드 이미지를 로드하지 못했습니다: {filename} (검색 경로: 'Background/{resourceName}', 'Backgroud/{resourceName}' 및 '{resourceName}')");
+            }
+
+            return sprite;
+        }
+
+        /// <summary>
         /// DialogueTable의 Sheet1 리스트에서 DialogueIndex가 일치하는 아이템을 찾습니다.
         /// </summary>
         private DialogueTableItem GetDialogueItem(int index)
@@ -242,6 +347,11 @@ namespace HornDancheong.Seongwoo.UI
             if (panelDialogue != null)
             {
                 panelDialogue.SetActive(false);
+            }
+
+            if (backgroundImage != null)
+            {
+                backgroundImage.gameObject.SetActive(false);
             }
         }
     }
