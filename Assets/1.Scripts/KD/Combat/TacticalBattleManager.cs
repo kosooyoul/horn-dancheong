@@ -333,6 +333,8 @@ namespace KD
         }
 
         /// <summary>현재 행동 모드를 취소하고 None 상태로 돌아간다. 이동/스킬 하이라이트를 제거한다.</summary>
+        // 일반 전투씬에서는 취소 메뉴가 필요없으므로 주석 처리
+        /*
         public void CancelCurrentAction()
         {
             if (currentPhase != BattlePhase.PlayerPhase) return;
@@ -343,6 +345,7 @@ namespace KD
             gridManager.ClearHighlight();
             Debug.Log("[TacticalBattleManager] 행동 취소");
         }
+        */
 
         // ── 이동·스킬 내부 로직 ──────────────────────────────────────────
 
