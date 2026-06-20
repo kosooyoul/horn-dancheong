@@ -99,7 +99,9 @@ namespace KD
                 foreach (BattleUnit target in targets)
                 {
                     if (target == null) continue;
-                    SpawnVfx(skill.impactVfxPrefab, GetUnitWorldPos(target), skill.vfxLifetime);
+                    Vector3 targetPos = GetUnitWorldPos(target);
+                    SpawnVfx(skill.impactVfxPrefab, targetPos, skill.vfxLifetime,
+                        GetImpactRotation(casterPos, targetPos));
                 }
             }
 
@@ -162,7 +164,9 @@ namespace KD
                 foreach (BattleUnit target in targets)
                 {
                     if (target == null) continue;
-                    SpawnVfx(skill.impactVfxPrefab, GetUnitWorldPos(target), skill.vfxLifetime);
+                    Vector3 targetPos = GetUnitWorldPos(target);
+                    SpawnVfx(skill.impactVfxPrefab, targetPos, skill.vfxLifetime,
+                        GetImpactRotation(casterPos, targetPos));
                 }
             }
 
@@ -262,7 +266,9 @@ namespace KD
                 foreach (BattleUnit target in targets)
                 {
                     if (target == null) continue;
-                    SpawnVfx(skill.impactVfxPrefab, GetUnitWorldPos(target), skill.vfxLifetime);
+                    Vector3 targetPos = GetUnitWorldPos(target);
+                    SpawnVfx(skill.impactVfxPrefab, targetPos, skill.vfxLifetime,
+                        GetImpactRotation(droneSpawn, targetPos));
                 }
             }
 
@@ -302,10 +308,13 @@ namespace KD
 
             if (skill.impactVfxPrefab != null)
             {
+                Vector3 casterPos = GetUnitWorldPos(caster);
                 foreach (BattleUnit target in targets)
                 {
                     if (target == null) continue;
-                    SpawnVfx(skill.impactVfxPrefab, GetUnitWorldPos(target), skill.vfxLifetime);
+                    Vector3 targetPos = GetUnitWorldPos(target);
+                    SpawnVfx(skill.impactVfxPrefab, targetPos, skill.vfxLifetime,
+                        GetImpactRotation(casterPos, targetPos));
                 }
             }
 
@@ -441,6 +450,15 @@ namespace KD
             Vector3 pos = gridManager.GridToWorld(tile);
             pos.y += 0.1f;
             return pos;
+        }
+
+        // from → to 방향으로 Y축 회전 반환 (XZ 평면 투영)
+        private static Quaternion GetImpactRotation(Vector3 from, Vector3 to)
+        {
+            Vector3 dir = to - from;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.001f) return Quaternion.identity;
+            return Quaternion.LookRotation(dir.normalized);
         }
 
         // castVfxPrefab 전용 — 크기 고정, caster 위 y+1에 1개만 스폰
