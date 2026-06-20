@@ -10,23 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80e61fdbfa9880041ad8000a062a06d5, type: 3}
-  m_Name: UnitData_Dealer
+  m_Name: BossData_1
   m_EditorClassIdentifier: Assembly-CSharp::KD.UnitData
   unitId: 
-  unitName: "\uC724\uC194\uD558"
+  unitName: "\uD63C\uC808\uC0C1\uD0DC"
   description: 
   icon: {fileID: 0}
-  prefab: {fileID: 4430476179508750244, guid: b3d9376b1554a48d288cd1dcbe00b4a2, type: 3}
+  prefab: {fileID: 4430476179508750244, guid: 2d53998d2a5764de3b9ecdea9ef4be8b, type: 3}
   role: 0
   attribute: 1
-  weaponType: 1
+  weaponType: 0
   movementType: 0
   moveAPCost: 30
   baseStats:
-    agility: 5
-    spirit: 5
-    guard: 5
-    luck: 5
-  uniqueSkill1: {fileID: 11400000, guid: a0abaca71ff37674aafb1f973e730186, type: 2}
-  uniqueSkill2: {fileID: 11400000, guid: 8e4ff1d1ac549ac4c9e8c758c8f07f4f, type: 2}
-  uniqueSkill3: {fileID: 11400000, guid: a0abaca71ff37674aafb1f973e730186, type: 2}
+    agility: 1
+    spirit: 1
+    guard: 1
+    luck: 1
+  uniqueSkill1: {fileID: 11400000, guid: ba28f5eb706f44c0a9666dff4f24fe38, type: 2}
+  uniqueSkill2: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}

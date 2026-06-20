@@ -13,6 +13,15 @@ MonoBehaviour:
   m_Name: EnemyPatternData_1
   m_EditorClassIdentifier: Assembly-CSharp::KD.EnemyPatternData
   steps:
-  - skill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
-    targetTiles:
-    - {x: 3, y: 3}
+  - skill: {fileID: 11400000, guid: 1bc9d54c4125cf942add4e95cf197b87, type: 2}
+    stepType: 0
+    targetTiles: []
+  - skill: {fileID: 11400000, guid: 9d3451a92e8ecfc42bbab455f6f81243, type: 2}
+    stepType: 0
+    targetTiles: []
+  - skill: {fileID: 11400000, guid: c1396359ce7ac2448aba418d0d76c69d, type: 2}
+    stepType: 0
+    targetTiles: []
+  - skill: {fileID: 11400000, guid: 9bf9c3e6b1052724eaaa5a0fcabd20a1, type: 2}
+    stepType: 1
+    targetTiles: []

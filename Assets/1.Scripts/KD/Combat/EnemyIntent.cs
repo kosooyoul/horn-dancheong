@@ -9,5 +9,12 @@ namespace KD
         public BattleUnit        caster;
         public SkillData         skill;
         public List<Vector2Int>  warningTiles = new List<Vector2Int>();
+
+        // 추적형일 때 true — ExecuteCurrentIntent에서 타일을 재계산함
+        public bool              isTracking;
+        public EnemyPatternStep  sourceStep;  // Tracking 재계산용
+
+        // RandomUnitTracking 전용 — 경고 시 지정된 대상 유닛 (실행 직전 현재 위치 사용)
+        public BattleUnit        trackedUnit;
     }
 }

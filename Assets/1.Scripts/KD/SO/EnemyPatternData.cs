@@ -14,16 +14,28 @@ namespace KD
         public List<EnemyPatternStep> steps = new List<EnemyPatternStep>();
     }
 
-    // 적 행동 1가지 — 스킬 + 맵상 고정 타일 목록
-    // targetTiles: 예고 및 실제 타격 타일 (월드 좌표 절대값)
-    // 예) 6x6 맵에서 네 귀퉁이 2x2씩 = (0,0),(0,1),(1,0),(1,1) + ... 총 16칸
+    // 적 행동 1가지 — 모든 타입이 skill.targetPattern(GridPatternData)을 사용
+    //
+    // Fixed          : 예고 시점에 fixedForward 방향으로 패턴 계산 → 실행까지 변하지 않음
+    // Tracking       : 예고·실행 양쪽에서 가장 가까운 플레이어 방향으로 패턴 재계산
+    // RandomUnitTracking : 예고 시점에 랜덤 플레이어 지정 → 실행 직전 그 유닛의 현재 위치 1칸
     [Serializable]
     public class EnemyPatternStep
     {
-        [Tooltip("이 행동에 사용할 스킬 (데미지/힐 효과 참조)")]
+        [Tooltip("이 행동에 사용할 스킬 (데미지/힐 효과 참조)\n모든 타입에서 skill.targetPattern을 범위로 사용")]
         public SkillData skill;
 
-        [Tooltip("예고 및 타격 대상 타일 목록 (맵 절대 좌표). 여기 있는 플레이어 유닛이 피해를 받음")]
-        public List<Vector2Int> targetTiles = new List<Vector2Int>();
+        [Tooltip("타일 결정 방식")]
+        public EnemyPatternStepType stepType = EnemyPatternStepType.Fixed;
+
+        [Tooltip("Fixed 전용 — 패턴을 펼칠 방향 (x=오른쪽, y=앞). 기본값 (0,1) = 정북\n예고 시점에 고정되며 이후 변하지 않음")]
+        public Vector2Int fixedForward = Vector2Int.up;
+    }
+
+    public enum EnemyPatternStepType
+    {
+        Fixed,             // Inspector 지정 절대 타일 — 플레이어 이동 무관
+        Tracking,          // 실행 직전 가장 가까운 플레이어 방향으로 패턴 재계산
+        RandomUnitTracking,// 경고 시점에 랜덤 플레이어 1명 지정 → 실행 직전 그 유닛의 현재 위치 1칸 타격
     }
 }
