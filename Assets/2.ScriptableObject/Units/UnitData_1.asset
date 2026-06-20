@@ -16,7 +16,7 @@ MonoBehaviour:
   unitName: "\uD604\uB3C4\uC724"
   description: 
   icon: {fileID: 0}
-  prefab: {fileID: 0}
+  prefab: {fileID: 4430476179508750244, guid: d15422d0bd9f5964cbe733757abeaeb3, type: 3}
   role: 1
   attribute: 0
   weaponType: 0

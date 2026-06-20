@@ -276,21 +276,21 @@ namespace KD
 
             Transform parent = unitVisualParent != null ? unitVisualParent : transform;
 
+            // 우선순위: 유닛 고유 prefab → GridManager defaultUnitMarkerPrefab → 큐브 폴백
+            GameObject sourcePrefab = (unit.Data != null && unit.Data.prefab != null)
+                ? unit.Data.prefab
+                : defaultUnitMarkerPrefab;
+
             GameObject marker;
-            if (defaultUnitMarkerPrefab != null)
+            if (sourcePrefab != null)
             {
-                marker = Instantiate(defaultUnitMarkerPrefab, parent);
+                marker = Instantiate(sourcePrefab, parent);
             }
             else
             {
                 marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 marker.transform.SetParent(parent);
                 marker.transform.localScale = new Vector3(0.6f, 1f, 0.6f);
-                Renderer r = marker.GetComponent<Renderer>();
-                if (r != null)
-                    r.material.color = unit.TeamId == 0
-                        ? new Color(0.2f, 0.4f, 1f)   // 플레이어: 파란색
-                        : new Color(1f,  0.2f, 0.2f);  // 적: 빨간색
             }
 
             UnitMover mover = marker.GetComponent<UnitMover>();
