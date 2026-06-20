@@ -55,6 +55,14 @@ namespace HornDancheong.Seongwoo.UI
         /// </summary>
         public void InitializeBattleUI(IEnumerable<ICharacterBattleInfo> characters)
         {
+            InitializeBattleUI(characters, sortByInitiative: true);
+        }
+
+        /// <summary>
+        /// 전투 시작 시 캐릭터 리스트를 받아 UI 패널들을 수동 레이아웃 좌표에 배치합니다. (정렬 여부 선택 가능)
+        /// </summary>
+        public void InitializeBattleUI(IEnumerable<ICharacterBattleInfo> characters, bool sortByInitiative)
+        {
             // 애니메이션 초기화
             if (_activeAnimationCoroutine != null)
             {
@@ -71,11 +79,10 @@ namespace HornDancheong.Seongwoo.UI
                 return;
             }
 
-            // 우선권(Initiative) 값이 높은 순서(내림차순)로 정렬
-            var sortedCharacters = characters
-                .Where(c => c != null)
-                .OrderByDescending(c => c.Initiative)
-                .ToList();
+            // 정렬 여부에 따라 캐릭터 리스트 구성
+            var sortedCharacters = sortByInitiative
+                ? characters.Where(c => c != null).OrderByDescending(c => c.Initiative).ToList()
+                : characters.Where(c => c != null).ToList();
 
             for (int i = 0; i < sortedCharacters.Count; i++)
             {
@@ -107,6 +114,124 @@ namespace HornDancheong.Seongwoo.UI
             }
 
             UpdateContainerSize();
+        }
+
+        /// <summary>
+        /// 틱 게이지 등 동적으로 변한 턴 순서에 맞춰 UI 패널들의 위치를 갱신합니다.
+        /// </summary>
+        public void UpdateTurnOrder(IEnumerable<ICharacterBattleInfo> characters)
+        {
+            if (_activeAnimationCoroutine != null)
+            {
+                StopCoroutine(_activeAnimationCoroutine);
+                ForceApplyTargets();
+            }
+
+            var newCharacters = characters.Where(c => c != null).ToList();
+            var newIds = new HashSet<string>(newCharacters.Select(c => c.Id));
+
+            // 1. 더이상 존재하지 않는 캐릭터 UI 제거
+            var idsToRemove = new List<string>();
+            foreach (var id in _activePanels.Keys)
+            {
+                if (!newIds.Contains(id))
+                {
+                    idsToRemove.Add(id);
+                }
+            }
+            foreach (var id in idsToRemove)
+            {
+                if (_activePanels.TryGetValue(id, out var panel))
+                {
+                    _panelsList.Remove(panel);
+                    _activePanels.Remove(id);
+                    Destroy(panel.gameObject);
+                }
+            }
+
+            // 2. 신규 캐릭터 UI 생성 및 기존 캐릭터 UI 순서 재정렬
+            var reorderedPanels = new List<CharacterPanelUI>();
+            foreach (var charInfo in newCharacters)
+            {
+                if (_activePanels.TryGetValue(charInfo.Id, out var panel))
+                {
+                    panel.Initialize(charInfo);
+                    reorderedPanels.Add(panel);
+                }
+                else
+                {
+                    if (_characterPanelPrefab != null)
+                    {
+                        GameObject panelObj = Instantiate(_characterPanelPrefab, transform);
+                        CharacterPanelUI panelUI = panelObj.GetComponent<CharacterPanelUI>();
+                        if (panelUI != null)
+                        {
+                            panelUI.Initialize(charInfo);
+                            SetupRectTransform(panelUI.GetComponent<RectTransform>());
+                            panelUI.SetAlpha(0f); // 페이드인 대기
+                            _activePanels[charInfo.Id] = panelUI;
+                            reorderedPanels.Add(panelUI);
+                        }
+                    }
+                }
+            }
+
+            _panelsList.Clear();
+            _panelsList.AddRange(reorderedPanels);
+
+            // 3. 변경된 순서에 맞게 슬라이딩 애니메이션 실행
+            _activeAnimationCoroutine = StartCoroutine(AnimateTransitionCoroutine());
+        }
+
+        private IEnumerator AnimateTransitionCoroutine()
+        {
+            int count = _panelsList.Count;
+            List<Vector2> startPositions = new List<Vector2>();
+            List<Vector2> targetPositions = new List<Vector2>();
+            List<float> startScales = new List<float>();
+            List<float> targetScales = new List<float>();
+            List<float> startAlphas = new List<float>();
+            List<float> targetAlphas = new List<float>();
+
+            for (int i = 0; i < count; i++)
+            {
+                var panel = _panelsList[i];
+                var rect = panel.GetComponent<RectTransform>();
+                startPositions.Add(rect.anchoredPosition);
+                targetPositions.Add(new Vector2(0f, GetTargetY(i)));
+                
+                startScales.Add(panel.transform.localScale.x);
+                targetScales.Add(GetTargetScale(i));
+
+                CanvasGroup cg = panel.GetComponent<CanvasGroup>() ?? panel.gameObject.AddComponent<CanvasGroup>();
+                startAlphas.Add(cg.alpha);
+                targetAlphas.Add(1f);
+            }
+
+            float elapsed = 0f;
+            while (elapsed < _animationDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / _animationDuration);
+                float tEase = Mathf.SmoothStep(0f, 1f, t);
+
+                for (int i = 0; i < count; i++)
+                {
+                    var panel = _panelsList[i];
+                    if (panel != null)
+                    {
+                        var rect = panel.GetComponent<RectTransform>();
+                        rect.anchoredPosition = Vector2.Lerp(startPositions[i], targetPositions[i], tEase);
+                        panel.SetScale(Mathf.Lerp(startScales[i], targetScales[i], tEase));
+                        panel.SetAlpha(Mathf.Lerp(startAlphas[i], targetAlphas[i], tEase));
+                    }
+                }
+                yield return null;
+            }
+
+            ForceApplyTargets();
+            UpdateContainerSize();
+            _activeAnimationCoroutine = null;
         }
 
         /// <summary>

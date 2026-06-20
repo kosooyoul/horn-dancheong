@@ -2,6 +2,7 @@ using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using HornDancheong.Seongwoo.UI;
 
 [System.Serializable]
 public class MapData
@@ -124,7 +125,7 @@ public class MapCollection
 }
 
 // 전투에 참가한 유닛의 런타임 정보 — 행동 순서(이니셔티브) 계산에 사용
-public class BattleUnitEntry
+public class BattleUnitEntry : ICharacterBattleInfo
 {
     public GameObject marker;        // 화면에 표시되는 유닛 마커
     public UnitDefinition definition; // ALLYS.json / ENEMIES.json 정의 (빈 슬롯이면 null)
@@ -139,12 +140,27 @@ public class BattleUnitEntry
     // 동시각 동점 시 안정적 정렬을 위한 등록 순서
     public int registrationOrder;
 
+    private float _currentHp;
+    private float _maxHp;
+
+    public string Id => marker != null ? marker.GetHashCode().ToString() : System.Guid.NewGuid().ToString();
+    public string CharacterName => DisplayName;
+    public string PortraitPath => string.Empty;
+    public Sprite PortraitSprite => null;
+    public float CurrentHp => _currentHp;
+    public float MaxHp => _maxHp;
+    public bool IsPC => !isEnemy;
+
     public BattleUnitEntry(GameObject marker, UnitDefinition definition, Vector2Int grid, bool isEnemy)
     {
         this.marker = marker;
         this.definition = definition;
         this.grid = grid;
         this.isEnemy = isEnemy;
+
+        int guard = definition != null && definition.defaultStats != null ? definition.defaultStats.guard : 0;
+        this._maxHp = guard > 0 ? guard * 10f : 100f;
+        this._currentHp = this._maxHp;
     }
 
     // 빈 슬롯(정의 없음)은 스탯을 0으로 취급
@@ -162,6 +178,10 @@ public class BattleUnitEntry
 
 public class BattleScript : MonoBehaviour
 {
+    [Header("UI Integration")]
+    [SerializeField] private GameObject initiativeUIGameObject;
+    private IInitiativeUI InitiativeUI;
+
     [Header("Battle Map Settings")]
     [SerializeField] private GameObject floorCubePrefab;
     [SerializeField] private float cubeSpacing = 1f;
@@ -238,6 +258,11 @@ public class BattleScript : MonoBehaviour
 
     void Start()
     {
+        if (initiativeUIGameObject != null)
+        {
+            InitiativeUI = initiativeUIGameObject.GetComponent<IInitiativeUI>();
+        }
+
         LoadTileAndObjectDefinitions();
         LoadUnitDefinitions();
         LoadMapData();
@@ -762,6 +787,11 @@ public class BattleScript : MonoBehaviour
         ResetCurrentTurnMovement();
 
         LogTurnOrder();
+
+        if (InitiativeUI != null)
+        {
+            InitiativeUI.InitializeBattleUI(GetUniqueUnitsInTurnOrder(), sortByInitiative: false);
+        }
     }
 
     // 다음에 행동할(=nextActionTime이 가장 빠른) 유닛을 고른다.
@@ -868,6 +898,35 @@ public class BattleScript : MonoBehaviour
         return a.registrationOrder < b.registrationOrder;
     }
 
+    public List<BattleUnitEntry> GetUniqueUnitsInTurnOrder()
+    {
+        var result = new List<BattleUnitEntry>();
+        if (turnOrder == null || turnOrder.Count == 0) return result;
+
+        var peeked = PeekTurnOrder(turnOrder.Count * 5);
+        var seen = new HashSet<BattleUnitEntry>();
+
+        foreach (var unit in peeked)
+        {
+            if (!seen.Contains(unit))
+            {
+                seen.Add(unit);
+                result.Add(unit);
+            }
+        }
+
+        foreach (var unit in turnOrder)
+        {
+            if (!seen.Contains(unit))
+            {
+                seen.Add(unit);
+                result.Add(unit);
+            }
+        }
+
+        return result;
+    }
+
     // 현재 턴 유닛 — 참가 유닛이 없으면 null
     public BattleUnitEntry GetCurrentTurnUnit()
     {
@@ -888,6 +947,12 @@ public class BattleScript : MonoBehaviour
         NormalizeTimesIfNeeded();
         currentTurnUnit = PickNextActor();
         ResetCurrentTurnMovement();
+
+        if (InitiativeUI != null)
+        {
+            InitiativeUI.UpdateTurnOrder(GetUniqueUnitsInTurnOrder());
+        }
+
         return currentTurnUnit;
     }
 

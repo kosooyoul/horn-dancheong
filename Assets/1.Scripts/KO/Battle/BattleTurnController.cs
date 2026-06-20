@@ -355,7 +355,7 @@ public class BattleTurnController : MonoBehaviour
         if (battleScript == null) return;
 
         // DrawCurrentTurnPanel();
-        DrawTurnOrderPanel();
+        // DrawTurnOrderPanel();
         DrawActionMenu();
     }
 

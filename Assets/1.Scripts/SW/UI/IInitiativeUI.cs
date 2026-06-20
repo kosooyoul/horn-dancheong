@@ -10,6 +10,11 @@ namespace HornDancheong.Seongwoo.UI
         void InitializeBattleUI(IEnumerable<ICharacterBattleInfo> characters);
 
         /// <summary>
+        /// 전투 시작 시 초기 UI 리스트 생성 (정렬 여부 선택 가능)
+        /// </summary>
+        void InitializeBattleUI(IEnumerable<ICharacterBattleInfo> characters, bool sortByInitiative);
+
+        /// <summary>
         /// 특정 캐릭터의 체력이 변했을 때 실시간 갱신
         /// </summary>
         void UpdateCharacterHp(string id, float currentHp, float maxHp);
@@ -28,5 +33,10 @@ namespace HornDancheong.Seongwoo.UI
         /// 턴 교체 시 맨 위에 있는 패널을 맨 아래로 순환시킴
         /// </summary>
         void NextTurn();
+
+        /// <summary>
+        /// 틱 게이지 등 동적으로 변한 턴 순서에 맞춰 UI 패널들의 위치를 갱신합니다.
+        /// </summary>
+        void UpdateTurnOrder(IEnumerable<ICharacterBattleInfo> characters);
     }
 }
