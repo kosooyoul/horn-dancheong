@@ -51,6 +51,9 @@ namespace HornDancheong.Seongwoo.UI
         // 가상 버프/디버프 아이콘 배열
         private List<Sprite> _buffDebuffSprites = new List<Sprite>();
 
+        // 실제 캐릭터 데이터 테스트용 필드
+        private KD.UnitData _realUnitData;
+
         // 컨트롤러 상태값
         public bool IsMoveModeActive { get; private set; }
 
@@ -126,7 +129,27 @@ namespace HornDancheong.Seongwoo.UI
             }
 
             EditorGUILayout.Space(15);
-            EditorGUILayout.LabelField("2. 컨트롤러 피드백 상태 모니터링", EditorStyles.miniBoldLabel);
+            EditorGUILayout.LabelField("2. 실제 캐릭터 데이터로 테스트", EditorStyles.boldLabel);
+            _realUnitData = (KD.UnitData)EditorGUILayout.ObjectField("실제 UnitData 에셋", _realUnitData, typeof(KD.UnitData), false);
+
+            if (GUILayout.Button("실제 캐릭터 UI 적용 (주입)"))
+            {
+                if (_realUnitData == null)
+                {
+                    Debug.LogError("[CombatInteractionUIEditorTool] 적용할 실제 UnitData가 지정되지 않았습니다.");
+                }
+                else
+                {
+                    // KD.BattleUnit 생성 (플레이어 팀=0, 시작 좌표=(0,0))
+                    KD.BattleUnit battleUnit = new KD.BattleUnit(_realUnitData, 0, Vector2Int.zero);
+                    BattleUnitAdapter adapter = new BattleUnitAdapter(battleUnit, true);
+                    manager.Initialize(adapter, this);
+                    Debug.Log($"[CombatInteractionUIEditorTool] 실제 캐릭터 '{_realUnitData.unitName}' ({_realUnitData.role}) 데이터가 UI에 주입되었습니다.");
+                }
+            }
+
+            EditorGUILayout.Space(15);
+            EditorGUILayout.LabelField("3. 컨트롤러 피드백 상태 모니터링", EditorStyles.miniBoldLabel);
             EditorGUILayout.LabelField($"이동 모드 상태 (IsMoveModeActive): {IsMoveModeActive}");
         }
 
