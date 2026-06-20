@@ -262,7 +262,7 @@ namespace KD
             if (idx < 0) return;
 
             EnemyPatternData pattern = idx < enemyPatterns.Count ? enemyPatterns[idx] : null;
-            intentControllers[idx].PrepareNextIntent(enemy, pattern);
+            intentControllers[idx].PrepareNextIntent(enemy, pattern, playerUnits);
         }
 
         /// <summary>적 예고 실행 — 경고 타일 위 플레이어 유닛 타격 후 턴 종료.</summary>
@@ -273,7 +273,7 @@ namespace KD
 
             int idx = enemyUnits.IndexOf(current);
             if (idx >= 0)
-                intentControllers[idx].ExecuteCurrentIntent();
+                intentControllers[idx].ExecuteCurrentIntent(playerUnits);
 
             EndCurrentTurn();
         }
