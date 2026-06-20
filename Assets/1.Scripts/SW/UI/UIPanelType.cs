@@ -11,6 +11,7 @@ namespace HornDancheong.Seongwoo.UI
         Panel_CombatInteraction,
         Panel_InitiativeTrack,
         Panel_Settings,
-        Panel_EscMenu
+        Panel_EscMenu,
+        Panel_BossHP
     }
 }
