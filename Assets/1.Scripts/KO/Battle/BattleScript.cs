@@ -2,6 +2,7 @@ using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
 
+// 맵 정의 (001.json 등) — 타일/오브젝트는 TILES.json / OBJECTS.json 정의를 id로 참조한다.
 [System.Serializable]
 public class MapData
 {
@@ -9,8 +10,14 @@ public class MapData
     public string description;
     public int width;
     public int height;
-    public int[] tiles; // 1차원 배열로 저장 (row-major order) - 32비트 값으로 타일+오브젝트 정보 포함
-    public TileTypeInfo[] tileTypes;
+
+    // 타일을 row-major(상단 row부터) 1차원 배열로 저장한다.
+    // 각 원소는 비트 단위로 타일/오브젝트 id를 패킹한 맵 칩 값이다.
+    //   비트  0~7  (0x0000FF) : 타일 id   → TILES.json
+    //   비트  8~15 (0x00FF00) : 오브젝트 id → OBJECTS.json (0이면 오브젝트 없음)
+    //   비트 16~23 (0xFF0000) : 예약(미사용)
+    public int[] tiles;
+
     public UnitPlacement[] allySpawns;   // 아군이 배치될 수 있는 빈 스폰 슬롯
     public EnemyPlacement[] enemySpawns; // 맵에 고정 배치되는 적 유닛
 }
@@ -106,14 +113,6 @@ public class UnitDefinitionCollection
     public string description;
     public string version;
     public UnitDefinition[] units;
-}
-
-[System.Serializable]
-public class TileTypeInfo
-{
-    public int id;
-    public string name;
-    public string colorHex; // #FFFFFF 형식
 }
 
 [System.Serializable]
@@ -222,7 +221,6 @@ public class BattleScript : MonoBehaviour
     private int mapHeight;
     private int[,] currentMapLayout;
     private MapData currentMapData;
-    private Dictionary<int, Color> tileColors;
     
     // 맵 칩 시스템
     private Dictionary<int, TileInfo> tileDefinitions;
@@ -349,8 +347,6 @@ public class BattleScript : MonoBehaviour
 
     private void LoadMapData()
     {
-        tileColors = new Dictionary<int, Color>();
-        
         if (loadFromJSON)
         {
             if (LoadMapFromJSON(defaultMapName))
@@ -386,9 +382,6 @@ public class BattleScript : MonoBehaviour
             // 1차원 배열을 2차원 배열로 변환
             ConvertToMapLayout(currentMapData);
             
-            // 타일 색상 정보 저장
-            LoadTileColors(currentMapData.tileTypes);
-            
             return true;
         }
         catch (System.Exception e)
@@ -412,29 +405,11 @@ public class BattleScript : MonoBehaviour
         }
     }
 
-    private void LoadTileColors(TileTypeInfo[] tileTypes)
-    {
-        if (tileTypes == null) return;
-        
-        foreach (var tileType in tileTypes)
-        {
-            if (ColorUtility.TryParseHtmlString(tileType.colorHex, out Color color))
-            {
-                tileColors[tileType.id] = color;
-            }
-        }
-    }
-
     private void UseDefaultMap()
     {
         currentMapLayout = fallbackMapLayout;
         mapHeight = currentMapLayout.GetLength(0);
         mapWidth = currentMapLayout.GetLength(1);
-        
-        // 기본 색상 설정
-        tileColors[1] = Color.white;
-        tileColors[2] = Color.red;
-        tileColors[3] = Color.black;
     }
     
     // 맵 칩 번호에서 타일 ID 추출 (0x0000FF 부분)
@@ -623,24 +598,6 @@ public class BattleScript : MonoBehaviour
         return cube;
     }
 
-    private void SetTileColor(GameObject cube, int tileType)
-    {
-        Renderer renderer = cube.GetComponent<Renderer>();
-        if (renderer != null)
-        {
-            if (tileColors.ContainsKey(tileType))
-            {
-                renderer.material.color = tileColors[tileType];
-            }
-            else
-            {
-                // 정의되지 않은 타일 타입은 회색으로 표시
-                renderer.material.color = Color.gray;
-                Debug.LogWarning($"정의되지 않은 타일 타입: {tileType}");
-            }
-        }
-    }
-    
     private void SetTileColorFromDefinition(GameObject cube, int tileId)
     {
         Renderer renderer = cube.GetComponent<Renderer>();
