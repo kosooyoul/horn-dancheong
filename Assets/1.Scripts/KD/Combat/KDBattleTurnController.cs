@@ -386,7 +386,7 @@ namespace KD
             BattleUnit unit = battleManager.SelectedUnit;
             if (unit == null) return;
 
-            float panelHeight = 44f + 4 * 30f;
+            float panelHeight = 44f + 3 * 30f;
             Vector2 pos = GetMenuScreenPosition(panelHeight);
             var area = new Rect(pos.x, pos.y, actionMenuWidth, panelHeight);
 
@@ -408,9 +408,6 @@ namespace KD
             // 대기 버튼 - 항상 활성화
             GUI.enabled = true;
             if (GUILayout.Button("대기 [W]"))    pendingAction = "대기";
-            
-            // 취소 버튼 - 항상 활성화
-            if (GUILayout.Button("취소 [Esc]"))  pendingAction = "취소";
 
             GUI.enabled = true; // GUI 상태 복원
             GUILayout.EndArea();
