@@ -1227,7 +1227,7 @@
     "m_CustomColors": {
         "m_SerializableColors": []
     },
-    "m_Space": 2,
+    "m_Space": 0,
     "m_PositionSource": 0
 }
 
@@ -2743,7 +2743,7 @@
     "m_Precision": 0,
     "m_PreviewExpanded": true,
     "m_DismissedVersion": 0,
-    "m_PreviewMode": 0,
+    "m_PreviewMode": 1,
     "m_CustomColors": {
         "m_SerializableColors": []
     }
@@ -5724,9 +5724,9 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -2035.2000732421875,
+            "x": -1838.400146484375,
             "y": -523.2000732421875,
-            "width": 119.199951171875,
+            "width": 119.2000732421875,
             "height": 148.79998779296876
         }
     },
@@ -8531,7 +8531,7 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -2286.39990234375,
+            "x": -2089.60009765625,
             "y": -523.2000732421875,
             "width": 208.0,
             "height": 310.4000244140625
