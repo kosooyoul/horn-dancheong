@@ -178,6 +178,13 @@ namespace KD
             Mouse mouse = Mouse.current;
             if (mouse == null) return;
 
+            // UI 클릭 시 뒤쪽 그리드 동작 무시
+            if (UnityEngine.EventSystems.EventSystem.current != null &&
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             if (mouse.leftButton.wasPressedThisFrame)
             {
                 if (TryGetGridUnderCursor(out Vector2Int tile))
@@ -228,6 +235,13 @@ namespace KD
         {
             Mouse mouse = Mouse.current;
             if (mouse == null || !mouse.leftButton.wasPressedThisFrame) return;
+
+            // UI 클릭 시 뒤쪽 그리드 동작 무시
+            if (UnityEngine.EventSystems.EventSystem.current != null &&
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
 
             if (TryGetGridUnderCursor(out Vector2Int tile))
                 battleManager.OnTileClicked(tile);

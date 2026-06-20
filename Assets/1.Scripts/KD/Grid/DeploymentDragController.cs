@@ -37,6 +37,14 @@ namespace KD
         private void HandlePickup()
         {
             if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return;
+
+            // UI 클릭 시 드래그 픽업 무시
+            if (UnityEngine.EventSystems.EventSystem.current != null &&
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             if (!TryGetTileUnderMouse(out Vector2Int tile)) return;
 
             OwnedUnit unit = gridManager.GetGhostUnitAt(tile);

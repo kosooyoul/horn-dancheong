@@ -12,7 +12,7 @@ namespace HornDancheong.Seongwoo.UI
     /// 확장된 상태에서 버튼 외부의 영역을 클릭하면 원래 크기와 피벗으로 복원됩니다.
     /// Stretch 앵커 및 LayoutGroup 환경도 완벽히 지원하며 상세 디버그 로그 기능을 제공합니다.
     /// </summary>
-    public class EasingExpandableButton : ButtonBase, IPointerClickHandler
+    public class EasingExpandableButton : ButtonBase, IPointerEnterHandler, IPointerExitHandler
     {
         public enum EasingType
         {
@@ -84,8 +84,7 @@ namespace HornDancheong.Seongwoo.UI
         {
             Log("Awake() called.");
             // base.Awake()를 호출하지 않음으로써 ButtonBase의 onClick.AddListener 바인딩을 우회합니다.
-            // 대신 IPointerClickHandler 인터페이스를 사용하여 클릭 이벤트를 직접 가로챕니다.
-            // 이렇게 하면 다른 매니저 클래스에서 버튼의 onClick.RemoveAllListeners()를 호출해도 정상 작동합니다.
+            // 대신 IPointerEnterHandler/IPointerExitHandler 인터페이스를 사용하여 호버(마우스 진입/이탈) 이벤트를 가로챕니다.
             Initialize();
         }
 
@@ -164,58 +163,30 @@ namespace HornDancheong.Seongwoo.UI
 
         protected override void Function()
         {
-            // 사용하지 않음 (IPointerClickHandler를 통해 OnPointerClick로 처리)
+            // 사용하지 않음
         }
 
         /// <summary>
-        /// 마우스 클릭/터치 입력이 이 오브젝트에서 감지되었을 때 호출됩니다.
+        /// 마우스 커서가 이 오브젝트 영역 내로 들어왔을 때 호출됩니다.
         /// </summary>
-        public void OnPointerClick(PointerEventData eventData)
+        public void OnPointerEnter(PointerEventData eventData)
         {
-            Log($"OnPointerClick() [Pointer Click Event] called. isExpanded: {isExpanded}");
+            Log($"OnPointerEnter() [Pointer Enter Event] called. isExpanded: {isExpanded}");
             if (!isExpanded)
             {
                 Expand();
             }
         }
 
-        private void Update()
+        /// <summary>
+        /// 마우스 커서가 이 오브젝트 영역 밖으로 빠져나갔을 때 호출됩니다.
+        /// </summary>
+        public void OnPointerExit(PointerEventData eventData)
         {
+            Log($"OnPointerExit() [Pointer Exit Event] called. isExpanded: {isExpanded}");
             if (isExpanded)
             {
-                bool clickDetected = false;
-                Vector2 pointerPosition = Vector2.zero;
-
-                if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
-                {
-                    clickDetected = true;
-                    pointerPosition = Mouse.current.position.ReadValue();
-                }
-                else if (Touchscreen.current != null && Touchscreen.current.touches.Count > 0 && Touchscreen.current.touches[0].press.wasPressedThisFrame)
-                {
-                    clickDetected = true;
-                    pointerPosition = Touchscreen.current.touches[0].position.ReadValue();
-                }
-
-                if (clickDetected)
-                {
-                    Log($"Input click detected while expanded. Frame: {Time.frameCount}, ExpandFrame: {expandFrameCount}");
-                    
-                    // 동일 프레임 클릭 감지 방지 (확장 버튼 클릭 시 바로 닫히는 현상 제거)
-                    if (Time.frameCount <= expandFrameCount)
-                    {
-                        Log("Ignoring click: click occurred in the same frame as Expand.");
-                        return;
-                    }
-
-                    bool overButton = IsPointerOverButton(pointerPosition);
-                    Log($"IsPointerOverButton check result: {overButton}");
-                    if (!overButton)
-                    {
-                        Log("Pointer is outside. Triggering Collapse().");
-                        Collapse();
-                    }
-                }
+                Collapse();
             }
         }
 
