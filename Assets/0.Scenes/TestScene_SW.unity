@@ -798,6 +798,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2c78e2c3a513354aa91581c438e9260, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HornDancheong.Seongwoo.UI.GameObjectActivateControllerButton
+  _button: {fileID: 0}
   _targetGameObject: {fileID: 2049283956}
   _isEnableMode: 1
 --- !u!1 &332455297
@@ -1087,6 +1088,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 380240861}
   m_CullTransparentMesh: 1
+--- !u!1 &411226264
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 411226267}
+  - component: {fileID: 411226266}
+  - component: {fileID: 411226265}
+  m_Layer: 5
+  m_Name: BackgroundImage
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &411226265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411226264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &411226266
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411226264}
+  m_CullTransparentMesh: 1
+--- !u!224 &411226267
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 411226264}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1579495794}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &415702475
 GameObject:
   m_ObjectHideFlags: 0
@@ -1121,7 +1197,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -375.08197}
+  m_AnchoredPosition: {x: 200, y: -260}
   m_SizeDelta: {x: 380, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &415702477
@@ -1199,7 +1275,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -975.082}
+  m_AnchoredPosition: {x: 200, y: -860}
   m_SizeDelta: {x: 380, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &425517484
@@ -1482,7 +1558,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -695.082}
+  m_AnchoredPosition: {x: 200, y: -580}
   m_SizeDelta: {x: 380, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &481283173
@@ -2636,11 +2712,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 872324390}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2c78e2c3a513354aa91581c438e9260, type: 3}
+  m_Script: {fileID: 11500000, guid: 25a0ea1c64f7e4d4389097f5b5cd7e50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HornDancheong.Seongwoo.UI.GameObjectActivateControllerButton
-  _targetGameObject: {fileID: 1079618568}
-  _isEnableMode: 0
+  _panelToClose: 5
+  _panelToOpen: 0
+  _dialogueIndex: 1
 --- !u!114 &872324393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2886,7 +2963,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -835.082}
+  m_AnchoredPosition: {x: 200, y: -720}
   m_SizeDelta: {x: 380, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &940945863
@@ -2980,11 +3057,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 940945861}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2c78e2c3a513354aa91581c438e9260, type: 3}
+  m_Script: {fileID: 11500000, guid: 25a0ea1c64f7e4d4389097f5b5cd7e50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets._1.Scripts.SW.PanelOpenButton
-  _targetGameObject: {fileID: 1079618568}
-  _isEnableMode: 1
+  _panelToClose: 0
+  _panelToOpen: 5
+  _dialogueIndex: 1
 --- !u!1 &946342260
 GameObject:
   m_ObjectHideFlags: 0
@@ -5007,6 +5085,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 411226267}
   - {fileID: 1812965601}
   - {fileID: 760185372}
   - {fileID: 1014279561}
@@ -5072,6 +5151,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HornDancheong.Seongwoo.UI.DialogueDisplayer
   dialogueTable: {fileID: 11400000, guid: 3dc166c425e014140978182509cf8dd7, type: 2}
   panelDialogue: {fileID: 1579495793}
+  backgroundImage: {fileID: 411226265}
   portraitLeft: {fileID: 1812965602}
   portraitCenter: {fileID: 1014279562}
   portraitRight: {fileID: 760185373}
@@ -6887,6 +6967,7 @@ GameObject:
   - component: {fileID: 2032758236}
   - component: {fileID: 2032758235}
   - component: {fileID: 2032758234}
+  - component: {fileID: 2032758237}
   m_Layer: 5
   m_Name: Button_NewGame
   m_TagString: Untagged
@@ -6911,7 +6992,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -555.082}
+  m_AnchoredPosition: {x: 200, y: -440}
   m_SizeDelta: {x: 380, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2032758234
@@ -6996,6 +7077,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2032758232}
   m_CullTransparentMesh: 1
+--- !u!114 &2032758237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2032758232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a0ea1c64f7e4d4389097f5b5cd7e50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HornDancheong.Seongwoo.UI.GameObjectActivateControllerButton
+  _panelToClose: 1
+  _panelToOpen: 2
+  _dialogueIndex: 1
 --- !u!1 &2049283956
 GameObject:
   m_ObjectHideFlags: 0

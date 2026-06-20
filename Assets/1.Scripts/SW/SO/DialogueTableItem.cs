@@ -9,5 +9,6 @@ public class DialogueTableItem
     public string LeftPortrait;
     public string CenterPortrait;
     public string RightPortrait;
+    public string BackgroundImage;
     public string NextUI;
 }
