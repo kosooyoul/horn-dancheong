@@ -26,9 +26,13 @@ namespace KD
         public void Init(Vector2Int pos)
         {
             GridPos = pos;
-            // FloorCubeStater가 부모에 있을 수도 있으므로 InParent로 탐색
             stater = GetComponentInParent<FloorCubeStater>();
             Debug.Log($"[GridTile] Init {pos} on '{gameObject.name}' | stater={(stater != null ? stater.gameObject.name : "없음")}");
+
+            float checkerOffset = ((pos.x + pos.y) % 2 == 0) ? 0f : 1f;
+            FloorCubeVisual visual = GetComponentInParent<FloorCubeVisual>();
+            if (visual != null)
+                visual.SetCheckerAlphaOffset(checkerOffset);
         }
 
         // ── SafetyType 제어 ───────────────────────────────────────────────

@@ -1,7 +1,6 @@
 using UnityEngine;
 
-// 현재 턴(행동 순서) 유닛을 카메라가 위에서 내려다보며 부드럽게 따라가도록 하는 컴포넌트.
-// 추적할 유닛이 아직 없으면 맵 중앙(원점)을 비춰 화면이 비지 않도록 한다.
+// 카메라가 맵 중앙(원점)을 위에서 내려다보도록 하는 컴포넌트.
 [RequireComponent(typeof(Camera))]
 public class BattleCameraFollow : MonoBehaviour
 {
@@ -72,19 +71,9 @@ public class BattleCameraFollow : MonoBehaviour
         ApplyRotation(targetPosition);
     }
 
-    // 추적 대상 위치 — 현재 턴 유닛이 있으면 그 마커, 없으면 맵 중앙(원점)
+    // 추적 대상 위치 — BattleScript는 맵을 원점 중심으로 생성하므로 (0,0,0)이 맵 중앙
     private Vector3 GetTargetPosition()
     {
-        if (battleScript != null)
-        {
-            BattleUnitEntry current = battleScript.GetCurrentTurnUnit();
-            if (current != null && current.marker != null)
-            {
-                return current.marker.transform.position;
-            }
-        }
-
-        // 유닛이 없을 때 폴백: BattleScript는 맵을 원점 중심으로 생성하므로 (0,0,0)이 맵 중앙
         return Vector3.zero;
     }
 
