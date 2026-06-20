@@ -30,7 +30,7 @@ namespace KD
     ///   1 또는 M     : 이동 모드
     ///   2 또는 K     : 첫 번째 사용 가능 스킬 선택
     ///   W 또는 Space : 대기
-    ///   Escape       : 현재 행동 취소
+    ///   Escape/우클릭 : 현재 행동 취소
     ///   Enter        : 배치 확정 (배치 단계)
     /// </summary>
     public class KDBattleTurnController : MonoBehaviour
@@ -216,7 +216,7 @@ namespace KD
             if (mode == BattleActionMode.Move || mode == BattleActionMode.Skill)
             {
                 HandleActionModeMouseClick();
-                HandleCancelKey();
+                HandleCancelInput();
             }
             else
             {
@@ -233,12 +233,19 @@ namespace KD
                 battleManager.OnTileClicked(tile);
         }
 
-        private void HandleCancelKey()
+        private void HandleCancelInput()
         {
+            // Escape 키로 현재 행동(이동/스킬 대상 선택) 취소
             Keyboard keyboard = Keyboard.current;
-            if (keyboard == null) return;
+            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
+            {
+                battleManager.CancelCurrentAction();
+                return;
+            }
 
-            if (keyboard.escapeKey.wasPressedThisFrame)
+            // 마우스 우클릭으로도 동일하게 취소
+            Mouse mouse = Mouse.current;
+            if (mouse != null && mouse.rightButton.wasPressedThisFrame)
                 battleManager.CancelCurrentAction();
         }
 
@@ -386,7 +393,7 @@ namespace KD
             BattleUnit unit = battleManager.SelectedUnit;
             if (unit == null) return;
 
-            float panelHeight = 44f + 4 * 30f;
+            float panelHeight = 44f + 3 * 30f;
             Vector2 pos = GetMenuScreenPosition(panelHeight);
             var area = new Rect(pos.x, pos.y, actionMenuWidth, panelHeight);
 
@@ -408,9 +415,6 @@ namespace KD
             // 대기 버튼 - 항상 활성화
             GUI.enabled = true;
             if (GUILayout.Button("대기 [W]"))    pendingAction = "대기";
-            
-            // 취소 버튼 - 항상 활성화
-            if (GUILayout.Button("취소 [Esc]"))  pendingAction = "취소";
 
             GUI.enabled = true; // GUI 상태 복원
             GUILayout.EndArea();
