@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80e61fdbfa9880041ad8000a062a06d5, type: 3}
+  m_Name: BossData
+  m_EditorClassIdentifier: Assembly-CSharp::KD.UnitData
+  unitId: 
+  unitName: "\uB3C4\uAE68\uBE44"
+  description: 
+  icon: {fileID: 0}
+  prefab: {fileID: 4430476179508750244, guid: e0c518344219d408aa53140fe8631f08, type: 3}
+  role: 0
+  attribute: 0
+  weaponType: 0
+  movementType: 0
+  moveAPCost: 0
+  baseStats:
+    agility: 5
+    spirit: 5
+    guard: 5
+    luck: 5
+  uniqueSkill1: {fileID: 0}
+  uniqueSkill2: {fileID: 0}
+  uniqueSkill3: {fileID: 0}

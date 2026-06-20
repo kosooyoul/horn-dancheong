@@ -1267,7 +1267,7 @@ MonoBehaviour:
   skillActionRunner: {fileID: 1047754883}
   deploymentRuleData: {fileID: 11400000, guid: 2d20a924f1897cc4391359962110871c, type: 2}
   enemyUnitDatas:
-  - {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
+  - {fileID: 11400000, guid: c2393756cdce2904b8cebea69dd90981, type: 2}
   enemyStartPositions:
   - {x: 7, y: 7}
   enemyPatterns:

@@ -113,6 +113,9 @@ namespace KD
 
         // ── 좌표 변환 ─────────────────────────────────────────────────────
 
+        /// <summary>타일 1칸의 월드 공간 크기 (VFX 스케일 계산용)</summary>
+        public float CellSize => cellSize;
+
         /// <summary>Grid 좌표 → 월드 좌표 (바닥 y, 타일 중앙)</summary>
         public Vector3 GridToWorld(Vector2Int gridPos)
         {
@@ -390,6 +393,20 @@ namespace KD
                     currentDangerHighlights[t] = dangerLevel;
             RefreshAllHighlights();
             Debug.Log($"[GridManager] 위험 하이라이트: {currentDangerHighlights.Count}개 ({dangerLevel})");
+        }
+
+        /// <summary>
+        /// 위험 타일을 기존 표시를 지우지 않고 누적 추가한다.
+        /// 여러 적의 예고를 동시에 표시할 때 사용 (각 적의 예고가 서로 덮어쓰지 않음).
+        /// 겹치는 타일은 마지막에 추가된 레벨로 표시된다.
+        /// </summary>
+        public void AddDangerTiles(List<Vector2Int> tiles, SafetyType dangerLevel = SafetyType.DangerS)
+        {
+            if (tiles == null || tiles.Count == 0) return;
+            foreach (var t in tiles)
+                currentDangerHighlights[t] = dangerLevel;
+            RefreshAllHighlights();
+            Debug.Log($"[GridManager] 위험 하이라이트 누적: +{tiles.Count}개 (총 {currentDangerHighlights.Count}개, {dangerLevel})");
         }
 
         public void HighlightDeployableTiles(List<Vector2Int> tiles)
