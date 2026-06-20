@@ -10,6 +10,9 @@ namespace KD
         public SkillData         skill;
         public List<Vector2Int>  warningTiles = new List<Vector2Int>();
 
+        // 예고 타일에 적용할 위험 표시 레벨 (타일 수 기반). 렌더링은 매니저가 일괄 처리
+        public SafetyType        dangerLevel  = SafetyType.DangerS;
+
         // 추적형일 때 true — ExecuteCurrentIntent에서 타일을 재계산함
         public bool              isTracking;
         public EnemyPatternStep  sourceStep;  // Tracking 재계산용

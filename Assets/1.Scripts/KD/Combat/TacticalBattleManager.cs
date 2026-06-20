@@ -11,7 +11,8 @@ namespace KD
     /// 전투 담당자가 연결해야 할 것:
     ///   - 마우스 입력 → OnDeploymentTileClicked / SelectUnit / OnTileClicked / UpdateHoveredTile 호출
     ///   - UI 버튼     → ConfirmDeployment / SelectMoveAction / SelectSkillAction / WaitSelectedUnit 호출
-    ///   - 적 예고 연출 → PrepareEnemyTurn() 호출 후 연출 재생, 완료 시 ExecuteEnemyTurn() 호출
+    ///   - 적 행동      → 보스는 "한 턴 전 예고" 방식. 자기 턴마다 지난 턴에 예고한 행동을 실행하고,
+    ///                    동시에 다음 턴에 실행할 행동을 예고(바닥 danger 하이라이트)한다. (RunEnemyTurn)
     ///   - 애니메이션  → GridManager 각 TODO 위치에 추가
     /// </summary>
     public class TacticalBattleManager : MonoBehaviour
@@ -244,38 +245,66 @@ namespace KD
             }
             else
             {
-                // 적 턴
+                // 적 턴 — "한 턴 전 예고" 방식
                 currentPhase = BattlePhase.EnemyPhase;
-                PrepareEnemyTurn(current);
-                // TODO: 전투 담당자 — 예고 연출 후 ExecuteEnemyTurn() 호출
-                // MVP: 즉시 실행
-                ExecuteEnemyTurn();
+                RunEnemyTurn(current);
             }
         }
 
-        // ── 적 턴 API ─────────────────────────────────────────────────────
+        // ── 적 턴 처리 ────────────────────────────────────────────────────
 
-        /// <summary>적 예고 단계 — 경고 타일 표시. 연출 후 ExecuteEnemyTurn() 호출.</summary>
-        public void PrepareEnemyTurn(BattleUnit enemy)
+        /// <summary>
+        /// 적 1체의 턴 처리.
+        ///   1) 지난 턴에 예고해 둔 행동이 있으면 지금 실제로 실행(타격)한다.
+        ///   2) 다음 턴에 실행할 행동을 새로 예고한다. (이번 턴엔 타격하지 않음)
+        ///   3) 살아있는 모든 적의 예고를 바닥에 danger 하이라이트로 다시 그린다.
+        /// 따라서 보스 첫 턴에는 예고만 하고, 그 다음 보스 턴부터 예고대로 타격한다.
+        /// </summary>
+        private void RunEnemyTurn(BattleUnit enemy)
         {
             int idx = enemyUnits.IndexOf(enemy);
-            if (idx < 0) return;
+            if (idx < 0) { EndCurrentTurn(); return; }
 
+            EnemyIntentController controller = intentControllers[idx];
+
+            // 1. 지난 턴 예고 실행 (없으면 — 예: 첫 턴 — 건너뜀)
+            if (controller.CurrentIntent != null)
+                controller.ExecuteCurrentIntent(playerUnits);
+
+            // 마지막 플레이어를 처치했으면 새 예고 없이 전투 종료
+            if (CheckBattleEnd())
+            {
+                gridManager.ClearDangerHighlight();
+                return;
+            }
+
+            // 2. 다음 턴을 위한 새 예고 준비 (이번 턴엔 타격 안 함)
             EnemyPatternData pattern = idx < enemyPatterns.Count ? enemyPatterns[idx] : null;
-            intentControllers[idx].PrepareNextIntent(enemy, pattern, playerUnits);
-        }
+            controller.PrepareNextIntent(enemy, pattern, playerUnits);
 
-        /// <summary>적 예고 실행 — 경고 타일 위 플레이어 유닛 타격 후 턴 종료.</summary>
-        public void ExecuteEnemyTurn()
-        {
-            BattleUnit current = CurrentTurnUnit;
-            if (current == null || current.TeamId != 1) return;
-
-            int idx = enemyUnits.IndexOf(current);
-            if (idx >= 0)
-                intentControllers[idx].ExecuteCurrentIntent(playerUnits);
+            // 3. 모든 적의 예고를 바닥에 다시 그림
+            RefreshEnemyTelegraphs();
 
             EndCurrentTurn();
+        }
+
+        /// <summary>
+        /// 살아있는 모든 적의 현재 예고(CurrentIntent)를 모아 바닥 danger 하이라이트를 다시 그린다.
+        /// 적이 여러 마리여도 서로의 예고가 덮어쓰이지 않도록 누적 렌더링한다.
+        /// </summary>
+        private void RefreshEnemyTelegraphs()
+        {
+            gridManager.ClearDangerHighlight();
+
+            for (int i = 0; i < intentControllers.Count; i++)
+            {
+                EnemyIntent intent = intentControllers[i].CurrentIntent;
+                if (intent == null) continue;
+                if (intent.caster == null || intent.caster.IsDead) continue;
+                if (intent.warningTiles == null || intent.warningTiles.Count == 0) continue;
+
+                gridManager.AddDangerTiles(intent.warningTiles, intent.dangerLevel);
+            }
         }
 
         // ── 플레이어 턴 API ───────────────────────────────────────────────
