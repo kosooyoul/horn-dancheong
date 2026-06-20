@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using HornDancheong.Audio;
 
 namespace HornDancheong.Seongwoo.UI
 {
@@ -119,6 +120,78 @@ namespace HornDancheong.Seongwoo.UI
 
             // 3. 백그라운드 이미지 설정
             UpdateBackground(_currentItem.BackgroundImage);
+
+            // 4. 사운드 재생
+            PlayDialogueAudio();
+        }
+
+        /// <summary>
+        /// 현재 대화 아이템의 오디오 설정(PlaySFX, PlayBGM)에 따라 사운드를 재생합니다.
+        /// </summary>
+        private void PlayDialogueAudio()
+        {
+            if (_currentItem == null || SoundManager.Instance == null) return;
+
+            // SFX 재생
+            if (!string.IsNullOrEmpty(_currentItem.PlaySFX))
+            {
+                string cleanSFX = GetCleanAudioName(_currentItem.PlaySFX);
+                string sanitizedSFX = SoundManager.SanitizeName(cleanSFX);
+                if (Enum.TryParse<SFXType>(sanitizedSFX, true, out var sfxType))
+                {
+                    SoundManager.Instance.PlaySFX(sfxType);
+                }
+                else
+                {
+                    string sanitizedOriginal = SoundManager.SanitizeName(_currentItem.PlaySFX);
+                    if (Enum.TryParse<SFXType>(sanitizedOriginal, true, out sfxType))
+                    {
+                        SoundManager.Instance.PlaySFX(sfxType);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[DialogueDisplayer] SFXType '{_currentItem.PlaySFX}'을 찾을 수 없습니다.");
+                    }
+                }
+            }
+
+            // BGM 재생
+            if (!string.IsNullOrEmpty(_currentItem.PlayBGM))
+            {
+                string cleanBGM = GetCleanAudioName(_currentItem.PlayBGM);
+                string sanitizedBGM = SoundManager.SanitizeName(cleanBGM);
+                if (Enum.TryParse<BGMType>(sanitizedBGM, true, out var bgmType))
+                {
+                    SoundManager.Instance.PlayBGM(bgmType);
+                }
+                else
+                {
+                    string sanitizedOriginal = SoundManager.SanitizeName(_currentItem.PlayBGM);
+                    if (Enum.TryParse<BGMType>(sanitizedOriginal, true, out bgmType))
+                    {
+                        SoundManager.Instance.PlayBGM(bgmType);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[DialogueDisplayer] BGMType '{_currentItem.PlayBGM}'을 찾을 수 없습니다.");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 파일명에서 확장자를 제거하여 순수 오디오 클립 이름만 추출합니다.
+        /// </summary>
+        private string GetCleanAudioName(string filename)
+        {
+            if (string.IsNullOrEmpty(filename)) return string.Empty;
+            string cleanName = filename;
+            int dotIndex = cleanName.LastIndexOf('.');
+            if (dotIndex > 0)
+            {
+                cleanName = cleanName.Substring(0, dotIndex);
+            }
+            return cleanName;
         }
 
         /// <summary>

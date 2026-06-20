@@ -6,6 +6,8 @@ public class DialogueTableItem
     public int DialogueIndex;
     public string CharacterName;
     public string DialogueText;
+    public string PlaySFX;
+    public string PlayBGM;
     public string LeftPortrait;
     public string CenterPortrait;
     public string RightPortrait;
