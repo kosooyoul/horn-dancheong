@@ -8,22 +8,13 @@ namespace KD
     // AP 소모 및 쿨타임 적용은 Execute 내부에서 자동 처리
     //
     // ── 최종 데미지 공식 ──────────────────────────────────────────────────
-    // 최종 데미지
-    // = 스킬 데미지
-    // × 치명타 계수
-    // × 방어력 계수
-    // × 피해 감소 계수
-    // × 회피 계수
-    // × 약점 계수
-    // × 연산 보정
-    //
-    // 스킬 데미지    = GetFinalAttackPower() × skillCoefficient
-    // 치명타 계수    = 1.5 / 1.0
-    // 방어력 계수    = 100 / (100 + 방어력)
-    // 피해 감소 계수 = 1 - 대상의 피해 감소 수치
-    // 회피 계수      = 0 (회피 성공 = Miss) / 1.0 (실패)
-    // 약점 계수      = 1.5 (속성 약점) / 0.5 (반대 속성) / 1.0 (무관)
-    // 연산 보정      = 소 ×1.5 / 중 ×2.0 / 대 ×2.5 / 특대 ×4.0
+    // 최종 데미지 = 스킬 데미지 × 치명타 계수 × 방어력 계수 × 회피 계수 × 약점 계수 × 연산 보정
+    //   스킬 데미지  = GetFinalAttackPower() × skillCoefficient
+    //   치명타 계수  = 1.5 (치명타 성공) / 1.0 (실패)  — 치명타 데미지 150% 고정
+    //   방어력 계수  = 100 / (100 + 방어력)
+    //   회피 계수    = 0 (회피 성공 = Miss) / 1.0 (실패)
+    //   약점 계수    = 1.5 (속성 약점) / 0.5 (반대 속성) / 1.0 (무관)
+    //   연산 보정    = 소 ×1.5 / 중 ×2.0 / 대 ×2.5 / 특대 ×4.0
     //
     // ── 회복 공식 ─────────────────────────────────────────────────────────
     // 최종 회복 = GetFinalHealPower() × skillCoefficient × 연산 보정
@@ -121,49 +112,37 @@ namespace KD
             float skillDamage = caster.GetFinalAttackPower() * skill.skillCoefficient;
 
             // 2. 치명타 계수 (150% 고정)
-            bool  isCrit     = Random.value < caster.Stats.critChance;
-            float critFactor = isCrit ? CritMultiplier : 1.0f;
+            bool  isCrit       = Random.value < caster.Stats.critChance;
+            float critFactor   = isCrit ? CritMultiplier : 1.0f;
 
             // 3. 방어력 계수 = 100 / (100 + 방어력)
             float defenseFactor = 100f / (100f + target.Stats.defense);
 
-            // 4. 피해 감소 계수 = 1 - 피해 감소 수치
-            float damageReductionRate   = target.DamageReductionRate;
-            float damageReductionFactor = 1f - damageReductionRate;
-
-            // 5. 회피 계수 (성공 → Miss)
+            // 4. 회피 계수 (성공 → Miss)
             bool  evaded        = Random.value < target.Stats.evasionChance;
             float evasionFactor = evaded ? 0f : 1.0f;
 
-            // 6. 약점 계수
+            // 5. 약점 계수
             float attrFactor = AttributeCalculator.GetDamageMultiplier(skill.attribute, target.Data.attribute);
 
-            // 7. 연산 보정
+            // 6. 연산 보정
             float scaleFactor = GetScaleMultiplier(skill.scale);
 
             // 최종 데미지
-            float raw = skillDamage
-                      * critFactor
-                      * defenseFactor
-                      * damageReductionFactor
-                      * evasionFactor
-                      * attrFactor
-                      * scaleFactor;
-
-            int finalDamage = (evaded || raw <= 0f) ? 0 : Mathf.Max(1, Mathf.RoundToInt(raw));
+            float raw         = skillDamage * critFactor * defenseFactor * evasionFactor * attrFactor * scaleFactor;
+            int   finalDamage = evaded ? 0 : Mathf.Max(1, Mathf.RoundToInt(raw));
 
             target.TakeDamage(finalDamage);
 
-            string critTag      = isCrit             ? " [치명타]"                          : "";
-            string evadeTag     = evaded             ? " [회피]"                            : "";
-            string attrTag      = attrFactor > 1f   ? " [약점]" : attrFactor < 1f ? " [저항]" : "";
-            string reductionTag = damageReductionRate > 0f ? $" [피해감소 {damageReductionRate:P0}]" : "";
+            string critTag  = isCrit  ? " [치명타]"            : "";
+            string evadeTag = evaded  ? " [회피]"              : "";
+            string attrTag  = attrFactor > 1f ? " [약점]"
+                            : attrFactor < 1f ? " [저항]"      : "";
 
             Debug.Log($"[SkillExecutor] {caster.Data.unitName} → {target.Data.unitName} " +
-                      $"'{skill.skillName}' 최종 {finalDamage}{critTag}{evadeTag}{attrTag}{reductionTag} " +
+                      $"'{skill.skillName}' 최종 {finalDamage}{critTag}{evadeTag}{attrTag} " +
                       $"(공격력 {caster.GetFinalAttackPower()} × 계수 {skill.skillCoefficient:F2} " +
-                      $"× 치명타 {critFactor:F1} × 방어 {defenseFactor:F2} " +
-                      $"× 피해감소 {damageReductionFactor:F2} × 속성 {attrFactor:F1} × 연산 {scaleFactor:F1})");
+                      $"× 방어 {defenseFactor:F2} × 연산 {scaleFactor:F1})");
         }
 
         // ── 회복 계산 ────────────────────────────────────────────────────

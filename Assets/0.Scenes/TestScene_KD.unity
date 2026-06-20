@@ -127,7 +127,6 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-<<<<<<< Updated upstream
   - component: {fileID: 243476135}
   - component: {fileID: 243476137}
   - component: {fileID: 243476136}
@@ -566,59 +565,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &535053140
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 535053142}
-  - component: {fileID: 535053141}
-=======
-  - component: {fileID: 640282639}
-  - component: {fileID: 640282638}
-  - component: {fileID: 640282637}
-  - component: {fileID: 640282641}
-  - component: {fileID: 640282640}
->>>>>>> Stashed changes
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &535053141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 535053140}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0bbee21b540cda49a17165c43ebc4ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KD.StatCalculatorSmokeTest
-  runOnStart: 1
---- !u!4 &535053142
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 535053140}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.16227, y: -0, z: -0.653}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-<<<<<<< Updated upstream
 --- !u!1 &563683553
 GameObject:
   m_ObjectHideFlags: 0
@@ -665,15 +611,11 @@ CanvasRenderer:
   m_GameObject: {fileID: 563683553}
   m_CullTransparentMesh: 1
 --- !u!114 &563683556
-=======
---- !u!114 &640282640
->>>>>>> Stashed changes
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-<<<<<<< Updated upstream
   m_GameObject: {fileID: 563683553}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -780,34 +722,11 @@ GameObject:
   m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!114 &729403854
-=======
-  m_GameObject: {fileID: 640282636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c0a928a4d5d0004c89ab47d995f803c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KD.BattleFlowSmokeTest
-  gridManager: {fileID: 640282641}
-  rosterManager: {fileID: 640282638}
-  deploymentRuleData: {fileID: 11400000, guid: a55b323690da77443b96cbacc758d31b, type: 2}
-  enemyPatternData: {fileID: 11400000, guid: 502eb7cc480f06d4da3b2a267e68d99b, type: 2}
-  enemyData: {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
-  autoPartyUnitDatas:
-  - {fileID: 11400000, guid: 258a8454f9a0d594694a1fe63dfc0812, type: 2}
-  enemyPos: {x: 3, y: 6}
-  autoDeployTiles:
-  - {x: 1, y: 1}
-  - {x: 2, y: 1}
-  - {x: 1, y: 2}
-  - {x: 2, y: 2}
---- !u!114 &640282641
->>>>>>> Stashed changes
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-<<<<<<< Updated upstream
   m_GameObject: {fileID: 729403853}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -951,21 +870,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
-=======
-  m_GameObject: {fileID: 640282636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38ee97062a3adef4ea3867b2a2dd86bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KD.GridManager
-  width: 7
-  height: 7
-  cellSize: 1
-  fixedWorldY: 0
-  worldOrigin: {x: 0, y: 0, z: 0}
-  wallTiles:
-  - {x: 0, y: 0}
->>>>>>> Stashed changes
 --- !u!1 &818491962
 GameObject:
   m_ObjectHideFlags: 0
@@ -2826,4 +2730,3 @@ SceneRoots:
   - {fileID: 511142114}
   - {fileID: 1213681542}
   - {fileID: 1854106571}
-  - {fileID: 535053142}

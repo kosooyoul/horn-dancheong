@@ -20,7 +20,6 @@ namespace KD
     {
         // ── Inspector ──────────────────────────────────────────────────────
 
-<<<<<<< Updated upstream
         [Header("Map Provider (BattleScript 맵 연동)")]
         [SerializeField] private BattleMapProvider mapProvider;
 
@@ -31,17 +30,6 @@ namespace KD
         [SerializeField] private float fixedWorldY = 0f;
 
         [Header("Blocked Tiles (mapProvider 없을 때 폴백)")]
-=======
-        [Header("World Transform")]
-        [Tooltip("타일 1칸 = 월드 거리 (m). Vector2Int.x = World X, Vector2Int.y = World Z")]
-        [SerializeField] private float   cellSize    = 1f;
-        [Tooltip("타일 오브젝트를 배치할 Y 높이 (고정)")]
-        [SerializeField] private float   fixedWorldY = 0f;
-        [Tooltip("그리드 (0,0) 타일의 월드 좌표")]
-        [SerializeField] private Vector3 worldOrigin = Vector3.zero;
-
-        [Header("Blocked Tiles")]
->>>>>>> Stashed changes
         [SerializeField] private List<Vector2Int> wallTiles = new List<Vector2Int>();
 
         [Header("Unit Visuals")]
@@ -140,26 +128,6 @@ namespace KD
             return new Vector2Int(
                 Mathf.RoundToInt(worldPos.x / cellSize),
                 Mathf.RoundToInt(worldPos.z / cellSize));
-        }
-
-        // ── 좌표 변환 ─────────────────────────────────────────────────────
-
-        /// <summary>그리드 좌표 → 월드 좌표. Vector2Int.x = World X, Vector2Int.y = World Z</summary>
-        public Vector3 GridToWorld(Vector2Int gridPos)
-        {
-            return worldOrigin + new Vector3(
-                gridPos.x * cellSize,
-                fixedWorldY,
-                gridPos.y * cellSize);
-        }
-
-        /// <summary>월드 좌표 → 그리드 좌표. Y축은 무시</summary>
-        public Vector2Int WorldToGrid(Vector3 worldPos)
-        {
-            Vector3 local = worldPos - worldOrigin;
-            return new Vector2Int(
-                Mathf.RoundToInt(local.x / cellSize),
-                Mathf.RoundToInt(local.z / cellSize));
         }
 
         // ── 타일 판단 ─────────────────────────────────────────────────────
@@ -291,25 +259,17 @@ namespace KD
 
         public void RemoveUnit(BattleUnit unit) => RemoveUnitFromCurrentTile(unit);
 
-<<<<<<< Updated upstream
         /// <summary>모든 유닛 점유 정보와 비주얼을 제거한다.</summary>
-=======
-        /// <summary>모든 유닛 점유 정보 초기화. 테스트 재실행 시 호출.</summary>
->>>>>>> Stashed changes
         public void ClearUnits()
         {
             unitByTile.Clear();
             tileByUnit.Clear();
-<<<<<<< Updated upstream
             foreach (var kvp in visualByUnit)
             {
                 if (kvp.Value != null)
                     Destroy(kvp.Value);
             }
             visualByUnit.Clear();
-=======
-            Debug.Log("[GridManager] 유닛 점유 정보 초기화");
->>>>>>> Stashed changes
         }
 
         private void RemoveUnitFromCurrentTile(BattleUnit unit)
