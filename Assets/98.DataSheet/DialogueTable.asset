@@ -19,7 +19,6 @@ MonoBehaviour:
     LeftPortrait: Portrait1.png
     CenterPortrait: 
     RightPortrait: 
-    EndOfDialogue: 0
     NextUI: 
   - DialogueIndex: 2
     CharacterName: "\uAD81\uC218"
@@ -27,7 +26,6 @@ MonoBehaviour:
     LeftPortrait: Portrait1.png
     CenterPortrait: 
     RightPortrait: Portrait2.png
-    EndOfDialogue: 0
     NextUI: 
   - DialogueIndex: 3
     CharacterName: "\uC804\uC0AC"
@@ -35,7 +33,6 @@ MonoBehaviour:
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
-    EndOfDialogue: 0
     NextUI: 
   - DialogueIndex: 4
     CharacterName: "\uAD81\uC218"
@@ -43,7 +40,6 @@ MonoBehaviour:
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
-    EndOfDialogue: 1
     NextUI: Panel_MainMenu
   - DialogueIndex: 5
     CharacterName: "\uAD81\uC218"
@@ -51,5 +47,4 @@ MonoBehaviour:
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: 
-    EndOfDialogue: 0
     NextUI: 
