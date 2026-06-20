@@ -338,6 +338,27 @@ namespace KD
             return visual.GetComponent<UnitMover>();
         }
 
+        /// <summary>유닛을 특정 방향으로 회전시킨다.</summary>
+        public void RotateUnitTowards(BattleUnit unit, Vector3 direction)
+        {
+            if (!visualByUnit.TryGetValue(unit, out GameObject visual)) return;
+            UnitMover mover = visual.GetComponent<UnitMover>();
+            if (mover != null)
+            {
+                mover.LookTowards(direction);
+            }
+        }
+
+        /// <summary>유닛을 특정 타일 방향으로 회전시킨다.</summary>
+        public void RotateUnitTowardsTile(BattleUnit unit, Vector2Int targetTile)
+        {
+            Vector3 currentPos = GridToWorld(unit.CurrentTilePos);
+            Vector3 targetPos = GridToWorld(targetTile);
+            Vector3 direction = (targetPos - currentPos).normalized;
+            
+            RotateUnitTowards(unit, direction);
+        }
+
         // ── 하이라이트 공개 API ───────────────────────────────────────────
 
         public void HighlightMoveTiles(List<MoveOption> moveOptions)
