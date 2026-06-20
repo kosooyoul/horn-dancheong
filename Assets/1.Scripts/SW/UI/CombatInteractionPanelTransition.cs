@@ -201,6 +201,10 @@ namespace HornDancheong.Seongwoo.UI
 
             if (battleManager != null)
             {
+                if (battleManager.IsInitiativeAnimating)
+                {
+                    return false;
+                }
                 return battleManager.CurrentPhase == BattlePhase.PlayerPhase &&
                        battleManager.SelectedUnit != null &&
                        battleManager.CurrentActionMode == BattleActionMode.None;

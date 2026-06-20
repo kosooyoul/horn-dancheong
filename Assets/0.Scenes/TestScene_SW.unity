@@ -1937,6 +1937,7 @@ MonoBehaviour:
   gridManager: {fileID: 291848803}
   skillActionRunner: {fileID: 291848796}
   combatUIManager: {fileID: 940176876}
+  initiativeManager: {fileID: 1586336391}
   deploymentRuleData: {fileID: 11400000, guid: 2d20a924f1897cc4391359962110871c, type: 2}
   enemyUnitDatas:
   - {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
@@ -2481,7 +2482,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &335641430
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2516,9 +2517,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
+  m_Maskable: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -9867,11 +9868,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 335641430}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 10, y: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -100}
   m_SizeDelta: {x: 400, y: 530}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1586336389
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9886,9 +9887,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
+  m_Maskable: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -9927,6 +9928,11 @@ MonoBehaviour:
   _spacing: 10
   _animationDuration: 0.35
   _slideDistance: 200
+  _panelContentHolder: {fileID: 1586336387}
+  _roundTransitionDuration: 0.5
+  _turnText: {fileID: 1169365662}
+  _textFadeDuration: 0.5
+  _textDisplayDuration: 3
 --- !u!1 &1599819039
 GameObject:
   m_ObjectHideFlags: 0

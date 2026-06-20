@@ -12,6 +12,9 @@ namespace KD
         public UnitData         Data   { get; private set; }
         public int              TeamId { get; private set; } // 0 = 플레이어, 1 = 적
         public UnitDerivedStats Stats  { get; private set; }
+        public string           InstanceId { get; private set; }
+
+        private static int _instanceCounter = 0;
 
         // ── 가변 상태 ────────────────────────────────────────────────────
         public int        CurrentHP      { get; private set; }
@@ -46,6 +49,7 @@ namespace KD
             CurrentTilePos = startTilePos;
             MaxAP          = BattleActionConfig.MaxAP;
             CurrentAP      = BattleActionConfig.MaxAP;
+            InstanceId     = (data != null ? data.unitId : "unknown") + "_" + (++_instanceCounter);
 
             if (optionalSkill != null)
                 TryEquipOptionalSkill(optionalSkill);

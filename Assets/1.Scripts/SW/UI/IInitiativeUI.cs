@@ -38,5 +38,11 @@ namespace HornDancheong.Seongwoo.UI
         /// 틱 게이지 등 동적으로 변한 턴 순서에 맞춰 UI 패널들의 위치를 갱신합니다.
         /// </summary>
         void UpdateTurnOrder(IEnumerable<ICharacterBattleInfo> characters);
+
+        /// <summary>
+        /// 현재 이니셔티브 트랙 UI 애니메이션이 진행 중인지 여부를 반환합니다.
+        /// </summary>
+        bool IsAnimating { get; }
     }
 }
+
