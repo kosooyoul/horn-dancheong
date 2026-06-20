@@ -81,4 +81,11 @@ namespace KD
         Diagonal4,      // 좌상, 우상, 좌하, 우하
         EightDirections // 8방향 전체
     }
+
+    // 피해 정도 (small, medium, large, Xlarge)
+
+    public enum Scale
+    {
+        Small, Medium, Large, Xlarge
+    }
 }

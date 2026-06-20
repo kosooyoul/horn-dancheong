@@ -9,14 +9,15 @@ namespace KD
     public class BattleUnit
     {
         // ── 고정 데이터 참조 (읽기 전용) ────────────────────────────────
-        public UnitData Data   { get; private set; }
-        public int      TeamId { get; private set; } // 0 = 플레이어, 1 = 적
-        public UnitDerivedStats Stats { get; private set; }
+        public UnitData         Data   { get; private set; }
+        public int              TeamId { get; private set; } // 0 = 플레이어, 1 = 적
+        public UnitDerivedStats Stats  { get; private set; }
 
         // ── 가변 상태 ────────────────────────────────────────────────────
-        public int CurrentHP      { get; private set; }
-        public int MaxAP          { get; private set; }
-        public int CurrentAP      { get; private set; }
+        public int        CurrentHP      { get; private set; }
+        public int        CurrentSP      { get; private set; }
+        public int        MaxAP          { get; private set; }
+        public int        CurrentAP      { get; private set; }
         public Vector2Int CurrentTilePos { get; private set; }
         public bool IsAlive => CurrentHP > 0;
         public bool IsDead  => CurrentHP <= 0;
@@ -28,6 +29,10 @@ namespace KD
         // 스킬별 남은 쿨타임 <skillId, remainingCooldown>
         private readonly Dictionary<string, int> _skillCooldowns = new Dictionary<string, int>();
 
+        // 버프: 공격력 증가 배율 (1.0 = 버프 없음), 고정 증가량
+        private float _attackPowerBuffRate  = 1.0f;
+        private int   _attackPowerFlatBuff  = 0;
+
         // ── 초기화 ───────────────────────────────────────────────────────
         // teamId: 0 = 플레이어 팀, 1 = 적 팀
         // optionalSkill: OwnedUnit.equippedOptionalSkill 전달 (null이면 미장착)
@@ -37,12 +42,39 @@ namespace KD
             TeamId         = teamId;
             Stats          = StatCalculator.Calculate(data.baseStats);
             CurrentHP      = Stats.maxHP;
+            CurrentSP      = Stats.maxSP;
             CurrentTilePos = startTilePos;
             MaxAP          = BattleActionConfig.MaxAP;
             CurrentAP      = BattleActionConfig.MaxAP;
 
             if (optionalSkill != null)
                 TryEquipOptionalSkill(optionalSkill);
+        }
+
+        // ── 최종 공격력/회복력 (버프 반영) ──────────────────────────────
+        // 최종 공격력 = 공격력 × 공격력 증가 버프(%) + 고정 공격력 증가 버프
+        public int GetFinalAttackPower()
+        {
+            return Mathf.RoundToInt(Stats.attackPower * _attackPowerBuffRate) + _attackPowerFlatBuff;
+        }
+
+        // 회복력은 현재 버프 미구현 — Stats.healPower 그대로 반환
+        public int GetFinalHealPower()
+        {
+            return Stats.healPower;
+        }
+
+        // 버프 적용 (향후 버프 시스템에서 호출)
+        public void ApplyAttackPowerBuff(float rateMultiplier, int flatBonus)
+        {
+            _attackPowerBuffRate += rateMultiplier - 1f;
+            _attackPowerFlatBuff += flatBonus;
+        }
+
+        public void ClearAttackPowerBuff()
+        {
+            _attackPowerBuffRate = 1.0f;
+            _attackPowerFlatBuff = 0;
         }
 
         // ── 스킬 관련 ────────────────────────────────────────────────────
@@ -109,13 +141,13 @@ namespace KD
 
         // ── 전투 처리 ────────────────────────────────────────────────────
 
-        // rawDamage: AttributeCalculator와 spiritMultiplier 적용 후의 값
-        // 여기서 defense만 추가로 적용
-        public void TakeDamage(int rawDamage)
+        // finalDamage: SkillExecutor에서 모든 계수(방어·치명타·회피·약점·연산보정)를 적용한 최종값
+        // 0이면 회피(Miss), 양수면 그대로 HP 감소
+        public void TakeDamage(int finalDamage)
         {
-            int actual = Mathf.Max(1, rawDamage - Stats.defense);
-            CurrentHP = Mathf.Max(0, CurrentHP - actual);
-            Debug.Log($"[BattleUnit] {Data.unitName} 피해 {actual} (입력: {rawDamage}, 방어: {Stats.defense}) → HP {CurrentHP}/{Stats.maxHP}");
+            CurrentHP = Mathf.Max(0, CurrentHP - finalDamage);
+            string tag = finalDamage == 0 ? "Miss" : $"피해 {finalDamage}";
+            Debug.Log($"[BattleUnit] {Data.unitName} {tag} → HP {CurrentHP}/{Stats.maxHP}");
         }
 
         public void Heal(int amount)

@@ -2,14 +2,14 @@ namespace KD
 {
     // 속성 상성에 따른 데미지 배율 계산
     // 상성 순환: Red > White > Blue > Yellow > Black > Red (오각형 순환)
-    // 배율 수정 시 Advantage / Disadvantage 상수만 조정
+    // 약점 공격: ×1.5 / 반대 속성: ×0.5 / 무관: ×1.0
     public static class AttributeCalculator
     {
-        private const float Advantage    = 1.25f;
-        private const float Disadvantage = 0.75f;
+        private const float Advantage    = 1.5f;
+        private const float Disadvantage = 0.5f;
         private const float Neutral      = 1.0f;
 
-        // 스킬 속성(attacker) vs 대상 속성(defender) → 데미지 배율 반환
+        // 스킬 속성(attacker) vs 대상 속성(defender) → 약점 계수 반환
         public static float GetDamageMultiplier(UnitAttribute attacker, UnitAttribute defender)
         {
             if (IsAdvantage(attacker, defender)) return Advantage;

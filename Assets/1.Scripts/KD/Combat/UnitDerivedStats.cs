@@ -8,30 +8,36 @@ namespace KD
     [Serializable]
     public struct UnitDerivedStats
     {
-        public int maxHP;           // 최대 체력 (guard 기반)
-        public int skillPower;      // 스킬 데미지/회복 기반 수치 (spirit 기반)
-        public int defense;         // 받는 피해 감소 (guard 기반)
-        public int moveRange;       // 이동 가능 최대 칸 수 (agility 기반)
-        public int initiative;      // 행동 순서 — 높을수록 먼저 행동 (agility + luck 기반)
-        public float critChance;    // 치명타 확률 0~1 (luck 기반)
-        public float evasionChance; // 회피 확률 0~1 (agility + luck 기반)
+        public int   maxHP;          // 최대 체력 (guard 기반)
+        public int   maxSP;          // 최대 SP — 150 고정
+        public int   initiative;     // 행동 순서 (agility = 민첩, 높을수록 선턴)
+        public int   moveRange;      // 실제 이동 칸수 (agility / 5, 최솟값 1, 최댓값 5)
+        public int   attackPower;    // 공격력 (spirit × 5)
+        public int   healPower;      // 회복력 (spirit × 5)
+        public int   defense;        // 방어력 (guard × 5)
+        public float critChance;     // 치명타 확률 0~1 (luck × 1%, 최솟값 5%, 최댓값 100%)
+        public float evasionChance;  // 회피 확률 0~1 (luck × 1%, 최솟값 5%, 최댓값 100%)
 
         public UnitDerivedStats(
-            int maxHP,
-            int skillPower,
-            int defense,
-            int moveRange,
-            int initiative,
+            int   maxHP,
+            int   maxSP,
+            int   initiative,
+            int   moveRange,
+            int   attackPower,
+            int   healPower,
+            int   defense,
             float critChance,
             float evasionChance)
         {
-            this.maxHP          = maxHP;
-            this.skillPower     = skillPower;
-            this.defense        = defense;
-            this.moveRange      = moveRange;
-            this.initiative     = initiative;
-            this.critChance     = critChance;
-            this.evasionChance  = evasionChance;
+            this.maxHP         = maxHP;
+            this.maxSP         = maxSP;
+            this.initiative    = initiative;
+            this.moveRange     = moveRange;
+            this.attackPower   = attackPower;
+            this.healPower     = healPower;
+            this.defense       = defense;
+            this.critChance    = critChance;
+            this.evasionChance = evasionChance;
         }
     }
 }

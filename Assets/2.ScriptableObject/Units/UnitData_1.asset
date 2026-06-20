@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: UnitData_1
   m_EditorClassIdentifier: Assembly-CSharp::KD.UnitData
   unitId: 
-  unitName: 
+  unitName: "\uD604\uB3C4\uC724"
   description: 
   icon: {fileID: 0}
   prefab: {fileID: 0}
-  role: 0
+  role: 1
   attribute: 0
   weaponType: 0
   movementType: 0

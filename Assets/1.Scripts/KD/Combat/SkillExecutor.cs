@@ -6,8 +6,22 @@ namespace KD
     // 광역 스킬: BattleManager가 GridPatternResolver로 범위 내 대상 목록을 수집 후 Execute를 반복 호출
     // SkillExecutor 자체는 항상 단일 대상만 처리
     // AP 소모 및 쿨타임 적용은 Execute 내부에서 자동 처리
+    //
+    // ── 최종 데미지 공식 ──────────────────────────────────────────────────
+    // 최종 데미지 = 스킬 데미지 × 치명타 계수 × 방어력 계수 × 회피 계수 × 약점 계수 × 연산 보정
+    //   스킬 데미지  = GetFinalAttackPower() × skillCoefficient
+    //   치명타 계수  = 1.5 (치명타 성공) / 1.0 (실패)  — 치명타 데미지 150% 고정
+    //   방어력 계수  = 100 / (100 + 방어력)
+    //   회피 계수    = 0 (회피 성공 = Miss) / 1.0 (실패)
+    //   약점 계수    = 1.5 (속성 약점) / 0.5 (반대 속성) / 1.0 (무관)
+    //   연산 보정    = 소 ×1.5 / 중 ×2.0 / 대 ×2.5 / 특대 ×4.0
+    //
+    // ── 회복 공식 ─────────────────────────────────────────────────────────
+    // 최종 회복 = GetFinalHealPower() × skillCoefficient × 연산 보정
     public static class SkillExecutor
     {
+        private const float CritMultiplier = 1.5f;
+
         // 전투 담당자는 이 함수 하나만 호출하면 됨
         // target: Self 타입이면 caster와 동일 대상을 넘길 것
         public static bool Execute(BattleUnit caster, BattleUnit target, SkillData skill)
@@ -90,27 +104,76 @@ namespace KD
             PlayEffect(skill, effectTarget);
         }
 
-        // ── MVP 구현 ─────────────────────────────────────────────────────
+        // ── 데미지 계산 ──────────────────────────────────────────────────
 
         private static void ApplyDamage(BattleUnit caster, BattleUnit target, SkillData skill)
         {
-            float attrMultiplier = AttributeCalculator.GetDamageMultiplier(skill.attribute, target.Data.attribute);
-            int rawDamage = Mathf.RoundToInt((skill.baseValue + caster.Stats.skillPower * skill.spiritMultiplier) * attrMultiplier);
+            // 1. 스킬 데미지 = 최종 공격력 × 스킬 계수
+            float skillDamage = caster.GetFinalAttackPower() * skill.skillCoefficient;
 
-            target.TakeDamage(rawDamage);
+            // 2. 치명타 계수 (150% 고정)
+            bool  isCrit       = Random.value < caster.Stats.critChance;
+            float critFactor   = isCrit ? CritMultiplier : 1.0f;
+
+            // 3. 방어력 계수 = 100 / (100 + 방어력)
+            float defenseFactor = 100f / (100f + target.Stats.defense);
+
+            // 4. 회피 계수 (성공 → Miss)
+            bool  evaded        = Random.value < target.Stats.evasionChance;
+            float evasionFactor = evaded ? 0f : 1.0f;
+
+            // 5. 약점 계수
+            float attrFactor = AttributeCalculator.GetDamageMultiplier(skill.attribute, target.Data.attribute);
+
+            // 6. 연산 보정
+            float scaleFactor = GetScaleMultiplier(skill.scale);
+
+            // 최종 데미지
+            float raw         = skillDamage * critFactor * defenseFactor * evasionFactor * attrFactor * scaleFactor;
+            int   finalDamage = evaded ? 0 : Mathf.Max(1, Mathf.RoundToInt(raw));
+
+            target.TakeDamage(finalDamage);
+
+            string critTag  = isCrit  ? " [치명타]"            : "";
+            string evadeTag = evaded  ? " [회피]"              : "";
+            string attrTag  = attrFactor > 1f ? " [약점]"
+                            : attrFactor < 1f ? " [저항]"      : "";
 
             Debug.Log($"[SkillExecutor] {caster.Data.unitName} → {target.Data.unitName} " +
-                      $"'{skill.skillName}' 데미지 {rawDamage} (속성 배율 {attrMultiplier:F2}x)");
+                      $"'{skill.skillName}' 최종 {finalDamage}{critTag}{evadeTag}{attrTag} " +
+                      $"(공격력 {caster.GetFinalAttackPower()} × 계수 {skill.skillCoefficient:F2} " +
+                      $"× 방어 {defenseFactor:F2} × 연산 {scaleFactor:F1})");
         }
+
+        // ── 회복 계산 ────────────────────────────────────────────────────
 
         private static void ApplyHeal(BattleUnit caster, BattleUnit target, SkillData skill)
         {
-            int healAmount = Mathf.RoundToInt(skill.baseValue + caster.Stats.skillPower * skill.spiritMultiplier);
+            // 회복량 = 회복력 × 스킬 회복량 계수 × 연산 보정
+            float scaleFactor = GetScaleMultiplier(skill.scale);
+            int   healAmount  = Mathf.Max(1, Mathf.RoundToInt(
+                caster.GetFinalHealPower() * skill.skillCoefficient * scaleFactor));
 
             target.Heal(healAmount);
 
             Debug.Log($"[SkillExecutor] {caster.Data.unitName} → {target.Data.unitName} " +
-                      $"'{skill.skillName}' 회복 {healAmount}");
+                      $"'{skill.skillName}' 회복 {healAmount} " +
+                      $"(회복력 {caster.GetFinalHealPower()} × 계수 {skill.skillCoefficient:F2} × 연산 {scaleFactor:F1})");
+        }
+
+        // ── 공통 유틸 ────────────────────────────────────────────────────
+
+        // 연산 보정: 소=1.5 / 중=2.0 / 대=2.5 / 특대=4.0
+        private static float GetScaleMultiplier(Scale scale)
+        {
+            switch (scale)
+            {
+                case Scale.Small:  return 1.5f;
+                case Scale.Medium: return 2.0f;
+                case Scale.Large:  return 2.5f;
+                case Scale.Xlarge: return 4.0f;
+                default:           return 1.5f;
+            }
         }
 
         private static void PlayEffect(SkillData skill, BattleUnit target)

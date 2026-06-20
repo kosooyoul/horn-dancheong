@@ -56,25 +56,35 @@ namespace KD
         // 하이라이트 목록
         private readonly List<MoveOption>  currentMoveHighlights           = new List<MoveOption>();
         private readonly List<Vector2Int>  currentSkillHighlights          = new List<Vector2Int>();
-        private readonly List<Vector2Int>  currentDangerHighlights         = new List<Vector2Int>();
         private readonly List<Vector2Int>  currentDeployableHighlights     = new List<Vector2Int>();
         private readonly List<Vector2Int>  currentBlockedDeployHighlights  = new List<Vector2Int>();
+
+        // danger 하이라이트: 타일 → SafetyType (DangerS/M/L/XL)
+        private readonly Dictionary<Vector2Int, SafetyType> currentDangerHighlights = new Dictionary<Vector2Int, SafetyType>();
+
+        // FloorCubeStater를 통해 SafetyType이 적용된 타일 (복원 시 Safe로 되돌릴 목록)
+        private readonly HashSet<Vector2Int> activeStaterTiles = new HashSet<Vector2Int>();
 
         // 하이라이트 이전 원본 색상 보존 (Renderer 키)
         private readonly Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
 
+        // SG_FloorCubeSide 셰이더는 _Color 대신 _BaseColor를 사용 → MPB로 읽고 씀
+        private static readonly int BaseColorID = Shader.PropertyToID("_BaseColor");
+        private MaterialPropertyBlock highlightMPB;
+
         // ── 외부 조회 프로퍼티 ────────────────────────────────────────────
 
-        public IReadOnlyList<MoveOption>  CurrentMoveHighlights          => currentMoveHighlights;
-        public IReadOnlyList<Vector2Int>  CurrentSkillHighlights         => currentSkillHighlights;
-        public IReadOnlyList<Vector2Int>  CurrentDangerHighlights        => currentDangerHighlights;
-        public IReadOnlyList<Vector2Int>  CurrentDeployableHighlights    => currentDeployableHighlights;
-        public IReadOnlyList<Vector2Int>  CurrentBlockedDeployHighlights => currentBlockedDeployHighlights;
+        public IReadOnlyList<MoveOption>                          CurrentMoveHighlights          => currentMoveHighlights;
+        public IReadOnlyList<Vector2Int>                          CurrentSkillHighlights         => currentSkillHighlights;
+        public IReadOnlyDictionary<Vector2Int, SafetyType>        CurrentDangerHighlights        => currentDangerHighlights;
+        public IReadOnlyList<Vector2Int>                          CurrentDeployableHighlights    => currentDeployableHighlights;
+        public IReadOnlyList<Vector2Int>                          CurrentBlockedDeployHighlights => currentBlockedDeployHighlights;
 
         // ── 초기화 ────────────────────────────────────────────────────────
 
         private void Awake()
         {
+            highlightMPB = new MaterialPropertyBlock();
             RebuildWallSet();
         }
 
@@ -103,11 +113,18 @@ namespace KD
             return new Vector3(gridPos.x * cellSize, fixedWorldY, gridPos.y * cellSize);
         }
 
+        private bool mapProviderWarned;
+
         /// <summary>월드 좌표 → 가장 가까운 Grid 좌표</summary>
         public Vector2Int WorldToGrid(Vector3 worldPos)
         {
             if (mapProvider != null)
                 return mapProvider.WorldToGrid(worldPos);
+            if (!mapProviderWarned)
+            {
+                Debug.LogWarning("[GridManager] mapProvider가 null — Inspector에서 BattleMapProvider를 연결하세요. offset 없이 fallback WorldToGrid 사용 중.");
+                mapProviderWarned = true;
+            }
             return new Vector2Int(
                 Mathf.RoundToInt(worldPos.x / cellSize),
                 Mathf.RoundToInt(worldPos.z / cellSize));
@@ -310,12 +327,19 @@ namespace KD
             Debug.Log($"[GridManager] 스킬 하이라이트: {currentSkillHighlights.Count}개");
         }
 
-        public void HighlightDangerTiles(List<Vector2Int> tiles)
+        /// <summary>
+        /// 위험 타일 하이라이트.
+        /// FloorCubeStater가 있는 큐브는 SafetyType 트랜지션으로 표시,
+        /// 없으면 material.color 폴백을 사용한다.
+        /// </summary>
+        public void HighlightDangerTiles(List<Vector2Int> tiles, SafetyType dangerLevel = SafetyType.DangerS)
         {
             currentDangerHighlights.Clear();
-            if (tiles != null) currentDangerHighlights.AddRange(tiles);
+            if (tiles != null)
+                foreach (var t in tiles)
+                    currentDangerHighlights[t] = dangerLevel;
             RefreshAllHighlights();
-            Debug.Log($"[GridManager] 위험 하이라이트: {currentDangerHighlights.Count}개");
+            Debug.Log($"[GridManager] 위험 하이라이트: {currentDangerHighlights.Count}개 ({dangerLevel})");
         }
 
         public void HighlightDeployableTiles(List<Vector2Int> tiles)
@@ -348,6 +372,33 @@ namespace KD
             RefreshAllHighlights();
         }
 
+        /// <summary>
+        /// 타일 GameObject에 GridTile이 없으면 추가하고 초기화.
+        /// go를 직접 넘기는 버전 — go는 항상 mapProvider.GetFloorTile()이 반환한 오브젝트여야 함.
+        /// </summary>
+        public GridTile EnsureGridTile(Vector2Int tile, GameObject go)
+        {
+            if (go == null) return null;
+            GridTile gt = go.GetComponent<GridTile>();
+            if (gt == null)
+            {
+                gt = go.AddComponent<GridTile>();
+                gt.Init(tile);
+            }
+            return gt;
+        }
+
+        /// <summary>
+        /// mapProvider를 통해 올바른 바닥 타일 오브젝트를 얻어 GridTile을 부착.
+        /// 레이캐스트 폴백 등에서 go 참조 없이 호출할 때 사용.
+        /// </summary>
+        public GridTile EnsureGridTile(Vector2Int tile)
+        {
+            if (mapProvider == null) return null;
+            GameObject go = mapProvider.GetFloorTile(tile);
+            return EnsureGridTile(tile, go);
+        }
+
         public void ClearDeploymentHighlight()
         {
             currentDeployableHighlights.Clear();
@@ -369,23 +420,61 @@ namespace KD
 
         /// <summary>
         /// 모든 활성 하이라이트를 다시 그린다.
-        /// 1) 원본 색 복원 → 2) 낮은 우선순위부터 적용 (높은 쪽이 덮어씀).
+        ///
+        /// Danger 타일: FloorCubeStater → SafetyType 트랜지션 (DangerS/M/L/XL).
+        ///              FloorCubeStater 없으면 material.color 폴백.
+        /// 나머지 타일: material.color Lerp.
         /// </summary>
         private void RefreshAllHighlights()
         {
-            // 저장된 모든 Renderer를 원본 색으로 복원
+            // 이전 danger 타일을 Safe로 되돌림 (FloorCubeStater 경로)
+            foreach (Vector2Int tile in activeStaterTiles)
+            {
+                GameObject go = GetFloorGameObject(tile);
+                if (go == null) continue;
+                go.GetComponent<GridTile>()?.ResetSafety();
+            }
+            activeStaterTiles.Clear();
+
+            // 저장된 Renderer를 원본 색으로 복원 (MPB _BaseColor 경로)
             foreach (var kvp in originalColors)
             {
                 if (kvp.Key != null)
-                    kvp.Key.material.color = kvp.Value;
+                {
+                    kvp.Key.GetPropertyBlock(highlightMPB);
+                    highlightMPB.SetColor(BaseColorID, kvp.Value);
+                    kvp.Key.SetPropertyBlock(highlightMPB);
+                }
             }
+            originalColors.Clear();
 
-            // 낮은 우선순위 → 높은 우선순위 순으로 적용
+            // 낮은 우선순위 → 높은 우선순위 (material.color)
             ApplyHighlightList(currentBlockedDeployHighlights, blockedDeployColor);
             ApplyHighlightList(currentDeployableHighlights,    deployableTileColor);
             ApplyMoveHighlights();
             ApplyHighlightList(currentSkillHighlights,         skillTileColor);
-            ApplyHighlightList(currentDangerHighlights,        dangerTileColor);
+
+            // Danger: FloorCubeStater 우선, 없으면 color 폴백
+            foreach (var kvp in currentDangerHighlights)
+                ApplyDangerHighlight(kvp.Key, kvp.Value);
+        }
+
+        private void ApplyDangerHighlight(Vector2Int tile, SafetyType level)
+        {
+            GameObject go = GetFloorGameObject(tile);
+            if (go == null) return;
+
+            GridTile gt = EnsureGridTile(tile, go);
+            if (gt != null && gt.HasStater)
+            {
+                gt.SetSafety(level);
+                activeStaterTiles.Add(tile);
+            }
+            else
+            {
+                // FloorCubeStater 없는 큐브: material.color 폴백
+                ApplyTileHighlight(tile, dangerTileColor);
+            }
         }
 
         private void ApplyHighlightList(List<Vector2Int> tiles, Color color)
@@ -407,18 +496,27 @@ namespace KD
             Renderer r = go.GetComponent<Renderer>();
             if (r == null) return;
 
-            // 처음 하이라이트하는 타일이면 원본 색 저장
             if (!originalColors.ContainsKey(r))
-                originalColors[r] = r.material.color;
+            {
+                r.GetPropertyBlock(highlightMPB);
+                Color orig = highlightMPB.GetColor(BaseColorID);
+                if (orig == Color.clear)
+                    orig = r.sharedMaterial != null ? r.sharedMaterial.GetColor(BaseColorID) : Color.white;
+                originalColors[r] = orig;
+            }
 
-            r.material.color = Color.Lerp(originalColors[r], color, highlightStrength);
+            r.GetPropertyBlock(highlightMPB);
+            highlightMPB.SetColor(BaseColorID, Color.Lerp(originalColors[r], color, highlightStrength));
+            r.SetPropertyBlock(highlightMPB);
         }
 
         private GameObject GetFloorGameObject(Vector2Int tile)
         {
-            if (mapProvider != null)
-                return mapProvider.GetFloorTile(tile);
-            return null;
+            if (mapProvider == null) return null;
+            GameObject go = mapProvider.GetFloorTile(tile);
+            // 첫 접근 시 GridTile 자동 부착
+            if (go != null) EnsureGridTile(tile, go);
+            return go;
         }
 
         // ── 배치 프리뷰 ───────────────────────────────────────────────────
