@@ -68,6 +68,17 @@ namespace KD
             return result;
         }
 
+        // 적 유닛 1체 생성 (스모크 테스트 등 단일 적이 필요할 때)
+        public BattleUnit CreateEnemyBattleUnit(UnitData data, Vector2Int startPos)
+        {
+            if (data == null)
+            {
+                Debug.LogWarning("[BattleSetup] CreateEnemyBattleUnit: data가 null입니다.");
+                return null;
+            }
+            return new BattleUnit(data, teamId: 1, startTilePos: startPos);
+        }
+
         // 적 유닛 생성 (UnitData를 직접 받는 단순 버전)
         public List<BattleUnit> CreateEnemyBattleUnits(
             List<UnitData> enemyDataList,

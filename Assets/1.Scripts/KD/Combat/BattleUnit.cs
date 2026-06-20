@@ -33,6 +33,11 @@ namespace KD
         private float _attackPowerBuffRate  = 1.0f;
         private int   _attackPowerFlatBuff  = 0;
 
+        // 피해 감소 수치 (0 = 감소 없음, 1 = 100% 감소)
+        // 피해 감소 계수 = 1 - damageReductionRate
+        private float _damageReductionRate = 0f;
+        public float DamageReductionRate => _damageReductionRate;
+
         // ── 초기화 ───────────────────────────────────────────────────────
         // teamId: 0 = 플레이어 팀, 1 = 적 팀
         // optionalSkill: OwnedUnit.equippedOptionalSkill 전달 (null이면 미장착)
@@ -75,6 +80,25 @@ namespace KD
         {
             _attackPowerBuffRate = 1.0f;
             _attackPowerFlatBuff = 0;
+        }
+
+        // ── 피해 감소 ────────────────────────────────────────────────────
+
+        /// <summary>피해 감소 수치를 고정값으로 설정. 0~1 클램프.</summary>
+        public void SetDamageReductionRate(float value)
+        {
+            _damageReductionRate = Mathf.Clamp01(value);
+        }
+
+        /// <summary>피해 감소 수치를 누적 가산. 합산 후 0~1 클램프.</summary>
+        public void AddDamageReductionRate(float value)
+        {
+            _damageReductionRate = Mathf.Clamp01(_damageReductionRate + value);
+        }
+
+        public void ClearDamageReductionRate()
+        {
+            _damageReductionRate = 0f;
         }
 
         // ── 스킬 관련 ────────────────────────────────────────────────────

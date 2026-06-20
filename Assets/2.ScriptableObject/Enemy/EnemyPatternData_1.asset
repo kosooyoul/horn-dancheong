@@ -15,4 +15,10 @@ MonoBehaviour:
   steps:
   - skill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
     targetTiles:
+<<<<<<< Updated upstream
     - {x: 3, y: 3}
+=======
+    - {x: 0, y: 0}
+    - {x: 1, y: 0}
+    - {x: 2, y: 0}
+>>>>>>> Stashed changes
