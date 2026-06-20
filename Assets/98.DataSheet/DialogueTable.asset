@@ -210,7 +210,7 @@ MonoBehaviour:
     DialogueText: "\uC548\uB155? \uBC18\uAC00\uC6CC. \uB09C \uB108\uB124\uB4E4\uC758
       \uBA58\uD1A0 \uC2E0\uC720\uD558\uC57C"
     PlaySFX: 
-    PlayBGM: "\uBC30\uACBD \uC74C\uC545-\uBA85\uB7C93.mp3"
+    PlayBGM: BGM-Bright3.mp3
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -221,7 +221,7 @@ MonoBehaviour:
     DialogueText: "\uACAC\uD559\uC740 \uACBD\uBCF5\uAD81\uC774\uB2C8\uAE4C \uC798
       \uB530\uB77C\uC640"
     PlaySFX: 
-    PlayBGM: "\uBC30\uACBD \uC74C\uC545-\uBA85\uB7C93.mp3"
+    PlayBGM: BGM-Bright3.mp3
     LeftPortrait: 
     CenterPortrait: 
     RightPortrait: yuha.png
@@ -316,7 +316,7 @@ MonoBehaviour:
     DialogueText: "(\uD604\uB3C4\uC724\uC774 \uC2E0\uC720\uD558 \uBA58\uD1A0\uC5D0\uAC8C
       \uC8FC\uBA39\uC744 \uD718\uB458\uB800\uC73C\uB098 \uAC00\uBCCD\uAC8C \uD53C\uD55C
       \uD6C4)"
-    PlaySFX: "\uD6A8\uACFC\uC74C-\uD68C\uD53C.mp3"
+    PlaySFX: SFX-Evade.mp3
     PlayBGM: BGM-Bright2.mp3
     LeftPortrait: 
     CenterPortrait: 
