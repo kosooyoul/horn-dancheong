@@ -541,7 +541,7 @@ GameObject:
   - component: {fileID: 322560247}
   - component: {fileID: 322560250}
   m_Layer: 5
-  m_Name: Button_CloseMenu
+  m_Name: Button_PauseMenu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -662,7 +662,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HornDancheong.Seongwoo.UI.GameObjectActivateControllerButton
   _targetGameObject: {fileID: 940176872}
-  _isEnableMode: 0
+  _isEnableMode: 1
 --- !u!1 &332455297
 GameObject:
   m_ObjectHideFlags: 0
@@ -2813,7 +2813,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 545095678}
   m_HandleRect: {fileID: 0}
@@ -4076,7 +4076,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 953461301}
   m_HandleRect: {fileID: 0}
