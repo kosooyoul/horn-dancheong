@@ -11,7 +11,7 @@
       "prefabPath": "",
       "defaultStats": { "agility": 5, "spirit": 3, "guard": 5, "luck": 3, "mov": 5 },
       "behaviorType": 2,
-      "detectionRange": 4
+      "detectionRange": 0
     },
     {
       "id": 2,
@@ -21,7 +21,7 @@
       "prefabPath": "",
       "defaultStats": { "agility": 4, "spirit": 4, "guard": 9, "luck": 3, "mov": 3 },
       "behaviorType": 1,
-      "detectionRange": 2
+      "detectionRange": 4
     },
     {
       "id": 3,
@@ -31,7 +31,7 @@
       "prefabPath": "",
       "defaultStats": { "agility": 7, "spirit": 8, "guard": 12, "luck": 6, "mov": 4 },
       "behaviorType": 0,
-      "detectionRange": 6
+      "detectionRange": 0
     }
   ]
 }
