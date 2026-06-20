@@ -19,6 +19,11 @@ namespace HornDancheong.Seongwoo.UI
 
         public static UIManager Instance { get; private set; }
 
+        /// <summary>
+        /// ESCMenu가 메인화면으로부터 열렸는지 여부를 나타내는 프로퍼티입니다.
+        /// </summary>
+        public bool IsEscMenuOpenedFromMainMenu { get; private set; }
+
         [Header("UI Panels Registration")]
         [SerializeField] private List<PanelEntry> panelEntries = new List<PanelEntry>();
 
@@ -68,7 +73,7 @@ namespace HornDancheong.Seongwoo.UI
         /// <summary>
         /// 특정 타입의 UI 패널을 활성화합니다.
         /// </summary>
-        public void ShowPanel(UIPanelType panelType)
+        public void ShowPanel(UIPanelType panelType, bool isFromMainMenu = false)
         {
             if (panelType == UIPanelType.None) return;
 
@@ -76,6 +81,12 @@ namespace HornDancheong.Seongwoo.UI
             {
                 Debug.LogError("[UIManager] Dialogue 패널은 다이얼로그 인덱스(dialogueIndex) 없이 활성화할 수 없습니다. 패널 열기를 차단합니다.");
                 return;
+            }
+
+            if (panelType == UIPanelType.Panel_EscMenu)
+            {
+                IsEscMenuOpenedFromMainMenu = isFromMainMenu;
+                Debug.Log($"[UIManager] Panel_EscMenu 활성화 시도. 메인화면으로부터 열림 여부: {IsEscMenuOpenedFromMainMenu}");
             }
 
             if (_panelsDict.TryGetValue(panelType, out var panelGo))
@@ -157,13 +168,13 @@ namespace HornDancheong.Seongwoo.UI
         /// <summary>
         /// 문자열 이름을 기반으로 패널을 활성화합니다. (엑셀 데이터 테이블 대응용)
         /// </summary>
-        public void ShowPanel(string panelName)
+        public void ShowPanel(string panelName, bool isFromMainMenu = false)
         {
             if (string.IsNullOrEmpty(panelName)) return;
 
             if (Enum.TryParse<UIPanelType>(panelName, out var type))
             {
-                ShowPanel(type);
+                ShowPanel(type, isFromMainMenu);
             }
             else
             {

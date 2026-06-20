@@ -14,6 +14,9 @@ namespace HornDancheong.Seongwoo.UI
         [Header("Dialogue Option (Only for Panel_Dialogue)")]
         [SerializeField] private int _dialogueIndex = 1;
 
+        [Header("EscMenu Option (Only for Panel_EscMenu)")]
+        [SerializeField] private bool _isOpenedFromMainMenu = false;
+
         protected override void Function()
         {
             if (UIManager.Instance == null)
@@ -34,6 +37,10 @@ namespace HornDancheong.Seongwoo.UI
                 if (_panelToOpen == UIPanelType.Panel_Dialogue)
                 {
                     UIManager.Instance.ShowPanel(_panelToOpen, _dialogueIndex);
+                }
+                else if (_panelToOpen == UIPanelType.Panel_EscMenu)
+                {
+                    UIManager.Instance.ShowPanel(_panelToOpen, _isOpenedFromMainMenu);
                 }
                 else
                 {
