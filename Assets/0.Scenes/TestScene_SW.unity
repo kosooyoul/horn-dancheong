@@ -5638,6 +5638,7 @@ GameObject:
   - component: {fileID: 940176875}
   - component: {fileID: 940176874}
   - component: {fileID: 940176876}
+  - component: {fileID: 940176877}
   m_Layer: 5
   m_Name: Panel_CombatInteraction
   m_TagString: Untagged
@@ -5752,6 +5753,62 @@ MonoBehaviour:
   attackButton: {fileID: 332455299}
   pendingButton: {fileID: 1671035717}
   skillButtonPrefab: {fileID: 9045611394628229254, guid: ec8cc8080ee9c3d47a70907ecf5fec50, type: 3}
+--- !u!114 &940176877
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 940176872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbe06aa8783320147946e5c9a60978c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HornDancheong.Seongwoo.UI.CombatInteractionPanelTransition
+  battleManager: {fileID: 0}
+  simpleBattleManager: {fileID: 0}
+  autoDetectManagers: 1
+  checkInterval: 0
+  direction: 3
+  customDirection: {x: 0, y: -1}
+  distance: 700
+  useSelfSizeAsDistance: 1
+  useLocalPosition: 0
+  instantInitAtStart: 1
+  duration: 0.35
+  easeInType: 5
+  easeOutType: 4
+  customCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  onTransitionStart:
+    m_PersistentCalls:
+      m_Calls: []
+  onTransitionComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  showDebugLogs: 0
 --- !u!1 &940945861
 GameObject:
   m_ObjectHideFlags: 0
