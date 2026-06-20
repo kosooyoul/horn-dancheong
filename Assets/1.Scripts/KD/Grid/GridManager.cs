@@ -113,6 +113,9 @@ namespace KD
 
         // ── 좌표 변환 ─────────────────────────────────────────────────────
 
+        /// <summary>타일 1칸의 월드 공간 크기 (VFX 스케일 계산용)</summary>
+        public float CellSize => cellSize;
+
         /// <summary>Grid 좌표 → 월드 좌표 (바닥 y, 타일 중앙)</summary>
         public Vector3 GridToWorld(Vector2Int gridPos)
         {
