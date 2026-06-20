@@ -113,26 +113,36 @@ MonoBehaviour:
   transitionTime: 0.3
   safeData:
     BaseColor: {r: 0.23529412, g: 0.60784316, b: 0.56078434, a: 1}
+    SubColor: {r: 1, g: 1, b: 1, a: 1}
+    ColorSwitchAlpha: 0
     TextureColor: {r: 0.5700605, g: 0.90188676, b: 0.8599719, a: 1}
     Intensity: 0
     OneHotMaskIndex: 0
   dangerSData:
     BaseColor: {r: 0.23529412, g: 0.60784316, b: 0.56078434, a: 1}
+    SubColor: {r: 1, g: 1, b: 1, a: 1}
+    ColorSwitchAlpha: 0
     TextureColor: {r: 0.5686275, g: 0.9019608, b: 0.85882354, a: 1}
     Intensity: 0
     OneHotMaskIndex: 0
   dangerMData:
     BaseColor: {r: 0.65882355, g: 0.5294118, b: 0.16862746, a: 1}
+    SubColor: {r: 1, g: 1, b: 1, a: 1}
+    ColorSwitchAlpha: 0
     TextureColor: {r: 0.8867924, g: 0.7441159, b: 0.34635097, a: 1}
     Intensity: 0
     OneHotMaskIndex: 0
   dangerLData:
     BaseColor: {r: 0.56078434, g: 0.11372549, b: 0.12941177, a: 1}
+    SubColor: {r: 1, g: 1, b: 1, a: 1}
+    ColorSwitchAlpha: 0
     TextureColor: {r: 0.90188676, g: 0.39989316, b: 0.4175069, a: 1}
     Intensity: 10
     OneHotMaskIndex: 1
   dangerXLData:
     BaseColor: {r: 0.22745098, g: 0.1882353, b: 0.15686275, a: 1}
+    SubColor: {r: 1, g: 1, b: 1, a: 1}
+    ColorSwitchAlpha: 0
     TextureColor: {r: 0.9607843, g: 0.94509804, b: 0.9098039, a: 1}
     Intensity: 0
     OneHotMaskIndex: 0

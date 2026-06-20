@@ -34,6 +34,52 @@ public class FloorCubeVisual : MonoBehaviour
 
     private Coroutine transitionCoroutine;
 
+    // 체커보드용 오프셋 — GridTile.Init()에서 (x+y)%2 기준으로 설정
+    private float _checkerAlphaOffset = 0f;
+
+    public void SetCheckerAlphaOffset(float offset)
+    {
+        _checkerAlphaOffset = offset;
+        targetRenderer.GetPropertyBlock(mpb);
+        mpb.SetFloat(ColorSwitchAlphaID, offset);
+        targetRenderer.SetPropertyBlock(mpb);
+    }
+
+    // ── 하이라이트 제어 ──────────────────────────────────────────────────
+    private Color _originalBaseColor;
+    private bool  _isHighlighted;
+
+    // GridManager에서 호출 — 하이라이트 색 적용 및 체커 비활성화
+    public void SetHighlight(Color highlightColor, float strength)
+    {
+        if (!_isHighlighted)
+        {
+            targetRenderer.GetPropertyBlock(mpb);
+            Color current = mpb.GetColor(BaseColorID);
+            if (current == Color.clear && targetRenderer.sharedMaterial != null)
+                current = targetRenderer.sharedMaterial.GetColor(BaseColorID);
+            _originalBaseColor = current;
+            _isHighlighted = true;
+        }
+
+        targetRenderer.GetPropertyBlock(mpb);
+        mpb.SetColor(BaseColorID, Color.Lerp(_originalBaseColor, highlightColor, strength));
+        mpb.SetFloat(ColorSwitchAlphaID, 0f);
+        targetRenderer.SetPropertyBlock(mpb);
+    }
+
+    // GridManager에서 호출 — BaseColor·ColorSwitchAlpha 복원
+    public void ClearHighlight()
+    {
+        if (!_isHighlighted) return;
+        _isHighlighted = false;
+
+        targetRenderer.GetPropertyBlock(mpb);
+        mpb.SetColor(BaseColorID, _originalBaseColor);
+        mpb.SetFloat(ColorSwitchAlphaID, _checkerAlphaOffset);
+        targetRenderer.SetPropertyBlock(mpb);
+    }
+
     private static readonly int BaseColorID =
         Shader.PropertyToID("_BaseColor");
 
@@ -185,10 +231,7 @@ public class FloorCubeVisual : MonoBehaviour
 
         mpb.SetFloat(
             ColorSwitchAlphaID,
-            Mathf.Lerp(
-                from.ColorSwitchAlpha,
-                to.ColorSwitchAlpha,
-                t));
+            _checkerAlphaOffset);
 
         mpb.SetColor(
             TextureColorID,
@@ -226,7 +269,7 @@ public class FloorCubeVisual : MonoBehaviour
 
         mpb.SetFloat(
             ColorSwitchAlphaID,
-            data.ColorSwitchAlpha);
+            _checkerAlphaOffset);
 
         mpb.SetColor(
             TextureColorID,
