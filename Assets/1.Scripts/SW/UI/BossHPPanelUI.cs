@@ -90,7 +90,7 @@ namespace HornDancheong.Seongwoo.UI
             {
                 bossName = _bossBattleUnit.Data != null ? _bossBattleUnit.Data.unitName : "Boss";
                 currentHp = _bossBattleUnit.CurrentHP;
-                maxHp = _bossBattleUnit.Stats != null ? _bossBattleUnit.Stats.maxHP : 1f;
+                maxHp = _bossBattleUnit.Stats.maxHP;
             }
             else if (_bossBattleUnitEntry != null)
             {
