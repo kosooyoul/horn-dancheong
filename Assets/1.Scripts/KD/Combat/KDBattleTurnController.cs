@@ -137,16 +137,16 @@ namespace KD
 
             if (IsSelectedUnitMoving()) return;
 
-            if (isActionMenuOpen)
-            {
+            // if (isActionMenuOpen)
+            // {
                 if (pendingAction != null)
                 {
                     string action = pendingAction;
                     pendingAction = null;
                     ExecutePendingAction(action);
-                }
                 return;
-            }
+                }
+            // }
 
             HandleMouseHover();
 
