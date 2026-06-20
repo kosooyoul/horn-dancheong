@@ -20,7 +20,7 @@ MonoBehaviour:
   effectPrefab: {fileID: 0}
   allowedWeaponTypes: 00000000
   targetType: 0
-  targetPattern: {fileID: 0}
+  targetPattern: {fileID: 11400000, guid: f956f962c5378094a9106d136f3ba942, type: 2}
   apCost: 30
   cooldown: 1
   effectType: 0
