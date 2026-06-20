@@ -41,5 +41,15 @@ namespace HornDancheong.Seongwoo.UI
         /// 활성화된 버프 및 디버프 아이콘 목록
         /// </summary>
         Sprite[] ActiveBuffDebuffs { get; }
+
+        /// <summary>
+        /// 실제 유닛 설계 데이터
+        /// </summary>
+        KD.UnitData UnitData { get; }
+
+        /// <summary>
+        /// 유닛이 가진 실제 스킬 목록
+        /// </summary>
+        System.Collections.Generic.List<KD.SkillData> Skills { get; }
     }
 }
