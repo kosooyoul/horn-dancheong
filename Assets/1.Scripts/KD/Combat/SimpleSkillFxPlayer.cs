@@ -50,7 +50,7 @@ namespace KD
                     break;
 
                 case SkillFxType.Pillar:
-                    yield return StartCoroutine(PlayPillar(caster, targets, targetTiles, skill, onImpact));
+                    yield return StartCoroutine(PlayPillar(caster, targetTiles, skill, onImpact));
                     break;
 
                 case SkillFxType.AreaRise:
@@ -99,7 +99,9 @@ namespace KD
                 foreach (BattleUnit target in targets)
                 {
                     if (target == null) continue;
-                    SpawnVfx(skill.impactVfxPrefab, GetUnitWorldPos(target), skill.vfxLifetime);
+                    Vector3 targetPos = GetUnitWorldPos(target);
+                    SpawnVfx(skill.impactVfxPrefab, targetPos, skill.vfxLifetime,
+                        GetImpactRotation(casterPos, targetPos));
                 }
             }
 
@@ -162,7 +164,9 @@ namespace KD
                 foreach (BattleUnit target in targets)
                 {
                     if (target == null) continue;
-                    SpawnVfx(skill.impactVfxPrefab, GetUnitWorldPos(target), skill.vfxLifetime);
+                    Vector3 targetPos = GetUnitWorldPos(target);
+                    SpawnVfx(skill.impactVfxPrefab, targetPos, skill.vfxLifetime,
+                        GetImpactRotation(casterPos, targetPos));
                 }
             }
 
@@ -173,35 +177,18 @@ namespace KD
         // ── Pillar ───────────────────────────────────────────────────────────
         private IEnumerator PlayPillar(
             BattleUnit       caster,
-            List<BattleUnit> targets,
             List<Vector2Int> targetTiles,
             SkillData        skill,
             Action           onImpact)
         {
             PlaySfx(skill.castSfx);
+            SpawnCastVfxFixed(skill.castVfxPrefab, GetUnitWorldPos(caster), skill.vfxLifetime);
 
             if (skill.castDelay > 0f)
                 yield return new WaitForSeconds(skill.castDelay);
 
             onImpact?.Invoke();
-
-            if (skill.castVfxPrefab != null)
-            {
-                foreach (BattleUnit target in targets)
-                {
-                    if (target == null) continue;
-                    Vector3 pos = GetUnitWorldPos(target);
-                    pos.y = 0f;
-                    SpawnVfx(skill.castVfxPrefab, pos, skill.vfxLifetime);
-                }
-            }
-
-            if (skill.areaVfxPrefab != null && targetTiles != null)
-            {
-                foreach (Vector2Int tile in targetTiles)
-                    SpawnVfx(skill.areaVfxPrefab, GetTileWorldPos(tile), skill.vfxLifetime);
-            }
-
+            SpawnAreaVfxScaled(skill.areaVfxPrefab, targetTiles, skill.vfxLifetime);
             PlaySfx(skill.impactSfx);
 
             if (skill.endDelay > 0f)
@@ -216,24 +203,13 @@ namespace KD
             Action           onImpact)
         {
             PlaySfx(skill.castSfx);
+            SpawnCastVfxFixed(skill.castVfxPrefab, GetUnitWorldPos(caster), skill.vfxLifetime);
 
             if (skill.castDelay > 0f)
                 yield return new WaitForSeconds(skill.castDelay);
 
             onImpact?.Invoke();
-
-            if (skill.castVfxPrefab != null && targetTiles != null)
-            {
-                foreach (Vector2Int tile in targetTiles)
-                    SpawnVfx(skill.castVfxPrefab, GetTileWorldPos(tile), skill.vfxLifetime);
-            }
-
-            if (skill.areaVfxPrefab != null && targetTiles != null)
-            {
-                foreach (Vector2Int tile in targetTiles)
-                    SpawnVfx(skill.areaVfxPrefab, GetTileWorldPos(tile), skill.vfxLifetime);
-            }
-
+            SpawnAreaVfxScaled(skill.areaVfxPrefab, targetTiles, skill.vfxLifetime);
             PlaySfx(skill.impactSfx);
 
             if (skill.endDelay > 0f)
@@ -290,7 +266,9 @@ namespace KD
                 foreach (BattleUnit target in targets)
                 {
                     if (target == null) continue;
-                    SpawnVfx(skill.impactVfxPrefab, GetUnitWorldPos(target), skill.vfxLifetime);
+                    Vector3 targetPos = GetUnitWorldPos(target);
+                    SpawnVfx(skill.impactVfxPrefab, targetPos, skill.vfxLifetime,
+                        GetImpactRotation(droneSpawn, targetPos));
                 }
             }
 
@@ -330,10 +308,13 @@ namespace KD
 
             if (skill.impactVfxPrefab != null)
             {
+                Vector3 casterPos = GetUnitWorldPos(caster);
                 foreach (BattleUnit target in targets)
                 {
                     if (target == null) continue;
-                    SpawnVfx(skill.impactVfxPrefab, GetUnitWorldPos(target), skill.vfxLifetime);
+                    Vector3 targetPos = GetUnitWorldPos(target);
+                    SpawnVfx(skill.impactVfxPrefab, targetPos, skill.vfxLifetime,
+                        GetImpactRotation(casterPos, targetPos));
                 }
             }
 
@@ -469,6 +450,53 @@ namespace KD
             Vector3 pos = gridManager.GridToWorld(tile);
             pos.y += 0.1f;
             return pos;
+        }
+
+        // from → to 방향으로 Y축 회전 반환 (XZ 평면 투영)
+        private static Quaternion GetImpactRotation(Vector3 from, Vector3 to)
+        {
+            Vector3 dir = to - from;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 0.001f) return Quaternion.identity;
+            return Quaternion.LookRotation(dir.normalized);
+        }
+
+        // castVfxPrefab 전용 — 크기 고정, caster 위 y+1에 1개만 스폰
+        private void SpawnCastVfxFixed(GameObject prefab, Vector3 casterWorldPos, float lifetime)
+        {
+            if (prefab == null) return;
+            Vector3 pos = casterWorldPos;
+            pos.y += 1f;
+            GameObject vfx = Instantiate(prefab, pos, Quaternion.identity);
+            Destroy(vfx, lifetime);
+        }
+
+        // areaVfxPrefab 전용 — 타일 범위 중앙에 1개, 전체 타일 크기만큼 Scale 적용
+        private void SpawnAreaVfxScaled(GameObject prefab, List<Vector2Int> tiles, float lifetime)
+        {
+            if (prefab == null || tiles == null || tiles.Count == 0) return;
+
+            int minX = int.MaxValue, maxX = int.MinValue;
+            int minZ = int.MaxValue, maxZ = int.MinValue;
+            Vector3 centerWorld = Vector3.zero;
+
+            foreach (Vector2Int t in tiles)
+            {
+                if (t.x < minX) minX = t.x;
+                if (t.x > maxX) maxX = t.x;
+                if (t.y < minZ) minZ = t.y;
+                if (t.y > maxZ) maxZ = t.y;
+                centerWorld += GetTileWorldPos(t);
+            }
+            centerWorld /= tiles.Count;
+
+            int widthTiles = maxX - minX + 1;
+            int depthTiles = maxZ - minZ + 1;
+
+            GameObject vfx = Instantiate(prefab, centerWorld, Quaternion.identity);
+            Vector3 s = vfx.transform.localScale;
+            vfx.transform.localScale = new Vector3(s.x * widthTiles, s.y, s.z * depthTiles);
+            Destroy(vfx, lifetime);
         }
 
         private void SpawnVfx(GameObject prefab, Vector3 pos, float lifetime)

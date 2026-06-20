@@ -93,19 +93,20 @@ namespace KD
                     return null;
             }
 
+            SafetyType level = DangerLevelFromTileCount(tiles.Count);
+
             currentIntent = new EnemyIntent
             {
                 caster      = enemy,
                 skill       = step.skill,
                 warningTiles = tiles,
+                dangerLevel = level,
                 isTracking  = step.stepType == EnemyPatternStepType.Tracking,
                 sourceStep  = step,
                 trackedUnit = trackedUnit,
             };
 
-            SafetyType level = DangerLevelFromTileCount(currentIntent.warningTiles.Count);
-            gridManager.HighlightDangerTiles(currentIntent.warningTiles, level);
-
+            // 바닥 위험 표시는 매니저가 모든 적의 예고를 모아 일괄 렌더링한다 (RefreshEnemyTelegraphs).
             Debug.Log($"[EnemyIntentController] {enemy.Data.unitName} 예고({step.stepType}): {step.skill.skillName} / {currentIntent.warningTiles.Count}타일 ({level})");
             return currentIntent;
         }
@@ -149,7 +150,7 @@ namespace KD
                 SkillExecutor.Execute(caster, unitOnTile, skill);
             }
 
-            gridManager.ClearDangerHighlight();
+            // 바닥 위험 표시 정리는 매니저가 일괄 처리한다 (RefreshEnemyTelegraphs).
             currentIntent = null;
 
             Debug.Log($"[EnemyIntentController] {caster.Data.unitName} → {skill.skillName} 실행 완료");
