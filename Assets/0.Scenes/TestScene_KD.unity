@@ -535,7 +535,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b89db8b3b328f4d1d8fa01e52bcee472, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleScript
-  initiativeUIGameObject: {fileID: 0}
   mapOnlyMode: 1
   floorCubePrefab: {fileID: 3524589421705389157, guid: 6b859aa1b722b6e4789089657f5e4f89, type: 3}
   cubeSpacing: 1
