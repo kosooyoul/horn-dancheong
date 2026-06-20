@@ -1,12 +1,14 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System.Collections.Generic;
 
 public class MapTester : MonoBehaviour
 {
     [Header("맵 테스터")]
     [SerializeField] private BattleScript battleScript;
-    [SerializeField] private KeyCode nextMapKey = KeyCode.Space;
-    [SerializeField] private KeyCode prevMapKey = KeyCode.B;
+    // 프로젝트가 새 Input System 패키지(activeInputHandler=1)로 설정돼 있어 Key enum을 사용한다.
+    [SerializeField] private Key nextMapKey = Key.Space;
+    [SerializeField] private Key prevMapKey = Key.B;
     
     private List<string> availableMaps;
     private int currentMapIndex = 0;
@@ -24,12 +26,15 @@ public class MapTester : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(nextMapKey))
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null) return;
+
+        if (keyboard[nextMapKey].wasPressedThisFrame)
         {
             LoadNextMap();
         }
         
-        if (Input.GetKeyDown(prevMapKey))
+        if (keyboard[prevMapKey].wasPressedThisFrame)
         {
             LoadPreviousMap();
         }
