@@ -31,10 +31,10 @@ MonoBehaviour:
   castVfxPrefab: {fileID: 0}
   projectilePrefab: {fileID: 0}
   impactVfxPrefab: {fileID: 0}
-  areaVfxPrefab: {fileID: 1377279482138388, guid: 653866134638b354ca265558d783dd1d, type: 3}
+  areaVfxPrefab: {fileID: 358637981425055526, guid: 8eb503696b886e04faff8fc0f480d473, type: 3}
   castSfx: {fileID: 0}
   projectileSfx: {fileID: 0}
-  impactSfx: {fileID: 0}
+  impactSfx: {fileID: 8300000, guid: 03a05b2e8b6e79d42a75f090b01b24dd, type: 3}
   castDelay: 0
   impactDelay: 0
   endDelay: 0.3
@@ -44,4 +44,4 @@ MonoBehaviour:
   useCameraShake: 0
   shakeDuration: 0.2
   shakeMagnitude: 0.15
-  vfxLifetime: 3
+  vfxLifetime: 1
