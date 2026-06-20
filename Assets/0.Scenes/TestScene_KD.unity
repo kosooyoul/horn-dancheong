@@ -1261,7 +1261,7 @@ MonoBehaviour:
   gridManager: {fileID: 1047754881}
   deploymentRuleData: {fileID: 11400000, guid: a55b323690da77443b96cbacc758d31b, type: 2}
   enemyUnitDatas:
-  - {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
+  - {fileID: 11400000, guid: 559bfa6fc27f0405baf85c9f3d1dcc6f, type: 2}
   enemyStartPositions:
   - {x: 4, y: 4}
   enemyPatterns:
@@ -1285,6 +1285,10 @@ MonoBehaviour:
     level: 1
   - instanceId: 
     unitData: {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
+    equippedOptionalSkill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
+    level: 1
+  - instanceId: 
+    unitData: {fileID: 11400000, guid: b3ad62b287f1a45afa65504a9fac5068, type: 2}
     equippedOptionalSkill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
     level: 1
   selectedParty: []
