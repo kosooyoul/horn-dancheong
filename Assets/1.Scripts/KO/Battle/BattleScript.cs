@@ -136,6 +136,11 @@ public class BattleUnitEntry
         this.definition = definition;
         this.grid = grid;
         this.isEnemy = isEnemy;
+
+        // TODO: 에러 발생, 임시 주석 처리
+        // int guard = definition != null && definition.defaultStats != null ? definition.defaultStats.guard : 0;
+        // this._maxHp = guard > 0 ? guard * 10f : 100f;
+        // this._currentHp = this._maxHp;
     }
 
     // 빈 슬롯(정의 없음)은 스탯을 0으로 취급
@@ -165,6 +170,10 @@ public class BattleUnitEntry
 
 public class BattleScript : MonoBehaviour
 {
+    // [Header("UI Integration")]
+    // [SerializeField] private GameObject initiativeUIGameObject;
+    // private IInitiativeUI InitiativeUI;
+
     [Header("Battle Map Settings")]
     [SerializeField] private GameObject floorCubePrefab;
     [SerializeField] private float cubeSpacing = 1f;
@@ -231,6 +240,11 @@ public class BattleScript : MonoBehaviour
 
     void Start()
     {
+        // if (initiativeUIGameObject != null)
+        // {
+        //     InitiativeUI = initiativeUIGameObject.GetComponent<IInitiativeUI>();
+        // }
+
         LoadTileAndObjectDefinitions();
         LoadUnitDefinitions();
         LoadMapData();
