@@ -208,20 +208,17 @@ namespace HornDancheong.Seongwoo.UI
         {
             if (!_isDialogueActive || _currentItem == null) return;
 
-            // 1. 대화 종료 조건 확인
-            if (_currentItem.EndOfDialogue)
+            // 1. 대화 종료 조건 확인 (NextUI가 빈칸이 아니면 대화의 끝으로 간주하고 해당 UI를 활성화하며 종료)
+            if (!string.IsNullOrEmpty(_currentItem.NextUI))
             {
                 // 다음 UI 활성화 처리 (UIManager 연동)
-                if (!string.IsNullOrEmpty(_currentItem.NextUI))
+                if (UIManager.Instance != null)
                 {
-                    if (UIManager.Instance != null)
-                    {
-                        UIManager.Instance.ShowPanel(_currentItem.NextUI);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[DialogueDisplayer] UIManager.Instance가 없어서 NextUI '{_currentItem.NextUI}'를 켤 수 없습니다.");
-                    }
+                    UIManager.Instance.ShowPanel(_currentItem.NextUI);
+                }
+                else
+                {
+                    Debug.LogWarning($"[DialogueDisplayer] UIManager.Instance가 없어서 NextUI '{_currentItem.NextUI}'를 켤 수 없습니다.");
                 }
 
                 // 대화 패널 비활성화 및 상태 초기화
