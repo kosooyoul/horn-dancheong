@@ -3,8 +3,10 @@ using UnityEngine;
 [System.Serializable]
 public class SafetyVisualData
 {
-    [Header("Base")]
+    [Header("Albedo")]
     public Color BaseColor = Color.white;
+    public Color SubColor = Color.white;
+    public float ColorSwitchAlpha = 0.0f;
 
     [Header("Emission")]
     public Color TextureColor = Color.white;
