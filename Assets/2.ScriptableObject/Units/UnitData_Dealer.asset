@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: UnitData_Dealer
   m_EditorClassIdentifier: Assembly-CSharp::KD.UnitData
   unitId: 
-  unitName: "\uC724\uC194\uD558"
+  unitName: "\uC724\uC194"
   description: 
   icon: {fileID: 0}
   prefab: {fileID: 4430476179508750244, guid: b3d9376b1554a48d288cd1dcbe00b4a2, type: 3}
