@@ -323,6 +323,14 @@ namespace KD
             return mover != null && mover.IsMoving;
         }
 
+        /// <summary>유닛 비주얼의 UnitMover 반환. 파티클 회전 계산에 사용.</summary>
+        public UnitMover GetUnitMover(BattleUnit unit)
+        {
+            if (!visualByUnit.TryGetValue(unit, out GameObject visual) || visual == null)
+                return null;
+            return visual.GetComponent<UnitMover>();
+        }
+
         // ── 하이라이트 공개 API ───────────────────────────────────────────
 
         public void HighlightMoveTiles(List<MoveOption> moveOptions)
