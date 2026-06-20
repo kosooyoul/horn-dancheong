@@ -109,6 +109,8 @@ namespace KD
             deploymentController = new DeploymentController(deploymentRuleData, gridManager);
             deploymentController.BuildDeploymentArea(enemyUnits);
 
+            gridManager.InitializeCheckerboard();
+
             currentPhase = BattlePhase.Deployment;
             Debug.Log("[TacticalBattleManager] 배치 페이즈 시작");
         }
