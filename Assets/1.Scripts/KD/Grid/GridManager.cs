@@ -65,10 +65,11 @@ namespace KD
         // FloorCubeStater를 통해 SafetyType이 적용된 타일 (복원 시 Safe로 되돌릴 목록)
         private readonly HashSet<Vector2Int> activeStaterTiles = new HashSet<Vector2Int>();
 
-        // 하이라이트 이전 원본 색상 보존 (Renderer 키)
-        private readonly Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
+        // FloorCubeVisual을 통한 하이라이트 (체커 복원 포함)
+        private readonly HashSet<FloorCubeVisual> highlightedVisuals = new HashSet<FloorCubeVisual>();
 
-        // SG_FloorCubeSide 셰이더는 _Color 대신 _BaseColor를 사용 → MPB로 읽고 씀
+        // FloorCubeVisual 없는 타일 폴백 — Renderer 직접 접근
+        private readonly Dictionary<Renderer, Color> originalColors = new Dictionary<Renderer, Color>();
         private static readonly int BaseColorID = Shader.PropertyToID("_BaseColor");
         private MaterialPropertyBlock highlightMPB;
 
@@ -470,7 +471,12 @@ namespace KD
             }
             activeStaterTiles.Clear();
 
-            // 저장된 Renderer를 원본 색으로 복원 (MPB _BaseColor 경로)
+            // FloorCubeVisual 하이라이트 복원 (BaseColor + ColorSwitchAlpha)
+            foreach (FloorCubeVisual visual in highlightedVisuals)
+                if (visual != null) visual.ClearHighlight();
+            highlightedVisuals.Clear();
+
+            // 폴백 Renderer 복원
             foreach (var kvp in originalColors)
             {
                 if (kvp.Key != null)
@@ -527,6 +533,16 @@ namespace KD
         {
             GameObject go = GetFloorGameObject(tile);
             if (go == null) return;
+
+            FloorCubeVisual visual = go.GetComponentInChildren<FloorCubeVisual>(true);
+            if (visual != null)
+            {
+                visual.SetHighlight(color, highlightStrength);
+                highlightedVisuals.Add(visual);
+                return;
+            }
+
+            // FloorCubeVisual 없는 타일 폴백 — Renderer 직접 접근
             Renderer r = go.GetComponent<Renderer>();
             if (r == null) return;
 
@@ -551,6 +567,37 @@ namespace KD
             // 첫 접근 시 GridTile 자동 부착
             if (go != null) EnsureGridTile(tile, go);
             return go;
+        }
+
+        // ── 체커보드 초기화 ───────────────────────────────────────────────
+
+        /// <summary>mapProvider의 모든 타일에 (x+z)%2 기반 체커 오프셋을 설정한다.</summary>
+        public void InitializeCheckerboard()
+        {
+            if (mapProvider == null) return;
+
+            int w = mapProvider.MapWidth;
+            int h = mapProvider.MapHeight;
+            int count = 0;
+
+            for (int x = 0; x < w; x++)
+            {
+                for (int z = 0; z < h; z++)
+                {
+                    Vector2Int tile = new(x, z);
+                    GameObject go = mapProvider.GetFloorTile(tile);
+                    if (go == null) continue;
+
+                    FloorCubeVisual visual = go.GetComponentInChildren<FloorCubeVisual>(true);
+                    if (visual == null) continue;
+
+                    float offset = ((x + z) % 2 == 0) ? 0f : 1f;
+                    visual.SetCheckerAlphaOffset(offset);
+                    count++;
+                }
+            }
+
+            Debug.Log($"[GridManager] 체커보드 초기화 완료: {count}/{w * h}개 타일");
         }
 
         // ── 배치 프리뷰 ───────────────────────────────────────────────────

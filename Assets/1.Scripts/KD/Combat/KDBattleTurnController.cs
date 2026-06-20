@@ -97,7 +97,6 @@ namespace KD
             {
                 // 좌표는 항상 WorldToGrid로 계산 (GetComponentInParent 금지 — 공통 조상 오염 방지)
                 grid = gridManager.WorldToGrid(hit.point);
-                Debug.Log($"[KDBattleTurnController] Ray hit: '{hit.collider.gameObject.name}' at {hit.point} → grid={grid} valid={gridManager.IsValidTile(grid)}");
 
                 if (!gridManager.IsValidTile(grid)) return false;
 

@@ -52,4 +52,7 @@ public class BattleMapProvider : MonoBehaviour
         if (battleScript == null) return null;
         return battleScript.GetFloorCube(tile.x, tile.y);
     }
+
+    public int MapWidth  => battleScript != null ? battleScript.MapWidth  : 0;
+    public int MapHeight => battleScript != null ? battleScript.MapHeight : 0;
 }

@@ -216,6 +216,9 @@ public class BattleScript : MonoBehaviour
     private Transform objectMapParent;
     private int mapWidth;
     private int mapHeight;
+
+    public int MapWidth  => mapWidth;
+    public int MapHeight => mapHeight;
     private int[,] currentMapLayout;
     private MapData currentMapData;
     
