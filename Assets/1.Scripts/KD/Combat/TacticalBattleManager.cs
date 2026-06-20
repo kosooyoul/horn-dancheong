@@ -156,17 +156,29 @@ namespace KD
             {
                 if (deploymentController.TryPlaceUnit(unit, tile))
                 {
-                    gridManager.PlaceDeploymentPreview(unit, tile);
+                    // TryPlaceUnit 내부에서 기존 배치 자동 제거 — ghost도 새 위치로 이동
+                    gridManager.SetUnitGhost(unit, tile);
                     return true;
                 }
                 return false;
             }
             else
             {
+                OwnedUnit occupant = gridManager.GetGhostUnitAt(tile);
                 bool removed = deploymentController.TryRemovePlacement(tile);
-                if (removed) gridManager.ClearDeploymentPreview();
+                if (removed && occupant != null)
+                    gridManager.RemoveUnitGhost(occupant);
                 return removed;
             }
+        }
+
+        /// <summary>드래그로 고스트를 새 타일에 재배치. DeploymentDragController에서 호출.</summary>
+        public bool TryRedeployGhost(OwnedUnit unit, Vector2Int toTile)
+        {
+            if (currentPhase != BattlePhase.Deployment) return false;
+            if (!deploymentController.TryPlaceUnit(unit, toTile)) return false;
+            gridManager.SetUnitGhost(unit, toTile);
+            return true;
         }
 
         /// <summary>배치 확정 버튼 클릭.</summary>
@@ -181,7 +193,7 @@ namespace KD
             }
 
             gridManager.ClearDeploymentHighlight();
-            gridManager.ClearDeploymentPreview();
+            gridManager.ClearAllUnitGhosts();
 
             List<BattleUnit> units = battleSetup.CreatePlayerBattleUnits(deploymentController.Placements);
             foreach (BattleUnit unit in units)

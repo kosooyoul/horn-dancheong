@@ -35,8 +35,11 @@ namespace KD
         [Header("Unit Visuals")]
         [SerializeField] private GameObject defaultUnitMarkerPrefab;
         [SerializeField] private Transform  unitVisualParent;
-        [SerializeField] private float      unitMoveSpeed   = 6f;
+        [SerializeField] private float      unitMoveSpeed    = 6f;
         [SerializeField] private float      unitHeightOffset = 0.5f;
+
+        [Header("배치 프리뷰")]
+        [SerializeField] private Material ghostMaterial;
 
         [Header("Highlight Colors")]
         [SerializeField] private Color moveTileColor       = new Color(0.3f, 1f,  0.45f);
@@ -52,6 +55,10 @@ namespace KD
         private readonly Dictionary<Vector2Int, BattleUnit> unitByTile  = new Dictionary<Vector2Int, BattleUnit>();
         private readonly Dictionary<BattleUnit, Vector2Int> tileByUnit  = new Dictionary<BattleUnit, Vector2Int>();
         private readonly Dictionary<BattleUnit, GameObject> visualByUnit = new Dictionary<BattleUnit, GameObject>();
+
+        // OwnedUnit → (배치 타일, 고스트 GO) — 배치 확정 전까지 유지
+        private readonly Dictionary<OwnedUnit, (Vector2Int tile, GameObject go)> _placedGhosts
+            = new Dictionary<OwnedUnit, (Vector2Int tile, GameObject go)>();
 
         // 하이라이트 목록
         private readonly List<MoveOption>  currentMoveHighlights           = new List<MoveOption>();
@@ -587,18 +594,77 @@ namespace KD
             Debug.Log($"[GridManager] 체커보드 초기화 완료: {count}/{w * h}개 타일");
         }
 
-        // ── 배치 프리뷰 ───────────────────────────────────────────────────
+        // ── 배치 고스트 ───────────────────────────────────────────────────
 
-        public void PlaceDeploymentPreview(OwnedUnit ownedUnit, Vector2Int tile)
+        /// <summary>유닛 고스트를 해당 타일에 배치/이동. 기존 고스트가 있으면 위치만 갱신.</summary>
+        public void SetUnitGhost(OwnedUnit ownedUnit, Vector2Int tile)
         {
-            if (ownedUnit == null) return;
-            Debug.Log($"[GridManager] 배치 프리뷰: {ownedUnit.unitData.unitName} → {tile}");
-            // TODO: 배치 단계 프리뷰 오브젝트 표시
+            if (ownedUnit == null || ownedUnit.unitData == null) return;
+
+            Vector3 worldPos = GhostWorldPos(tile);
+
+            if (_placedGhosts.TryGetValue(ownedUnit, out var existing))
+            {
+                existing.go.transform.position = worldPos;
+                _placedGhosts[ownedUnit] = (tile, existing.go);
+                return;
+            }
+
+            GameObject prefab = ownedUnit.unitData.prefab;
+            if (prefab == null) return;
+
+            Transform  parent = unitVisualParent != null ? unitVisualParent : transform;
+            GameObject go     = Instantiate(prefab, worldPos, Quaternion.identity, parent);
+
+            foreach (UnitMover m in go.GetComponentsInChildren<UnitMover>())
+                m.enabled = false;
+
+            if (ghostMaterial != null)
+            {
+                foreach (Renderer r in go.GetComponentsInChildren<Renderer>(true))
+                {
+                    Material[] mats = new Material[r.sharedMaterials.Length];
+                    for (int i = 0; i < mats.Length; i++)
+                        mats[i] = ghostMaterial;
+                    r.materials = mats;
+                }
+            }
+
+            _placedGhosts[ownedUnit] = (tile, go);
         }
 
-        public void ClearDeploymentPreview()
+        /// <summary>특정 유닛 고스트 제거.</summary>
+        public void RemoveUnitGhost(OwnedUnit ownedUnit)
         {
-            // TODO: 배치 프리뷰 오브젝트 제거
+            if (!_placedGhosts.TryGetValue(ownedUnit, out var entry)) return;
+            if (entry.go != null) Destroy(entry.go);
+            _placedGhosts.Remove(ownedUnit);
+        }
+
+        /// <summary>모든 고스트 제거 (배치 취소 또는 전투 시작 시).</summary>
+        public void ClearAllUnitGhosts()
+        {
+            foreach (var entry in _placedGhosts.Values)
+                if (entry.go != null) Destroy(entry.go);
+            _placedGhosts.Clear();
+        }
+
+        /// <summary>해당 타일에 고스트가 있는 OwnedUnit 반환. 없으면 null.</summary>
+        public OwnedUnit GetGhostUnitAt(Vector2Int tile)
+        {
+            foreach (var kvp in _placedGhosts)
+                if (kvp.Value.tile == tile) return kvp.Key;
+            return null;
+        }
+
+        /// <summary>전투 시작 시 실제 배치에 사용할 전체 고스트 목록.</summary>
+        public IReadOnlyDictionary<OwnedUnit, (Vector2Int tile, GameObject go)> PlacedGhosts => _placedGhosts;
+
+        private Vector3 GhostWorldPos(Vector2Int tile)
+        {
+            Vector3 p = GridToWorld(tile);
+            p.y += unitHeightOffset;
+            return p;
         }
     }
 }
