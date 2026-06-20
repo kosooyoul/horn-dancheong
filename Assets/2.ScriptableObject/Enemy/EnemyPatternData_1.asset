@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11c3ae9f274c6f04580dab44136ddc1d, type: 3}
+  m_Name: EnemyPatternData_1
+  m_EditorClassIdentifier: Assembly-CSharp::KD.EnemyPatternData
+  steps:
+  - skill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
+    targetTiles:
+    - {x: 3, y: 3}

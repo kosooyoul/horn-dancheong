@@ -119,70 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &640282636
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 640282639}
-  - component: {fileID: 640282638}
-  - component: {fileID: 640282637}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &640282637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 640282636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6946e61d66b21924994c6dad234fb961, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KD.RosterSmokeTest
-  rosterManager: {fileID: 640282638}
-  skillDatabase: {fileID: 11400000, guid: c5c46850e2dc8244480c9e64feec75bf, type: 2}
-  testUnitData: {fileID: 11400000, guid: 258a8454f9a0d594694a1fe63dfc0812, type: 2}
-  testStartPositions:
-  - {x: 1, y: 1}
---- !u!114 &640282638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 640282636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7c886a020df5b174689b3fe5900852c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KD.PlayerRosterManager
-  ownedUnits: []
-  selectedParty: []
---- !u!4 &640282639
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 640282636}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -42.2282, y: 0, z: 30.06924}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &818491962
 GameObject:
   m_ObjectHideFlags: 0
@@ -321,6 +257,7 @@ GameObject:
   - component: {fileID: 1029839484}
   - component: {fileID: 1029839483}
   - component: {fileID: 1029839482}
+  - component: {fileID: 1029839485}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -402,10 +339,247 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1029839485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1029839481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
+--- !u!1 &1047754877
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1047754882}
+  - component: {fileID: 1047754881}
+  - component: {fileID: 1047754880}
+  - component: {fileID: 1047754879}
+  - component: {fileID: 1047754878}
+  m_Layer: 0
+  m_Name: System
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1047754878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047754877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8324cab03de38ff40a8eed0c62adfbaf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KD.KDBattleTurnController
+  gridManager: {fileID: 1047754881}
+  battleManager: {fileID: 1047754879}
+  battleCamera: {fileID: 1029839483}
+  actionMenuWidth: 150
+--- !u!114 &1047754879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047754877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 439751bac3ed5ec4f97da5b1bd7ee6bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KD.TacticalBattleManager
+  rosterManager: {fileID: 1047754880}
+  gridManager: {fileID: 1047754881}
+  deploymentRuleData: {fileID: 11400000, guid: a55b323690da77443b96cbacc758d31b, type: 2}
+  enemyUnitDatas:
+  - {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
+  enemyStartPositions:
+  - {x: 4, y: 4}
+  enemyPatterns:
+  - {fileID: 11400000, guid: 502eb7cc480f06d4da3b2a267e68d99b, type: 2}
+--- !u!114 &1047754880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047754877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c886a020df5b174689b3fe5900852c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KD.PlayerRosterManager
+  ownedUnits:
+  - instanceId: 
+    unitData: {fileID: 11400000, guid: 258a8454f9a0d594694a1fe63dfc0812, type: 2}
+    equippedOptionalSkill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
+    level: 1
+  selectedParty: []
+--- !u!114 &1047754881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047754877}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38ee97062a3adef4ea3867b2a2dd86bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::KD.GridManager
+  mapProvider: {fileID: 1155594486}
+  width: 7
+  height: 7
+  cellSize: 1
+  fixedWorldY: 0
+  wallTiles:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  defaultUnitMarkerPrefab: {fileID: 0}
+  unitVisualParent: {fileID: 0}
+  unitMoveSpeed: 6
+  unitHeightOffset: 0.5
+  moveTileColor: {r: 0.3, g: 1, b: 0.45, a: 1}
+  skillTileColor: {r: 1, g: 0.9, b: 0.2, a: 1}
+  dangerTileColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  deployableTileColor: {r: 0.2, g: 0.6, b: 1, a: 1}
+  blockedDeployColor: {r: 0.9, g: 0.3, b: 0.1, a: 1}
+  highlightStrength: 0.55
+--- !u!4 &1047754882
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047754877}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1155594484
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1155594487}
+  - component: {fileID: 1155594486}
+  - component: {fileID: 1155594485}
+  m_Layer: 0
+  m_Name: BattleMap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1155594485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155594484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b89db8b3b328f4d1d8fa01e52bcee472, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleScript
+  initiativeUIGameObject: {fileID: 0}
+  mapOnlyMode: 1
+  floorCubePrefab: {fileID: 3524589421705389157, guid: 6b859aa1b722b6e4789089657f5e4f89, type: 3}
+  cubeSpacing: 1
+  mapFolderPath: Assets/1.Scripts/KO/Battle/MapData/
+  defaultMapName: basic_10x10
+  loadFromJSON: 1
+  autoFillAllySpawns: 1
+  unitMarkerSize: {x: 0.6, y: 1, z: 0.6}
+  allyColor: {r: 0.2, g: 0.4, b: 1, a: 1}
+  enemyColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  unitMoveSpeed: 6
+--- !u!114 &1155594486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155594484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b4e4eb37f5713246b94be1384eccecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleMapProvider
+  battleScript: {fileID: 1155594485}
+--- !u!4 &1155594487
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155594484}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1029839484}
   - {fileID: 818491964}
-  - {fileID: 640282639}
+  - {fileID: 1047754882}
+  - {fileID: 1155594487}

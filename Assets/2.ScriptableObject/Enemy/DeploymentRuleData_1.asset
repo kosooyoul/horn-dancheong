@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a13d1b3d3b70a7a42a9f9bb1febcec3f, type: 3}
+  m_Name: DeploymentRuleData_1
+  m_EditorClassIdentifier: Assembly-CSharp::KD.DeploymentRuleData
+  candidateDeployTiles:
+  - {x: 4, y: 4}
+  forbiddenPatternFromEnemy: {fileID: 11400000, guid: f956f962c5378094a9106d136f3ba942, type: 2}
+  maxDeployCount: 4
