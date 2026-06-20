@@ -269,8 +269,21 @@ namespace KD
             Vector3 worldPos  = GridToWorld(targetPos);
             worldPos.y += unitHeightOffset;
             UnitMover mover = visual.GetComponent<UnitMover>();
-            if (mover != null) mover.MoveTo(worldPos);
-            else visual.transform.position = worldPos;
+            if (mover != null) 
+            {
+                mover.MoveTo(worldPos);
+                // 이동 방향 계산하여 캐릭터가 그 방향을 바라보도록 설정
+                Vector3 currentWorldPos = visual.transform.position;
+                Vector3 moveDirection = worldPos - currentWorldPos;
+                if (moveDirection.sqrMagnitude > 0.001f)
+                {
+                    mover.LookTowards(moveDirection);
+                }
+            }
+            else 
+            {
+                visual.transform.position = worldPos;
+            }
 
             Debug.Log($"[GridManager] 이동: {unit.Data.unitName} → {targetPos} / AP: {unit.CurrentAP}");
             return true;

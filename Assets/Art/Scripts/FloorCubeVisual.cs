@@ -37,6 +37,12 @@ public class FloorCubeVisual : MonoBehaviour
     private static readonly int BaseColorID =
         Shader.PropertyToID("_BaseColor");
 
+    private static readonly int SubColorID =
+        Shader.PropertyToID("_SubColor");
+
+    private static readonly int ColorSwitchAlphaID =
+        Shader.PropertyToID("_ColorSwitchAlpha");
+
     private static readonly int TextureColorID =
         Shader.PropertyToID("_TextureColor");
 
@@ -66,7 +72,9 @@ public class FloorCubeVisual : MonoBehaviour
 
     private void Start()
     {
-        ApplyData(GetVisualData(stater.CurrentSafety));
+        ApplyData(
+            GetVisualData(
+                stater.CurrentSafety));
     }
 
     private void HandleSafetyChanged(
@@ -75,13 +83,15 @@ public class FloorCubeVisual : MonoBehaviour
     {
         if (transitionCoroutine != null)
         {
-            StopCoroutine(transitionCoroutine);
+            StopCoroutine(
+                transitionCoroutine);
         }
 
-        transitionCoroutine = StartCoroutine(
-            TransitionCoroutine(
-                GetVisualData(oldState),
-                GetVisualData(newState)));
+        transitionCoroutine =
+            StartCoroutine(
+                TransitionCoroutine(
+                    GetVisualData(oldState),
+                    GetVisualData(newState)));
     }
 
     private SafetyVisualData GetVisualData(
@@ -126,9 +136,13 @@ public class FloorCubeVisual : MonoBehaviour
             elapsed += Time.deltaTime;
 
             float t =
-                Mathf.Clamp01(elapsed / transitionTime);
+                Mathf.Clamp01(
+                    elapsed / transitionTime);
 
-            ApplyInterpolatedData(from, to, t);
+            ApplyInterpolatedData(
+                from,
+                to,
+                t);
 
             if (maskChanged &&
                 !swappedMask &&
@@ -149,9 +163,9 @@ public class FloorCubeVisual : MonoBehaviour
     }
 
     private void ApplyInterpolatedData(
-    SafetyVisualData from,
-    SafetyVisualData to,
-    float t)
+        SafetyVisualData from,
+        SafetyVisualData to,
+        float t)
     {
         targetRenderer.GetPropertyBlock(mpb);
 
@@ -160,6 +174,20 @@ public class FloorCubeVisual : MonoBehaviour
             Color.Lerp(
                 from.BaseColor,
                 to.BaseColor,
+                t));
+
+        mpb.SetColor(
+            SubColorID,
+            Color.Lerp(
+                from.SubColor,
+                to.SubColor,
+                t));
+
+        mpb.SetFloat(
+            ColorSwitchAlphaID,
+            Mathf.Lerp(
+                from.ColorSwitchAlpha,
+                to.ColorSwitchAlpha,
                 t));
 
         mpb.SetColor(
@@ -193,6 +221,14 @@ public class FloorCubeVisual : MonoBehaviour
             data.BaseColor);
 
         mpb.SetColor(
+            SubColorID,
+            data.SubColor);
+
+        mpb.SetFloat(
+            ColorSwitchAlphaID,
+            data.ColorSwitchAlpha);
+
+        mpb.SetColor(
             TextureColorID,
             data.TextureColor);
 
@@ -218,4 +254,5 @@ public class FloorCubeVisual : MonoBehaviour
 
         targetRenderer.SetPropertyBlock(mpb);
     }
+
 }
