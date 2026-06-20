@@ -21,7 +21,7 @@ MonoBehaviour:
   attribute: 0
   weaponType: 0
   movementType: 0
-  moveAPCost: 30
+  moveAPCost: 10
   baseStats:
     agility: 1
     spirit: 1

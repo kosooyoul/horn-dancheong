@@ -138,7 +138,7 @@ namespace KD
                     // 스폰 즉시 타겟 방향을 바라보도록 — 첫 프레임 파티클이 대각선으로 튀는 현상 방지
                     Vector3    toDir     = targetPos - casterPos;
                     Quaternion spawnRot  = toDir.sqrMagnitude > 0.001f
-                        ? Quaternion.LookRotation(toDir.normalized)
+                        ? Quaternion.LookRotation(-toDir.normalized)
                         : casterRot;
 
                     GameObject proj = Instantiate(skill.projectilePrefab, casterPos, spawnRot);
@@ -394,7 +394,7 @@ namespace KD
 
                 Vector3 dir = to - from;
                 if (dir.sqrMagnitude > 0.001f)
-                    proj.transform.rotation = Quaternion.LookRotation(dir.normalized);
+                    proj.transform.rotation = Quaternion.LookRotation(-dir.normalized);
 
                 yield return null;
             }
