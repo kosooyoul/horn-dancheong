@@ -15,12 +15,15 @@ namespace KD
     ///                    동시에 다음 턴에 실행할 행동을 예고(바닥 danger 하이라이트)한다. (RunEnemyTurn)
     ///   - 애니메이션  → GridManager 각 TODO 위치에 추가
     /// </summary>
-    public class TacticalBattleManager : MonoBehaviour
+    public class TacticalBattleManager : MonoBehaviour, HornDancheong.Seongwoo.UI.ICombatInteractionController
     {
         [Header("References")]
         [SerializeField] private PlayerRosterManager rosterManager;
         [SerializeField] private GridManager         gridManager;
         [SerializeField] private SkillActionRunner   skillActionRunner;
+
+        [Header("UI References")]
+        [SerializeField] private HornDancheong.Seongwoo.UI.CombatInteractionUIManager combatUIManager;
 
         [Header("Deployment")]
         [SerializeField] private DeploymentRuleData deploymentRuleData;
@@ -242,6 +245,12 @@ namespace KD
                 selectedUnit = current;
                 currentActionMode = BattleActionMode.None;
                 Debug.Log($"[TacticalBattleManager] 플레이어 턴: {current.Data.unitName} / AP: {current.CurrentAP}");
+
+                // UI 연동 및 표시
+                if (combatUIManager != null)
+                {
+                    combatUIManager.Initialize(new HornDancheong.Seongwoo.UI.BattleUnitAdapter(current, true), this);
+                }
             }
             else
             {
@@ -353,6 +362,9 @@ namespace KD
             if (currentPhase != BattlePhase.PlayerPhase) return;
             if (skillActionRunner != null && skillActionRunner.IsRunning) return;
 
+            // 경고 창이 활성화되어 3초 지연 대기 상태일 때는 타일 조작 클릭 무시
+            if (combatUIManager != null && combatUIManager.IsWarningActive) return;
+
             switch (currentActionMode)
             {
                 case BattleActionMode.Move:  TryMoveSelectedUnit(tile);  break;
@@ -394,18 +406,36 @@ namespace KD
 
         private void TryUseSelectedSkill(Vector2Int tile)
         {
-            if (!skillRangePreview.Contains(tile)) { Debug.Log("[TacticalBattleManager] 스킬 범위 밖"); return; }
+            // 1. 사거리 체크
+            if (!skillRangePreview.Contains(tile))
+            {
+                Debug.Log("[TacticalBattleManager] 스킬 범위 밖");
+                TriggerSkillFailureWarning("사거리 밖입니다.");
+                return;
+            }
 
-            if (selectedUnit.GetCooldown(selectedSkill.skillId) > 0) { Debug.Log("[TacticalBattleManager] 스킬 쿨타임"); return; }
-            if (!selectedUnit.HasEnoughAP(selectedSkill.apCost))     { Debug.Log("[TacticalBattleManager] AP 부족"); return; }
+            if (selectedUnit.GetCooldown(selectedSkill.skillId) > 0)
+            {
+                Debug.Log("[TacticalBattleManager] 스킬 쿨타임");
+                TriggerSkillFailureWarning("스킬이 쿨타임 중입니다.");
+                return;
+            }
+            if (!selectedUnit.HasEnoughAP(selectedSkill.apCost))
+            {
+                Debug.Log("[TacticalBattleManager] AP 부족");
+                TriggerSkillFailureWarning("AP가 부족합니다.");
+                return;
+            }
 
             List<BattleUnit>  targets     = CollectSkillTargets();
             List<Vector2Int>  targetTiles = new(skillRangePreview.CurrentRange);
             SkillData         skill       = selectedSkill;
 
+            // 2. 대상 존재 여부 체크
             if (targets.Count == 0 && skill.targetType != TargetType.Tile)
             {
                 Debug.Log("[TacticalBattleManager] 유효한 대상 없음");
+                TriggerSkillFailureWarning("유효한 대상이 없습니다.");
                 return;
             }
 
@@ -420,6 +450,26 @@ namespace KD
                 else if (targets.Count > 1)
                     SkillExecutor.ExecuteArea(selectedUnit, targets, skill);
                 OnSkillComplete();
+            }
+        }
+
+        private void TriggerSkillFailureWarning(string message)
+        {
+            // 타겟팅 및 타일 하이라이트를 즉시 정리합니다.
+            gridManager.ClearHighlight();
+            skillRangePreview.Clear();
+
+            if (combatUIManager != null)
+            {
+                // 3초간 경고 메시지 출력 후 행동 취소 및 UI 복구 수행
+                combatUIManager.ShowWarningMessage(message, () => {
+                    CancelCurrentAction();
+                    combatUIManager.ShowActionMenu(); // 3초 뒤에 경고창이 사라지면 액션 메뉴로 명시적 복구
+                });
+            }
+            else
+            {
+                CancelCurrentAction();
             }
         }
 
@@ -479,6 +529,12 @@ namespace KD
             skillRangePreview.Clear();
             gridManager.ClearHighlight();
 
+            // UI를 액션 메뉴 초기 상태로 복구
+            if (combatUIManager != null)
+            {
+                combatUIManager.ShowActionMenu();
+            }
+
             if (CheckBattleEnd()) return;
 
             turnIndex++;
@@ -516,6 +572,55 @@ namespace KD
                 return true;
             }
             return false;
+        }
+
+        // ── ICombatInteractionController 인터페이스 구현 ──
+
+        public bool IsMoveModeActive => currentActionMode == BattleActionMode.Move;
+
+        public void SetMoveMode(bool active)
+        {
+            if (active)
+            {
+                SelectMoveAction();
+            }
+            else
+            {
+                CancelCurrentAction();
+            }
+        }
+
+        public void ExecuteSkill(string skillId)
+        {
+            if (selectedUnit == null) return;
+
+            SkillData skillToUse = null;
+            if (selectedUnit.Data.uniqueSkill1 != null && selectedUnit.Data.uniqueSkill1.skillId == skillId)
+            {
+                skillToUse = selectedUnit.Data.uniqueSkill1;
+            }
+            else if (selectedUnit.Data.uniqueSkill2 != null && selectedUnit.Data.uniqueSkill2.skillId == skillId)
+            {
+                skillToUse = selectedUnit.Data.uniqueSkill2;
+            }
+            else if (selectedUnit.EquippedOptionalSkill != null && selectedUnit.EquippedOptionalSkill.skillId == skillId)
+            {
+                skillToUse = selectedUnit.EquippedOptionalSkill;
+            }
+
+            if (skillToUse != null)
+            {
+                SelectSkillAction(skillToUse);
+            }
+            else
+            {
+                Debug.LogWarning($"[TacticalBattleManager] ID가 '{skillId}'인 스킬을 유닛의 보유 스킬에서 찾을 수 없습니다.");
+            }
+        }
+
+        public void ExecuteWait()
+        {
+            WaitSelectedUnit();
         }
     }
 }

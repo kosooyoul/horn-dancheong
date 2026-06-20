@@ -151,6 +151,20 @@ namespace HornDancheong.Seongwoo.UI
             EditorGUILayout.Space(15);
             EditorGUILayout.LabelField("3. 컨트롤러 피드백 상태 모니터링", EditorStyles.miniBoldLabel);
             EditorGUILayout.LabelField($"이동 모드 상태 (IsMoveModeActive): {IsMoveModeActive}");
+
+            // 트랜지션 컴포넌트 감지 및 테스트 기능 제공
+            var transition = manager.GetComponent<CombatInteractionPanelTransition>();
+            if (transition != null)
+            {
+                EditorGUILayout.Space(15);
+                EditorGUILayout.LabelField("4. 패널 트랜지션 테스트 (Panel Transition)", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField($"현재 플레이어 턴 활성 여부: {transition.IsPlayerTurnActive}");
+                
+                if (GUILayout.Button(transition.IsPlayerTurnActive ? "턴 비활성화 (Slide Out)" : "턴 활성화 (Slide In)"))
+                {
+                    transition.SetPlayerTurnActive(!transition.IsPlayerTurnActive);
+                }
+            }
         }
 
         // ── ICombatInteractionController 인터페이스 구현 ──
