@@ -64,8 +64,8 @@ namespace KD
 
         private bool CanDrop(Vector2Int tile)
         {
-            if (!gridManager.CurrentDeployableHighlights.Contains(tile))
-                return false;
+            // if (!gridManager.CurrentDeployableHighlights.Contains(tile))
+            //     return false;
 
             OwnedUnit occupant = gridManager.GetGhostUnitAt(tile);
             return occupant == null || occupant == _dragging;
