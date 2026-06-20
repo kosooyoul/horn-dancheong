@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 653b2ffd0f03f3842ac2a0f3c8cd3352, type: 3}
+  m_Name: DialogueTable
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueTable
+  Sheet1:
+  - DialogueIndex: 1
+    CharacterName: "\uC804\uC0AC"
+    DialogueText: "\uC548\uB155\uD558\uC138\uC694."
+    LeftPortrait: Portrait1.png
+    CenterPortrait: 
+    RightPortrait: 
+    BackgroundImage: BG1
+    NextUI: 
+  - DialogueIndex: 2
+    CharacterName: "\uAD81\uC218"
+    DialogueText: "\uBC18\uAC11\uC2B5\uB2C8\uB2E4."
+    LeftPortrait: Portrait1.png
+    CenterPortrait: 
+    RightPortrait: Portrait2.png
+    BackgroundImage: 
+    NextUI: 
+  - DialogueIndex: 3
+    CharacterName: "\uC804\uC0AC"
+    DialogueText: "\uC5B4\uB514 \uAC00\uC138\uC694?"
+    LeftPortrait: 
+    CenterPortrait: 
+    RightPortrait: 
+    BackgroundImage: BG1
+    NextUI: 
+  - DialogueIndex: 4
+    CharacterName: "\uAD81\uC218"
+    DialogueText: "\uB358\uC804\uC5D0 \uC0AC\uB0E5\uD558\uB7EC \uAC11\uB2C8\uB2E4."
+    LeftPortrait: 
+    CenterPortrait: 
+    RightPortrait: 
+    BackgroundImage: BG1
+    NextUI: Panel_MainMenu
+  - DialogueIndex: 5
+    CharacterName: "\uAD81\uC218"
+    DialogueText: "\uB450 \uBC88\uC9F8 \uB300\uD654\uC785\uB2C8\uB2E4."
+    LeftPortrait: 
+    CenterPortrait: 
+    RightPortrait: 
+    BackgroundImage: 
+    NextUI: 
