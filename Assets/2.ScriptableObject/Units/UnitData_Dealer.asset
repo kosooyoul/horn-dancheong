@@ -27,6 +27,6 @@ MonoBehaviour:
     spirit: 5
     guard: 5
     luck: 5
-  uniqueSkill1: {fileID: 11400000, guid: a0abaca71ff37674aafb1f973e730186, type: 2}
+  uniqueSkill1: {fileID: 11400000, guid: 338baf2f887963d4f94adf6dbfc19d78, type: 2}
   uniqueSkill2: {fileID: 11400000, guid: 8e4ff1d1ac549ac4c9e8c758c8f07f4f, type: 2}
   uniqueSkill3: {fileID: 11400000, guid: a0abaca71ff37674aafb1f973e730186, type: 2}

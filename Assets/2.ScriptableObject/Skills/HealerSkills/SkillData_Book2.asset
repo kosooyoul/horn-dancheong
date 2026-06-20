@@ -23,16 +23,16 @@ MonoBehaviour:
   targetPattern: {fileID: 11400000, guid: 44d48e7b13b07ee488039b760c63656a, type: 2}
   apCost: 20
   cooldown: 2
-  effectType: 0
+  effectType: 1
   attribute: 2
   skillCoefficient: 1
   scale: 0
   damageReductionValue: 0
   fxType: 4
-  castVfxPrefab: {fileID: 0}
+  castVfxPrefab: {fileID: 7077073274749413061, guid: f86b6169130782e4495812dd1c453f87, type: 3}
   projectilePrefab: {fileID: 0}
   impactVfxPrefab: {fileID: 0}
-  areaVfxPrefab: {fileID: 0}
+  areaVfxPrefab: {fileID: 1374770465800164, guid: d0e33492ce1ba064291b3ff95ce32e4e, type: 3}
   castSfx: {fileID: 0}
   projectileSfx: {fileID: 0}
   impactSfx: {fileID: 0}

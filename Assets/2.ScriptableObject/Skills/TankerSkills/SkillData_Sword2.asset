@@ -28,11 +28,11 @@ MonoBehaviour:
   skillCoefficient: 1
   scale: 1
   damageReductionValue: 0.7
-  fxType: 6
+  fxType: 4
   castVfxPrefab: {fileID: 0}
   projectilePrefab: {fileID: 0}
   impactVfxPrefab: {fileID: 0}
-  areaVfxPrefab: {fileID: 0}
+  areaVfxPrefab: {fileID: 1951465474858694, guid: f61a463d2bbcb974cbc52cc78089f173, type: 3}
   castSfx: {fileID: 0}
   projectileSfx: {fileID: 0}
   impactSfx: {fileID: 0}

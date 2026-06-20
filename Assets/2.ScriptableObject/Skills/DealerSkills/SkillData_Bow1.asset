@@ -30,7 +30,7 @@ MonoBehaviour:
   damageReductionValue: 0
   fxType: 2
   castVfxPrefab: {fileID: 0}
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 919132149155446097, guid: 5013c59eff5510b47ae30b45e483fff1, type: 3}
   impactVfxPrefab: {fileID: 0}
   areaVfxPrefab: {fileID: 0}
   castSfx: {fileID: 0}
