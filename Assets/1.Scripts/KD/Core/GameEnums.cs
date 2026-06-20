@@ -88,4 +88,26 @@ namespace KD
     {
         Small, Medium, Large, Xlarge
     }
+
+    // 스킬 연출 방식 — SimpleSkillFxPlayer에서 이 타입으로 연출 분기
+    //
+    // SlashBeam     : 시전자 위에 검기(띠 모양)가 나타났다 사라짐 (탱커 일반/단일, 도깨비 일반)
+    // Projectile    : 시전자 → 대상으로 오브젝트가 날아감 (딜러 일반·단일·광역, 힐러 일반)
+    // Pillar        : 타겟 타일 바닥에서 빛기둥이 솟아오름 (탱커 피해감소 / 힐러 광역회복)
+    // AreaRise      : 타일 전체에 땅·먼지 효과 (딜러 광역, 도깨비 광역)
+    // DroneDeliver  : 드론이 하늘에서 등장 후 아이템 투하 (힐러 부활)
+    // Lightning     : 하늘에서 번개가 대상에게 내리꽂힘 (도깨비 단일)
+    // DustShockwave : 시전자 주변 먼지+카메라 진동 (도깨비 전체 공격)
+    // None          : 연출 없음 (폴백)
+    public enum SkillFxType
+    {
+        None,
+        SlashBeam,
+        Projectile,
+        Pillar,
+        AreaRise,
+        DroneDeliver,
+        Lightning,
+        DustShockwave
+    }
 }

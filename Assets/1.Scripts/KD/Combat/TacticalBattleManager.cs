@@ -19,6 +19,7 @@ namespace KD
         [Header("References")]
         [SerializeField] private PlayerRosterManager rosterManager;
         [SerializeField] private GridManager         gridManager;
+        [SerializeField] private SkillActionRunner   skillActionRunner;
 
         [Header("Deployment")]
         [SerializeField] private DeploymentRuleData deploymentRuleData;
@@ -309,6 +310,7 @@ namespace KD
         public void OnTileClicked(Vector2Int tile)
         {
             if (currentPhase != BattlePhase.PlayerPhase) return;
+            if (skillActionRunner != null && skillActionRunner.IsRunning) return;
 
             switch (currentActionMode)
             {
@@ -353,14 +355,59 @@ namespace KD
         {
             if (!skillRangePreview.Contains(tile)) { Debug.Log("[TacticalBattleManager] 스킬 범위 밖"); return; }
 
-            BattleUnit target = selectedSkill.targetType == TargetType.Self
-                ? selectedUnit
-                : gridManager.GetUnitAt(tile);
+            if (selectedUnit.GetCooldown(selectedSkill.skillId) > 0) { Debug.Log("[TacticalBattleManager] 스킬 쿨타임"); return; }
+            if (!selectedUnit.HasEnoughAP(selectedSkill.apCost))     { Debug.Log("[TacticalBattleManager] AP 부족"); return; }
 
-            if (target == null && selectedSkill.targetType != TargetType.Tile) { Debug.Log("[TacticalBattleManager] 대상 없음"); return; }
-            if (!SkillExecutor.Execute(selectedUnit, target, selectedSkill))   { Debug.Log("[TacticalBattleManager] 스킬 실행 실패"); return; }
+            List<BattleUnit>  targets     = CollectSkillTargets();
+            List<Vector2Int>  targetTiles = new(skillRangePreview.CurrentRange);
+            SkillData         skill       = selectedSkill;
 
-            Debug.Log($"[TacticalBattleManager] 스킬 완료: {selectedSkill.skillName}");
+            if (targets.Count == 0 && skill.targetType != TargetType.Tile)
+            {
+                Debug.Log("[TacticalBattleManager] 유효한 대상 없음");
+                return;
+            }
+
+            if (skillActionRunner != null)
+            {
+                skillActionRunner.StartUseSkill(selectedUnit, targets, targetTiles, skill, OnSkillComplete);
+            }
+            else
+            {
+                if (targets.Count == 1)
+                    SkillExecutor.Execute(selectedUnit, targets[0], skill);
+                else if (targets.Count > 1)
+                    SkillExecutor.ExecuteArea(selectedUnit, targets, skill);
+                OnSkillComplete();
+            }
+        }
+
+        private List<BattleUnit> CollectSkillTargets()
+        {
+            var result = new List<BattleUnit>();
+
+            if (selectedSkill.targetType == TargetType.Self)
+            {
+                result.Add(selectedUnit);
+                return result;
+            }
+
+            foreach (Vector2Int t in skillRangePreview.CurrentRange)
+            {
+                BattleUnit u = gridManager.GetUnitAt(t);
+                if (u == null || !u.IsAlive) continue;
+
+                if      (selectedSkill.targetType == TargetType.Enemy   && u.TeamId != selectedUnit.TeamId) result.Add(u);
+                else if (selectedSkill.targetType == TargetType.Ally    && u.TeamId == selectedUnit.TeamId) result.Add(u);
+                else if (selectedSkill.targetType == TargetType.AnyUnit) result.Add(u);
+            }
+
+            return result;
+        }
+
+        private void OnSkillComplete()
+        {
+            Debug.Log("[TacticalBattleManager] 스킬 완료");
             EndCurrentTurn();
         }
 
