@@ -14,14 +14,11 @@ namespace KD
     ///   - 적 예고 연출 → PrepareEnemyTurn() 호출 후 연출 재생, 완료 시 ExecuteEnemyTurn() 호출
     ///   - 애니메이션  → GridManager 각 TODO 위치에 추가
     /// </summary>
-    public class TacticalBattleManager : MonoBehaviour, HornDancheong.Seongwoo.UI.ICombatInteractionController
+    public class TacticalBattleManager : MonoBehaviour
     {
         [Header("References")]
         [SerializeField] private PlayerRosterManager rosterManager;
         [SerializeField] private GridManager         gridManager;
-
-        [Header("UI References")]
-        [SerializeField] private HornDancheong.Seongwoo.UI.CombatInteractionUIManager combatUIManager;
         [SerializeField] private SkillActionRunner   skillActionRunner;
 
         [Header("Deployment")]
@@ -244,12 +241,6 @@ namespace KD
                 selectedUnit = current;
                 currentActionMode = BattleActionMode.None;
                 Debug.Log($"[TacticalBattleManager] 플레이어 턴: {current.Data.unitName} / AP: {current.CurrentAP}");
-
-                // UI 갱신 및 표시
-                if (combatUIManager != null)
-                {
-                    combatUIManager.Initialize(new HornDancheong.Seongwoo.UI.BattleUnitAdapter(current, true), this);
-                }
             }
             else
             {
@@ -359,12 +350,6 @@ namespace KD
             skillRangePreview.Clear();
             gridManager.ClearHighlight();
             Debug.Log("[TacticalBattleManager] 행동 취소");
-
-            // UI를 액션 메뉴 상태로 복구
-            if (combatUIManager != null)
-            {
-                combatUIManager.ShowActionMenu();
-            }
         }
 
         // ── 이동·스킬 내부 로직 ──────────────────────────────────────────
@@ -465,12 +450,6 @@ namespace KD
             skillRangePreview.Clear();
             gridManager.ClearHighlight();
 
-            // UI 비활성화
-            if (combatUIManager != null)
-            {
-                combatUIManager.gameObject.SetActive(false);
-            }
-
             if (CheckBattleEnd()) return;
 
             turnIndex++;
@@ -508,55 +487,6 @@ namespace KD
                 return true;
             }
             return false;
-        }
-
-        // ── ICombatInteractionController 구현 ──
-
-        public bool IsMoveModeActive => currentActionMode == BattleActionMode.Move;
-
-        public void SetMoveMode(bool active)
-        {
-            if (active)
-            {
-                SelectMoveAction();
-            }
-            else
-            {
-                CancelCurrentAction();
-            }
-        }
-
-        public void ExecuteSkill(string skillId)
-        {
-            if (selectedUnit == null) return;
-
-            SkillData skillToUse = null;
-            if (selectedUnit.Data.uniqueSkill1 != null && selectedUnit.Data.uniqueSkill1.skillId == skillId)
-            {
-                skillToUse = selectedUnit.Data.uniqueSkill1;
-            }
-            else if (selectedUnit.Data.uniqueSkill2 != null && selectedUnit.Data.uniqueSkill2.skillId == skillId)
-            {
-                skillToUse = selectedUnit.Data.uniqueSkill2;
-            }
-            else if (selectedUnit.EquippedOptionalSkill != null && selectedUnit.EquippedOptionalSkill.skillId == skillId)
-            {
-                skillToUse = selectedUnit.EquippedOptionalSkill;
-            }
-
-            if (skillToUse != null)
-            {
-                SelectSkillAction(skillToUse);
-            }
-            else
-            {
-                Debug.LogWarning($"[TacticalBattleManager] ID가 '{skillId}'인 스킬을 유닛에게서 찾을 수 없습니다.");
-            }
-        }
-
-        public void ExecuteWait()
-        {
-            WaitSelectedUnit();
         }
     }
 }
