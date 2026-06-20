@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KD
@@ -30,6 +31,54 @@ namespace KD
                 return false;
 
             ExecuteEffect(caster, target, skill);
+            caster.TrySpendAP(skill.apCost);
+
+            if (skill.cooldown > 0)
+                caster.SetCooldown(skill.skillId, skill.cooldown);
+
+            return true;
+        }
+
+        // 광역 시전: 한 번의 시전으로 범위 내 여러 대상에게 효과를 적용한다.
+        // AP·쿨타임은 1회만 소모하므로, 대상마다 Execute를 반복 호출할 때 생기는
+        // "두 번째 대상부터 쿨타임/AP로 차단" 문제를 피한다. (적 광역 공격용)
+        public static bool ExecuteArea(BattleUnit caster, IReadOnlyList<BattleUnit> targets, SkillData skill)
+        {
+            if (caster == null || !caster.IsAlive)
+            {
+                Debug.LogWarning("[SkillExecutor] 시전자가 없거나 사망 상태입니다.");
+                return false;
+            }
+            if (skill == null)
+            {
+                Debug.LogWarning("[SkillExecutor] 스킬 데이터가 없습니다.");
+                return false;
+            }
+            if (caster.GetCooldown(skill.skillId) > 0)
+            {
+                Debug.Log($"[SkillExecutor] '{skill.skillName}' 쿨타임 중 ({caster.GetCooldown(skill.skillId)}턴 남음)");
+                return false;
+            }
+            if (!caster.HasEnoughAP(skill.apCost))
+            {
+                Debug.Log($"[SkillExecutor] '{skill.skillName}' AP 부족 (필요: {skill.apCost}, 현재: {caster.CurrentAP})");
+                return false;
+            }
+
+            int hitCount = 0;
+            if (targets != null)
+            {
+                foreach (BattleUnit target in targets)
+                {
+                    if (target == null || !target.IsAlive) continue;
+                    ExecuteEffect(caster, target, skill);
+                    hitCount++;
+                }
+            }
+
+            if (hitCount == 0)
+                return false;
+
             caster.TrySpendAP(skill.apCost);
 
             if (skill.cooldown > 0)
