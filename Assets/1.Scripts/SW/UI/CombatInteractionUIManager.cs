@@ -272,11 +272,31 @@ namespace HornDancheong.Seongwoo.UI
                     _instantiatedSkillButtons.Add(buttonObj);
 
                     Button btn = buttonObj.GetComponent<Button>();
-                    TMP_Text btnText = buttonObj.GetComponentInChildren<TMP_Text>();
+                    TMP_Text nameText = null;
+                    TMP_Text descText = null;
 
-                    if (btnText != null)
+                    if (skillButtonPrefab != null)
                     {
-                        btnText.text = $"{skill.skillName} (AP: {skill.apCost})";
+                        var nameTrans = buttonObj.transform.Find("Panel/Text_SkillName") ?? buttonObj.transform.Find("Text_SkillName");
+                        if (nameTrans != null) nameText = nameTrans.GetComponent<TMP_Text>();
+
+                        var descTrans = buttonObj.transform.Find("Panel/Text_SkillDescription") ?? buttonObj.transform.Find("Text_SkillDescription");
+                        if (descTrans != null) descText = descTrans.GetComponent<TMP_Text>();
+                    }
+
+                    if (nameText == null)
+                    {
+                        nameText = buttonObj.GetComponentInChildren<TMP_Text>();
+                    }
+
+                    if (nameText != null)
+                    {
+                        nameText.text = $"{skill.skillName} (AP: {skill.apCost})";
+                    }
+
+                    if (descText != null)
+                    {
+                        descText.text = $"소모 AP: {skill.apCost}\n{skill.description}";
                     }
 
                     // 직군별 스킬 버튼 스타일 적용
@@ -303,26 +323,26 @@ namespace HornDancheong.Seongwoo.UI
                 nameOrClass = extendedInfo.ClassName;
             }
 
-            List<(string id, string name, int cost)> skillsToSpawn = new List<(string, string, int)>();
-            skillsToSpawn.Add(("99", "기본 공격", 0));
+            List<(string id, string name, int cost, string description)> skillsToSpawn = new List<(string, string, int, string)>();
+            skillsToSpawn.Add(("99", "기본 공격", 0, "적 하나에게 기본 물리 공격을 가합니다."));
 
             if (nameOrClass.Contains("Warrior") || nameOrClass.Contains("전사"))
             {
-                skillsToSpawn.Add(("3", "광역 폭발", 12));
+                skillsToSpawn.Add(("3", "광역 폭발", 12, "강력한 폭발을 일으켜 지면의 대상을 강타합니다."));
             }
             else if (nameOrClass.Contains("Archer") || nameOrClass.Contains("궁수") || nameOrClass.Contains("마법사"))
             {
-                skillsToSpawn.Add(("1", "파이어볼", 5));
+                skillsToSpawn.Add(("1", "파이어볼", 5, "화염의 구체를 던져 대상에게 피해를 줍니다."));
             }
             else if (nameOrClass.Contains("Healer") || nameOrClass.Contains("힐러") || nameOrClass.Contains("지원"))
             {
-                skillsToSpawn.Add(("2", "치유", 3));
+                skillsToSpawn.Add(("2", "치유", 3, "생명의 원소로 대상을 치유합니다."));
             }
             else
             {
-                skillsToSpawn.Add(("1", "파이어볼", 5));
-                skillsToSpawn.Add(("2", "치유", 3));
-                skillsToSpawn.Add(("3", "광역 폭발", 12));
+                skillsToSpawn.Add(("1", "파이어볼", 5, "화염의 구체를 던져 대상에게 피해를 줍니다."));
+                skillsToSpawn.Add(("2", "치유", 3, "생명의 원소로 대상을 치유합니다."));
+                skillsToSpawn.Add(("3", "광역 폭발", 12, "강력한 폭발을 일으켜 지면의 대상을 강타합니다."));
             }
 
             // 가상 캐릭터의 역할 추정
@@ -347,11 +367,31 @@ namespace HornDancheong.Seongwoo.UI
                 _instantiatedSkillButtons.Add(buttonObj);
 
                 Button btn = buttonObj.GetComponent<Button>();
-                TMP_Text btnText = buttonObj.GetComponentInChildren<TMP_Text>();
+                TMP_Text nameText = null;
+                TMP_Text descText = null;
 
-                if (btnText != null)
+                if (skillButtonPrefab != null)
                 {
-                    btnText.text = $"{skill.name} (MP: {skill.cost})";
+                    var nameTrans = buttonObj.transform.Find("Panel/Text_SkillName") ?? buttonObj.transform.Find("Text_SkillName");
+                    if (nameTrans != null) nameText = nameTrans.GetComponent<TMP_Text>();
+
+                    var descTrans = buttonObj.transform.Find("Panel/Text_SkillDescription") ?? buttonObj.transform.Find("Text_SkillDescription");
+                    if (descTrans != null) descText = descTrans.GetComponent<TMP_Text>();
+                }
+
+                if (nameText == null)
+                {
+                    nameText = buttonObj.GetComponentInChildren<TMP_Text>();
+                }
+
+                if (nameText != null)
+                {
+                    nameText.text = $"{skill.name} (MP: {skill.cost})";
+                }
+
+                if (descText != null)
+                {
+                    descText.text = $"소모 MP: {skill.cost}\n{skill.description}";
                 }
 
                 // 직군별 스킬 버튼 스타일 적용
