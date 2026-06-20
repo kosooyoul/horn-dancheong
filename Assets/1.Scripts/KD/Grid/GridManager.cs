@@ -520,15 +520,17 @@ namespace KD
             }
             originalColors.Clear();
 
-            // 낮은 우선순위 → 높은 우선순위 (material.color)
+            // 낮은 우선순위 → 높은 우선순위 (나중에 적용될수록 덮어씀)
             ApplyHighlightList(currentBlockedDeployHighlights, blockedDeployColor);
             ApplyHighlightList(currentDeployableHighlights,    deployableTileColor);
-            ApplyMoveHighlights();
-            ApplyHighlightList(currentSkillHighlights,         skillTileColor);
 
-            // Danger: FloorCubeStater 우선, 없으면 color 폴백
+            // Danger: 이동·스킬보다 낮은 우선순위 — 플레이어 행동 표시가 위험 경고를 덮어씀
             foreach (var kvp in currentDangerHighlights)
                 ApplyDangerHighlight(kvp.Key, kvp.Value);
+
+            // 이동·스킬 하이라이트 (최고 우선순위)
+            ApplyMoveHighlights();
+            ApplyHighlightList(currentSkillHighlights, skillTileColor);
         }
 
         private void ApplyDangerHighlight(Vector2Int tile, SafetyType level)
