@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80e61fdbfa9880041ad8000a062a06d5, type: 3}
+  m_Name: UnitData_Tanker
+  m_EditorClassIdentifier: Assembly-CSharp::KD.UnitData
+  unitId: 
+  unitName: "\uD604\uB3C4\uC724"
+  description: 
+  icon: {fileID: 0}
+  prefab: {fileID: 4430476179508750244, guid: d15422d0bd9f5964cbe733757abeaeb3, type: 3}
+  role: 1
+  attribute: 0
+  weaponType: 0
+  movementType: 0
+  moveAPCost: 10
+  baseStats:
+    agility: 1
+    spirit: 1
+    guard: 1
+    luck: 1
+  uniqueSkill1: {fileID: 11400000, guid: a08dc50242eaecd45b6f6e9e3637dd46, type: 2}
+  uniqueSkill2: {fileID: 11400000, guid: 0f19b836b6a7b074a957f750d8daab53, type: 2}
+  uniqueSkill3: {fileID: 11400000, guid: 67f32d0c273bf4a4aadaebcacc4f24da, type: 2}

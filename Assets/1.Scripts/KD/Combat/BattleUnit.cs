@@ -96,6 +96,7 @@ namespace KD
             if (skill == null) return false;
             return skill == Data.uniqueSkill1
                 || skill == Data.uniqueSkill2
+                || skill == Data.uniqueSkill3
                 || skill == _equippedOptionalSkill;
         }
 
@@ -105,6 +106,7 @@ namespace KD
             var usable = new List<SkillData>();
             TryAddIfReady(usable, Data.uniqueSkill1);
             TryAddIfReady(usable, Data.uniqueSkill2);
+            TryAddIfReady(usable, Data.uniqueSkill3);
             TryAddIfReady(usable, _equippedOptionalSkill);
             return usable;
         }
@@ -128,7 +130,7 @@ namespace KD
             _skillCooldowns[skillId] = Mathf.Max(0, turns);
         }
 
-        // 턴 종료 시 호출 — 모든 쿨타임 1 감소
+        // 턴 종료 시 호출 — 모든 쿨타임 1 감소, 피해감소 버프 해제
         public void OnTurnEnd()
         {
             var keys = new List<string>(_skillCooldowns.Keys);
@@ -137,7 +139,17 @@ namespace KD
                 if (_skillCooldowns[key] > 0)
                     _skillCooldowns[key]--;
             }
+
+            ClearDamageReductionRate();
         }
+
+        // ── 피해 감소 ────────────────────────────────────────────────────
+        private float _damageReductionRate = 0f;
+        public  float DamageReductionRate  => _damageReductionRate;
+
+        public void SetDamageReductionRate(float value) => _damageReductionRate = Mathf.Clamp01(value);
+        public void AddDamageReductionRate(float value) => _damageReductionRate = Mathf.Clamp01(_damageReductionRate + value);
+        public void ClearDamageReductionRate()          => _damageReductionRate = 0f;
 
         // ── 전투 처리 ────────────────────────────────────────────────────
 

@@ -129,7 +129,7 @@
             },
             "m_InputSlot": {
                 "m_Node": {
-                    "m_Id": "7f8d3dd2ebba47cca22131aa8a858271"
+                    "m_Id": "a7147b61677c4a798243d5f53d53a9f2"
                 },
                 "m_SlotId": 0
             }
@@ -1579,7 +1579,7 @@
     "m_AlembicMotionVectors": false,
     "m_SupportsLODCrossFade": false,
     "m_CustomEditorGUI": "",
-    "m_SupportVFX": false
+    "m_SupportVFX": true
 }
 
 {

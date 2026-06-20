@@ -23,13 +23,7 @@ namespace KD
         [Tooltip("이 행동에 사용할 스킬 (데미지/힐 효과 참조)")]
         public SkillData skill;
 
-        [Tooltip("예고 및 타격 대상 타일 목록.\n" +
-                 "useAbsoluteTiles = false(기본): targetTiles를 '모양'으로 보고, 첫 타일(anchor)이 가장 가까운 플레이어 위에 오도록 평행이동해 타격한다.\n" +
-                 "useAbsoluteTiles = true: targetTiles를 맵 절대 좌표 그대로 사용한다.")]
+        [Tooltip("예고 및 타격 대상 타일 목록 (맵 절대 좌표). 여기 있는 플레이어 유닛이 피해를 받음")]
         public List<Vector2Int> targetTiles = new List<Vector2Int>();
-
-        [Tooltip("true면 targetTiles를 맵 절대 좌표로 그대로 사용. " +
-                 "false(기본)면 가장 가까운 플레이어를 기준으로 패턴을 평행이동해 항상 명중시킨다.")]
-        public bool useAbsoluteTiles = false;
     }
 }

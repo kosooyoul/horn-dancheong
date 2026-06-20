@@ -10,22 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80e61fdbfa9880041ad8000a062a06d5, type: 3}
-  m_Name: UnitData_2
+  m_Name: UnitData_Healer
   m_EditorClassIdentifier: Assembly-CSharp::KD.UnitData
   unitId: 
-  unitName: "\uC724\uC194\uD558"
+  unitName: "\uC2E0\uC720\uD558"
   description: 
   icon: {fileID: 0}
-  prefab: {fileID: 4430476179508750244, guid: b3d9376b1554a48d288cd1dcbe00b4a2, type: 3}
-  role: 0
-  attribute: 1
-  weaponType: 1
+  prefab: {fileID: 4430476179508750244, guid: a486bfcc0a022495e9ccf7de67cbc89d, type: 3}
+  role: 3
+  attribute: 2
+  weaponType: 3
   movementType: 0
-  moveAPCost: 30
+  moveAPCost: 10
   baseStats:
     agility: 1
     spirit: 1
     guard: 1
     luck: 1
-  uniqueSkill1: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
-  uniqueSkill2: {fileID: 11400000, guid: 559b88dccd54d4907be2309c86385e84, type: 2}
+  uniqueSkill1: {fileID: 11400000, guid: 88257a20511deff4bb714951dd50e4fe, type: 2}
+  uniqueSkill2: {fileID: 11400000, guid: 4fdfec671aec50c45bc2638885662c28, type: 2}
+  uniqueSkill3: {fileID: 11400000, guid: 065f9fdcbeec93643a3e7f87ed001ae2, type: 2}

@@ -30,6 +30,7 @@ namespace KD
     ///   1 또는 M     : 이동 모드
     ///   2 또는 K     : 첫 번째 사용 가능 스킬 선택
     ///   W 또는 Space : 대기
+    ///   Escape       : 현재 행동 취소
     ///   Enter        : 배치 확정 (배치 단계)
     /// </summary>
     public class KDBattleTurnController : MonoBehaviour
@@ -109,7 +110,6 @@ namespace KD
             if (ground.Raycast(ray, out float dist))
             {
                 grid = gridManager.WorldToGrid(ray.GetPoint(dist));
-                Debug.Log($"[KDBattleTurnController] 평면 교점 → grid={grid} valid={gridManager.IsValidTile(grid)}");
                 return gridManager.IsValidTile(grid);
             }
 
@@ -216,6 +216,7 @@ namespace KD
             if (mode == BattleActionMode.Move || mode == BattleActionMode.Skill)
             {
                 HandleActionModeMouseClick();
+                HandleCancelKey();
             }
             else
             {
@@ -232,8 +233,6 @@ namespace KD
                 battleManager.OnTileClicked(tile);
         }
 
-        // 일반 전투씬에서는 취소 기능이 필요없으므로 주석 처리
-        /*
         private void HandleCancelKey()
         {
             Keyboard keyboard = Keyboard.current;
@@ -242,7 +241,6 @@ namespace KD
             if (keyboard.escapeKey.wasPressedThisFrame)
                 battleManager.CancelCurrentAction();
         }
-        */
 
         private void HandleKeyboardShortcuts()
         {
@@ -345,8 +343,7 @@ namespace KD
                 case "이동":   battleManager.SelectMoveAction(); break;
                 case "스킬":   SelectFirstAvailableSkill();      break;
                 case "대기":   battleManager.WaitSelectedUnit(); break;
-                // 일반 전투씬에서는 취소 메뉴 불필요
-                // case "취소":   /* 메뉴만 닫음 */                 break;
+                case "취소":   /* 메뉴만 닫음 */                 break;
                 case "배치확정": battleManager.ConfirmDeployment(); break;
             }
         }
@@ -389,7 +386,7 @@ namespace KD
             BattleUnit unit = battleManager.SelectedUnit;
             if (unit == null) return;
 
-            float panelHeight = 44f + 3 * 30f; // 취소 버튼 제거로 인해 버튼 수를 4개에서 3개로 변경
+            float panelHeight = 44f + 4 * 30f;
             Vector2 pos = GetMenuScreenPosition(panelHeight);
             var area = new Rect(pos.x, pos.y, actionMenuWidth, panelHeight);
 
@@ -412,8 +409,8 @@ namespace KD
             GUI.enabled = true;
             if (GUILayout.Button("대기 [W]"))    pendingAction = "대기";
             
-            // 일반 전투씬에서는 취소 버튼 불필요
-            // if (GUILayout.Button("취소 [Esc]"))  pendingAction = "취소";
+            // 취소 버튼 - 항상 활성화
+            if (GUILayout.Button("취소 [Esc]"))  pendingAction = "취소";
 
             GUI.enabled = true; // GUI 상태 복원
             GUILayout.EndArea();

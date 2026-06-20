@@ -15,15 +15,12 @@ MonoBehaviour:
   patternId: 
   patternName: 
   directionMode: 0
-  directionSet: 2
+  directionSet: 0
   includeOrigin: 0
-  fixedCells:
-  - localOffset: {x: 1, y: 1}
-  - localOffset: {x: -1, y: 1}
-  - localOffset: {x: 0, y: 1}
+  fixedCells: []
   rays:
   - startLocalOffset: {x: 0, y: 0}
     localDirection: {x: 0, y: 1}
     minDistance: 1
-    maxDistance: 2
+    maxDistance: 1
     stopOnBlocked: 0

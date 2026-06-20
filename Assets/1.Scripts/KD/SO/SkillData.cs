@@ -45,6 +45,57 @@ namespace KD
         [Tooltip("연산 보정 단계. 소=×1.5 / 중=×2.0 / 대=×2.5 / 특대=×4.0")]
         public Scale scale;
 
+        [Header("버프 수치")]
+        [Tooltip("피해 감소 비율. Buff 스킬에서 사용. 0.3 = 30% 피해 감소")]
+        public float damageReductionValue = 0f;
+
+        [Header("연출 — 연출 타입")]
+        [Tooltip("SimpleSkillFxPlayer가 이 값으로 재생 방식을 결정한다")]
+        public SkillFxType fxType = SkillFxType.None;
+
+        [Header("연출 — VFX Prefab")]
+        [Tooltip("시전자 위 / 타일 바닥에서 재생되는 기본 이펙트")]
+        public GameObject castVfxPrefab;
+        [Tooltip("날아가는 투사체 (Projectile, DroneDeliver 타입에서 사용)")]
+        public GameObject projectilePrefab;
+        [Tooltip("대상에게 닿았을 때 재생되는 임팩트 이펙트")]
+        public GameObject impactVfxPrefab;
+        [Tooltip("범위 전체 타일에 깔리는 이펙트 (Pillar 반짝이, AreaRise 먼지 등)")]
+        public GameObject areaVfxPrefab;
+
+        [Header("연출 — SFX")]
+        public AudioClip castSfx;
+        public AudioClip projectileSfx;
+        public AudioClip impactSfx;
+
+        [Header("연출 — 타이밍 (초)")]
+        [Tooltip("시전 이펙트 재생 후 투사체/임팩트 전까지 대기 시간")]
+        public float castDelay   = 0f;
+        [Tooltip("투사체 도착 후 실제 피해/효과 적용 전 대기 시간")]
+        public float impactDelay = 0f;
+        [Tooltip("임팩트 이펙트 후 다음 행동으로 넘어가기 전 여운 시간")]
+        public float endDelay    = 0.3f;
+
+        [Header("연출 — 투사체")]
+        [Tooltip("투사체 이동 속도 (유닛/초)")]
+        public float projectileSpeed     = 8f;
+        [Tooltip("포물선 궤도 여부 (Projectile 타입에서 사용)")]
+        public bool  projectileArc;
+        [Tooltip("포물선 최대 높이")]
+        public float projectileArcHeight = 1.5f;
+
+        [Header("연출 — 카메라 흔들림")]
+        [Tooltip("임팩트 타이밍에 카메라를 흔들지 여부")]
+        public bool  useCameraShake;
+        [Tooltip("카메라 흔들림 지속 시간 (초)")]
+        public float shakeDuration  = 0.2f;
+        [Tooltip("카메라 흔들림 강도")]
+        public float shakeMagnitude = 0.15f;
+
+        [Header("연출 — VFX 수명")]
+        [Tooltip("Instantiate된 VFX 오브젝트가 자동 삭제되는 시간 (초)")]
+        public float vfxLifetime = 3f;
+
 #if UNITY_EDITOR
         private void OnValidate()
         {

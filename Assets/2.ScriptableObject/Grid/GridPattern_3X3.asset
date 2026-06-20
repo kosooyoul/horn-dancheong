@@ -10,24 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 396d73b623e40c64394f49163f5dc6b5, type: 3}
-  m_Name: GridPattern_2
+  m_Name: GridPattern_3X3
   m_EditorClassIdentifier: Assembly-CSharp::KD.GridPatternData
   patternId: 
   patternName: 
   directionMode: 0
-  directionSet: 2
+  directionSet: 0
   includeOrigin: 0
   fixedCells:
-  - localOffset: {x: 7, y: 1}
-  - localOffset: {x: 6, y: 0}
-  - localOffset: {x: 5, y: -1}
-  - localOffset: {x: 4, y: 0}
-  - localOffset: {x: 3, y: 1}
-  - localOffset: {x: 2, y: 0}
-  - localOffset: {x: 1, y: 0}
-  rays:
-  - startLocalOffset: {x: 0, y: 0}
-    localDirection: {x: 0, y: 1}
-    minDistance: 1
-    maxDistance: 2
-    stopOnBlocked: 0
+  - localOffset: {x: -1, y: 1}
+  - localOffset: {x: -1, y: 2}
+  - localOffset: {x: -1, y: 3}
+  - localOffset: {x: 0, y: 3}
+  - localOffset: {x: 0, y: 2}
+  - localOffset: {x: 0, y: 1}
+  - localOffset: {x: 1, y: 1}
+  - localOffset: {x: 1, y: 2}
+  - localOffset: {x: 1, y: 3}
+  rays: []
