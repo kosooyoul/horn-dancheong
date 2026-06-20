@@ -371,7 +371,7 @@ public class BattleScript : MonoBehaviour
         
         if (!File.Exists(filePath))
         {
-            Debug.LogError($"맵 파일을 찾을 수 없습니다: {filePath}");
+            Debug.LogWarning($"맵 파일을 찾을 수 없습니다: {filePath}");
             return false;
         }
 

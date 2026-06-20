@@ -84,6 +84,13 @@ namespace KD
                 }
             }
 
+            // 후보 타일 밖이어도 금지존 안의 유효한 타일은 blocked로 시각화
+            foreach (Vector2Int tile in forbiddenSet)
+            {
+                if (gridManager.IsValidTile(tile) && !deployableSet.Contains(tile) && !blockedTiles.Contains(tile))
+                    blockedTiles.Add(tile);
+            }
+
             // 하이라이트는 즉시 적용하지 않음 — ShowHighlights()를 명시적으로 호출할 것
 
             Debug.Log($"[DeploymentController] 배치 가능: {deployableTiles.Count}타일 / 금지: {blockedTiles.Count}타일");

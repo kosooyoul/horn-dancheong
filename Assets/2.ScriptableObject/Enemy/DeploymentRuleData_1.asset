@@ -33,5 +33,5 @@ MonoBehaviour:
   - {x: 1, y: 7}
   - {x: 1, y: 8}
   - {x: 1, y: 9}
-  forbiddenPatternFromEnemy: {fileID: 11400000, guid: f956f962c5378094a9106d136f3ba942, type: 2}
+  forbiddenPatternFromEnemy: {fileID: 11400000, guid: 15ec1875ba8110440a077c52ffa77d96, type: 2}
   maxDeployCount: 4
