@@ -293,7 +293,7 @@ namespace KD
             Debug.Log($"[TacticalBattleManager] 스킬 모드: {skill.skillName}");
         }
 
-        /// <summary>마우스가 타일 위에 올라갈 때 호출 — 스킬 범위 갱신.</summary>
+        /// <summary>마우스가 타일 위에 올라갈 때 호출 — 스킬 범위 갱신 및 회전 미리보기.</summary>
         public void UpdateHoveredTile(Vector2Int hoveredTile)
         {
             if (currentPhase      != BattlePhase.PlayerPhase) return;
@@ -301,6 +301,12 @@ namespace KD
             if (selectedUnit == null || selectedSkill == null) return;
 
             skillRangePreview.Show(selectedUnit, selectedSkill, hoveredTile);
+            
+            // 마우스 호버 시 미리 회전 방향 보여주기 (Self 타겟 제외)
+            if (selectedSkill.targetType != TargetType.Self)
+            {
+                gridManager.RotateUnitTowardsTile(selectedUnit, hoveredTile);
+            }
         }
 
         /// <summary>타일 클릭 — 이동 또는 스킬 발동.</summary>
@@ -350,6 +356,12 @@ namespace KD
         private void TryUseSelectedSkill(Vector2Int tile)
         {
             if (!skillRangePreview.Contains(tile)) { Debug.Log("[TacticalBattleManager] 스킬 범위 밖"); return; }
+
+            // 스킬 사용 전에 타겟 방향으로 회전
+            if (selectedSkill.targetType != TargetType.Self)
+            {
+                gridManager.RotateUnitTowardsTile(selectedUnit, tile);
+            }
 
             BattleUnit target = selectedSkill.targetType == TargetType.Self
                 ? selectedUnit

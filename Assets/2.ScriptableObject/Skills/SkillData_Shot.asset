@@ -10,17 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69c395e8e17145a48a606a69d697fe7e, type: 3}
-  m_Name: SkillData_Slash
+  m_Name: SkillData_Shot
   m_EditorClassIdentifier: Assembly-CSharp::KD.SkillData
-  skillId: 1001
-  skillName: "\uD718\uB450\uB974\uAE30"
-  description: "1\uCE78 \uBC94\uC704 \uB0B4 \uC801 1\uCCB4\uC5D0\uAC8C \uC18C \uB370\uBBF8\uC9C0\uB97C
-    \uC900\uB2E4."
+  skillId: 1002
+  skillName: "\uBC1C\uC0AC\uD558\uAE30"
+  description: "\uC124\uBA85 \uD544\uC694"
   icon: {fileID: 0}
   effectPrefab: {fileID: 0}
   allowedWeaponTypes: 00000000
   targetType: 0
-  targetPattern: {fileID: 11400000, guid: e7cd415e015a54345a6c07f09a98248b, type: 2}
+  targetPattern: {fileID: 11400000, guid: f956f962c5378094a9106d136f3ba942, type: 2}
   apCost: 30
   cooldown: 1
   effectType: 0

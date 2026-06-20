@@ -17,7 +17,7 @@ public class UnitMover : MonoBehaviour
     [SerializeField] private bool autoRotateToMoveDirection = true;
     
     [Tooltip("회전 방향 제한 (4: 상하좌우, 8: 8방향, 0: 제한없음)")]
-    [SerializeField] private int directionCount = 4;
+    [SerializeField] private int directionCount = 8;
     
     [Tooltip("이 각도 이내로 회전하면 이동을 시작 (도 단위)")]
     [SerializeField] private float earlyMovementThreshold = 30f;
