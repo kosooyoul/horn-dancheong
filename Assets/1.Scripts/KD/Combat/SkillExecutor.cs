@@ -69,7 +69,6 @@ namespace KD
                 return false;
             }
 
-            // < Note: skill VFX
             bool anyApplied = false;
             foreach (BattleUnit target in targets)
             {
@@ -85,7 +84,6 @@ namespace KD
                 caster.SetCooldown(skill.skillId, skill.cooldown);
 
             Debug.Log($"[SkillExecutor] {caster.Data.unitName} '{skill.skillName}' 광역 → {targets.Count}명에게 적용");
-            // < Note
 
             // < Note: from KO
             int hitCount = 0;
