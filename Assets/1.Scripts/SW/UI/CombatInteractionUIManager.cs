@@ -95,12 +95,20 @@ namespace HornDancheong.Seongwoo.UI
                     spSlider.value = extendedInfo.CurrentSp;
                 }
 
-                // 직업 이름 및 아이콘
-                if (classText != null) classText.text = extendedInfo.ClassName;
-                if (classImage != null)
+                // 직업 이름 및 아이콘 - CharacterClassUI가 있으면 활용
+                var classUI = classImage != null ? classImage.GetComponent<CharacterClassUI>() : null;
+                if (classUI != null && extendedInfo.UnitData != null)
                 {
-                    classImage.sprite = extendedInfo.ClassIcon;
-                    classImage.gameObject.SetActive(extendedInfo.ClassIcon != null);
+                    classUI.Initialize(extendedInfo.UnitData);
+                }
+                else
+                {
+                    if (classText != null) classText.text = extendedInfo.ClassName;
+                    if (classImage != null)
+                    {
+                        classImage.sprite = extendedInfo.ClassIcon;
+                        classImage.gameObject.SetActive(extendedInfo.ClassIcon != null);
+                    }
                 }
 
                 // 속성 이름 및 아이콘
@@ -182,7 +190,7 @@ namespace HornDancheong.Seongwoo.UI
         /// <summary>
         /// 액션 메뉴 활성화 상태로 전환합니다.
         /// </summary>
-        private void ShowActionMenu()
+        public void ShowActionMenu()
         {
             if (actionMenuPanel != null) actionMenuPanel.SetActive(true);
             if (skillMenuPanel != null) skillMenuPanel.SetActive(false);
@@ -213,42 +221,87 @@ namespace HornDancheong.Seongwoo.UI
 
             if (skillListParent == null || _currentCharacterInfo == null) return;
 
-            // 캐릭터 이름/직업을 기반으로 스킬 세트 판별
-            string nameOrClass = _currentCharacterInfo.CharacterName;
             var extendedInfo = _currentCharacterInfo as ICombatCharacterInfo;
+
+            // 1. 실제 유닛의 스킬 목록이 제공된다면 이를 사용하여 생성
+            var realSkills = extendedInfo?.Skills;
+            if (realSkills != null && realSkills.Count > 0)
+            {
+                foreach (var skill in realSkills)
+                {
+                    if (skill == null) continue;
+
+                    GameObject buttonObj;
+                    if (skillButtonPrefab != null)
+                    {
+                        buttonObj = Instantiate(skillButtonPrefab, skillListParent);
+                    }
+                    else
+                    {
+                        buttonObj = CreateDefaultButtonObject(skill.skillName, skill.apCost);
+                    }
+
+                    _instantiatedSkillButtons.Add(buttonObj);
+
+                    Button btn = buttonObj.GetComponent<Button>();
+                    TMP_Text btnText = buttonObj.GetComponentInChildren<TMP_Text>();
+
+                    if (btnText != null)
+                    {
+                        btnText.text = $"{skill.skillName} (AP: {skill.apCost})";
+                    }
+
+                    // 직군별 스킬 버튼 스타일 적용
+                    var styler = buttonObj.GetComponent<SkillButtonStyler>();
+                    if (styler != null && extendedInfo.UnitData != null)
+                    {
+                        styler.ApplyStyle(extendedInfo.UnitData.role);
+                    }
+
+                    string skillId = skill.skillId;
+                    if (btn != null)
+                    {
+                        btn.onClick.RemoveAllListeners();
+                        btn.onClick.AddListener(() => OnSkillSelected(skillId));
+                    }
+                }
+                return; // 실제 스킬 목록 생성이 완료되었으므로 복귀
+            }
+
+            // 2. [Fallback] 캐릭터 이름/직업을 기반으로 스킬 세트 판별 (테스트 시연용)
+            string nameOrClass = _currentCharacterInfo.CharacterName;
             if (extendedInfo != null && !string.IsNullOrEmpty(extendedInfo.ClassName))
             {
                 nameOrClass = extendedInfo.ClassName;
             }
 
-            // 기본 스킬 정의 리스트 빌드
-            // Warrior: 기본 공격, 광역 폭발
-            // Archer: 기본 공격, 파이어볼
-            // Healer: 기본 공격, 치유
-            List<(int id, string name, int cost)> skillsToSpawn = new List<(int, string, int)>();
-
-            // 공통: 기본 공격은 무조건 맨 위에 노출 (ID: 99, 마나소모: 0)
-            skillsToSpawn.Add((99, "기본 공격", 0));
+            List<(string id, string name, int cost)> skillsToSpawn = new List<(string, string, int)>();
+            skillsToSpawn.Add(("99", "기본 공격", 0));
 
             if (nameOrClass.Contains("Warrior") || nameOrClass.Contains("전사"))
             {
-                skillsToSpawn.Add((3, "광역 폭발", 12));
+                skillsToSpawn.Add(("3", "광역 폭발", 12));
             }
             else if (nameOrClass.Contains("Archer") || nameOrClass.Contains("궁수") || nameOrClass.Contains("마법사"))
             {
-                skillsToSpawn.Add((1, "파이어볼", 5));
+                skillsToSpawn.Add(("1", "파이어볼", 5));
             }
             else if (nameOrClass.Contains("Healer") || nameOrClass.Contains("힐러") || nameOrClass.Contains("지원"))
             {
-                skillsToSpawn.Add((2, "치유", 3));
+                skillsToSpawn.Add(("2", "치유", 3));
             }
             else
             {
-                // 기본 폴백: 모든 스킬 노출
-                skillsToSpawn.Add((1, "파이어볼", 5));
-                skillsToSpawn.Add((2, "치유", 3));
-                skillsToSpawn.Add((3, "광역 폭발", 12));
+                skillsToSpawn.Add(("1", "파이어볼", 5));
+                skillsToSpawn.Add(("2", "치유", 3));
+                skillsToSpawn.Add(("3", "광역 폭발", 12));
             }
+
+            // 가상 캐릭터의 역할 추정
+            KD.UnitRole mockRole = KD.UnitRole.Dealer;
+            if (nameOrClass.Contains("Warrior") || nameOrClass.Contains("전사")) mockRole = KD.UnitRole.Dealer;
+            else if (nameOrClass.Contains("Archer") || nameOrClass.Contains("궁수") || nameOrClass.Contains("마법사")) mockRole = KD.UnitRole.Supporter;
+            else if (nameOrClass.Contains("Healer") || nameOrClass.Contains("힐러") || nameOrClass.Contains("지원")) mockRole = KD.UnitRole.Healer;
 
             // 버튼 오브젝트 생성 및 이벤트 바인딩
             foreach (var skill in skillsToSpawn)
@@ -260,7 +313,6 @@ namespace HornDancheong.Seongwoo.UI
                 }
                 else
                 {
-                    // 프리팹이 없을 경우 기본 버튼 오브젝트 생성 (동작성 확보용)
                     buttonObj = CreateDefaultButtonObject(skill.name, skill.cost);
                 }
 
@@ -274,7 +326,14 @@ namespace HornDancheong.Seongwoo.UI
                     btnText.text = $"{skill.name} (MP: {skill.cost})";
                 }
 
-                int skillId = skill.id;
+                // 직군별 스킬 버튼 스타일 적용
+                var styler = buttonObj.GetComponent<SkillButtonStyler>();
+                if (styler != null)
+                {
+                    styler.ApplyStyle(mockRole);
+                }
+
+                string skillId = skill.id;
                 if (btn != null)
                 {
                     btn.onClick.RemoveAllListeners();
@@ -341,7 +400,7 @@ namespace HornDancheong.Seongwoo.UI
         }
 
 
-        private void OnSkillSelected(int skillId)
+        private void OnSkillSelected(string skillId)
         {
             Debug.Log($"[CombatInteractionUI] 스킬 ID {skillId} 선택됨 -> 실행 요청");
             if (_controller != null)

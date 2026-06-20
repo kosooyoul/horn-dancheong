@@ -29,6 +29,9 @@ namespace HornDancheong.Seongwoo.UI
             public string AttributeName { get; set; } = "Fire";
             public Sprite AttributeIcon { get; set; }
             public Sprite[] ActiveBuffDebuffs { get; set; } = new Sprite[0];
+
+            public KD.UnitData UnitData => null;
+            public System.Collections.Generic.List<KD.SkillData> Skills => null;
         }
 
         // 입력 데이터
@@ -136,7 +139,7 @@ namespace HornDancheong.Seongwoo.UI
             Repaint();
         }
 
-        public void ExecuteSkill(int skillId)
+        public void ExecuteSkill(string skillId)
         {
             Debug.Log($"[MockController] ExecuteSkill(스킬 ID: {skillId}) 이(가) 실행되었습니다! (행동 수행)");
         }

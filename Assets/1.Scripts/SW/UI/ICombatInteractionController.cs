@@ -20,7 +20,7 @@ namespace HornDancheong.Seongwoo.UI
         /// <summary>
         /// 지정한 스킬 ID의 스킬을 실행합니다.
         /// </summary>
-        void ExecuteSkill(int skillId);
+        void ExecuteSkill(string skillId);
 
         /// <summary>
         /// 대기(턴 종료)를 실행합니다.
