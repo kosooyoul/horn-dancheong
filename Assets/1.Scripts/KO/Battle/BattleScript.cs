@@ -510,6 +510,10 @@ public class BattleScript : MonoBehaviour
     [SerializeField] private GameObject initiativeUIGameObject;
     private IInitiativeUI InitiativeUI;
 
+    [Header("Map Only Mode")]
+    [Tooltip("true면 맵 생성까지만 실행. 유닛 배치/턴 시스템은 KD 시스템이 담당한다. MVP에서는 true.")]
+    [SerializeField] private bool mapOnlyMode = true;
+
     [Header("Battle Map Settings")]
     [SerializeField] private GameObject floorCubePrefab;
     [SerializeField] private float cubeSpacing = 1f;
@@ -608,7 +612,7 @@ public class BattleScript : MonoBehaviour
         LoadSkillDefinitions();
         LoadMapData();
         CreateBattleMap();
-        PlaceUnits();
+        if (!mapOnlyMode) PlaceUnits();
     }
 
     // ALLYS.json / ENEMIES.json에서 유닛 종류 정의 로딩

@@ -56,6 +56,15 @@ namespace KD
         public BattlePhase      CurrentPhase      => currentPhase;
         public BattleActionMode CurrentActionMode => currentActionMode;
         public BattleUnit       SelectedUnit      => selectedUnit;
+
+        public bool IsDeploymentReady
+            => deploymentController != null && deploymentController.IsDeploymentReady();
+
+        public IReadOnlyList<DeploymentPlacement> CurrentPlacements
+            => deploymentController?.Placements ?? System.Array.Empty<DeploymentPlacement>();
+
+        public int MaxDeployCount
+            => deploymentController?.MaxDeployCount ?? 0;
         public EnemyIntent      CurrentEnemyIntent
         {
             get
@@ -122,20 +131,38 @@ namespace KD
 
         // ── 배치 페이즈 API ───────────────────────────────────────────────
 
-        /// <summary>배치 타일 클릭. unit != null이면 배치 시도, null이면 해당 타일 배치 취소.</summary>
-        public void OnDeploymentTileClicked(Vector2Int tile, OwnedUnit unit)
+        /// <summary>유닛 선택 시 배치 가능 타일 하이라이트 표시.</summary>
+        public void ShowDeploymentHighlights()
         {
-            if (currentPhase != BattlePhase.Deployment) return;
+            if (currentPhase == BattlePhase.Deployment)
+                deploymentController?.ShowHighlights();
+        }
+
+        /// <summary>유닛 선택 해제 또는 배치 확정 시 배치 하이라이트 제거.</summary>
+        public void HideDeploymentHighlights()
+        {
+            deploymentController?.HideHighlights();
+        }
+
+        /// <summary>배치 타일 클릭. unit != null이면 배치 시도, null이면 해당 타일 배치 취소. 성공 여부 반환.</summary>
+        public bool OnDeploymentTileClicked(Vector2Int tile, OwnedUnit unit)
+        {
+            if (currentPhase != BattlePhase.Deployment) return false;
 
             if (unit != null)
             {
                 if (deploymentController.TryPlaceUnit(unit, tile))
+                {
                     gridManager.PlaceDeploymentPreview(unit, tile);
+                    return true;
+                }
+                return false;
             }
             else
             {
-                deploymentController.TryRemovePlacement(tile);
-                gridManager.ClearDeploymentPreview();
+                bool removed = deploymentController.TryRemovePlacement(tile);
+                if (removed) gridManager.ClearDeploymentPreview();
+                return removed;
             }
         }
 
@@ -295,6 +322,18 @@ namespace KD
             selectedUnit.Wait();
             Debug.Log($"[TacticalBattleManager] 대기 / AP: {selectedUnit.CurrentAP}");
             EndCurrentTurn();
+        }
+
+        /// <summary>현재 행동 모드를 취소하고 None 상태로 돌아간다. 이동/스킬 하이라이트를 제거한다.</summary>
+        public void CancelCurrentAction()
+        {
+            if (currentPhase != BattlePhase.PlayerPhase) return;
+            currentActionMode = BattleActionMode.None;
+            selectedSkill     = null;
+            currentMoveOptions.Clear();
+            skillRangePreview.Clear();
+            gridManager.ClearHighlight();
+            Debug.Log("[TacticalBattleManager] 행동 취소");
         }
 
         // ── 이동·스킬 내부 로직 ──────────────────────────────────────────

@@ -47,10 +47,20 @@ namespace KD
                 warningTiles = new List<Vector2Int>(step.targetTiles)
             };
 
-            gridManager.HighlightDangerTiles(currentIntent.warningTiles);
+            SafetyType level = DangerLevelFromTileCount(currentIntent.warningTiles.Count);
+            gridManager.HighlightDangerTiles(currentIntent.warningTiles, level);
 
-            Debug.Log($"[EnemyIntentController] {enemy.Data.unitName} 예고: {step.skill.skillName} / {currentIntent.warningTiles.Count}타일");
+            Debug.Log($"[EnemyIntentController] {enemy.Data.unitName} 예고: {step.skill.skillName} / {currentIntent.warningTiles.Count}타일 ({level})");
             return currentIntent;
+        }
+
+        // 예고 타일 수 → DangerS/M/L/XL
+        private static SafetyType DangerLevelFromTileCount(int count)
+        {
+            if (count <= 3)  return SafetyType.DangerS;
+            if (count <= 8)  return SafetyType.DangerM;
+            if (count <= 15) return SafetyType.DangerL;
+            return SafetyType.DangerXL;
         }
 
         // 예고 타일 위에 있는 플레이어 유닛에 스킬 실행

@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: UnitData_2
   m_EditorClassIdentifier: Assembly-CSharp::KD.UnitData
   unitId: 
-  unitName: 
+  unitName: "\uC724\uC194\uD558"
   description: 
   icon: {fileID: 0}
   prefab: {fileID: 0}
   role: 0
-  attribute: 0
+  attribute: 1
+  weaponType: 1
   movementType: 0
   moveAPCost: 30
   baseStats:
@@ -28,4 +29,3 @@ MonoBehaviour:
     luck: 1
   uniqueSkill1: {fileID: 0}
   uniqueSkill2: {fileID: 0}
-  availableOptionalSkills: []
