@@ -82,7 +82,7 @@ namespace HornDancheong.Seongwoo.UI
 
             _isDialogueActive = true;
 
-            if (panelDialogue != null)
+            if (panelDialogue != null && !panelDialogue.activeSelf)
             {
                 panelDialogue.SetActive(true);
             }

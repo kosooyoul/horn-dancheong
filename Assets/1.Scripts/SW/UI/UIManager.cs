@@ -72,11 +72,60 @@ namespace HornDancheong.Seongwoo.UI
         {
             if (panelType == UIPanelType.None) return;
 
+            if (panelType == UIPanelType.Panel_Dialogue)
+            {
+                Debug.LogError("[UIManager] Dialogue 패널은 다이얼로그 인덱스(dialogueIndex) 없이 활성화할 수 없습니다. 패널 열기를 차단합니다.");
+                return;
+            }
+
+            if (_panelsDict.TryGetValue(panelType, out var panelGo))
+            {
+                if (panelGo != null && !panelGo.activeSelf)
+                {
+                    panelGo.SetActive(true);
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[UIManager] 등록되지 않은 패널을 표시하려 했습니다: {panelType}");
+            }
+        }
+
+        /// <summary>
+        /// 다이얼로그 인덱스를 지정하여 특정 타입의 UI 패널을 활성화합니다. (대화 패널 전용)
+        /// </summary>
+        public void ShowPanel(UIPanelType panelType, int dialogueIndex)
+        {
+            if (panelType == UIPanelType.None) return;
+
             if (_panelsDict.TryGetValue(panelType, out var panelGo))
             {
                 if (panelGo != null)
                 {
-                    panelGo.SetActive(true);
+                    if (!panelGo.activeSelf)
+                    {
+                        panelGo.SetActive(true);
+                    }
+
+                    if (panelType == UIPanelType.Panel_Dialogue)
+                    {
+                        if (DialogueDisplayer.Instance != null)
+                        {
+                            DialogueDisplayer.Instance.StartDialogue(dialogueIndex);
+                        }
+                        else
+                        {
+                            var displayer = panelGo.GetComponent<DialogueDisplayer>();
+                            if (displayer != null)
+                            {
+                                displayer.StartDialogue(dialogueIndex);
+                            }
+                            else
+                            {
+                                Debug.LogWarning("[UIManager] Panel_Dialogue GameObject에 DialogueDisplayer 컴포넌트가 존재하지 않습니다.");
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -115,6 +164,23 @@ namespace HornDancheong.Seongwoo.UI
             if (Enum.TryParse<UIPanelType>(panelName, out var type))
             {
                 ShowPanel(type);
+            }
+            else
+            {
+                Debug.LogWarning($"[UIManager] UIPanelType Enum으로 파싱할 수 없는 패널 이름입니다: {panelName}");
+            }
+        }
+
+        /// <summary>
+        /// 문자열 이름과 다이얼로그 인덱스를 지정하여 패널을 활성화합니다. (대화 패널 전용)
+        /// </summary>
+        public void ShowPanel(string panelName, int dialogueIndex)
+        {
+            if (string.IsNullOrEmpty(panelName)) return;
+
+            if (Enum.TryParse<UIPanelType>(panelName, out var type))
+            {
+                ShowPanel(type, dialogueIndex);
             }
             else
             {

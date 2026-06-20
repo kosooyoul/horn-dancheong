@@ -33,10 +33,22 @@ namespace HornDancheong.Seongwoo.UI
                 EditorGUILayout.LabelField("1. 대화 수동 시작 테스트", EditorStyles.miniBoldLabel);
                 _testStartIndex = EditorGUILayout.IntField("시작 인덱스 (Index)", _testStartIndex);
 
+                // 다이얼로그 창이 이미 켜진 경우(대화가 진행 중인 경우) 시작 버튼을 비활성화하여 다시 활성화되지 않도록 함
+                bool isAlreadyActive = displayer.IsDialogueActive;
+                EditorGUI.BeginDisabledGroup(isAlreadyActive);
                 if (GUILayout.Button("대화 시작 (Start Dialogue)"))
                 {
-                    displayer.StartDialogue(_testStartIndex);
+                    if (UIManager.Instance != null)
+                    {
+                        UIManager.Instance.ShowPanel(UIPanelType.Panel_Dialogue, _testStartIndex);
+                    }
+                    else
+                    {
+                        // UIManager가 씬에 없거나 초기화되지 않은 경우 직접 시작하는 Fallback 처리
+                        displayer.StartDialogue(_testStartIndex);
+                    }
                 }
+                EditorGUI.EndDisabledGroup();
             }
             EditorGUILayout.EndVertical();
 
