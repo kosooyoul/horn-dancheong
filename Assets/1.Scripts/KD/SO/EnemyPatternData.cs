@@ -14,13 +14,15 @@ namespace KD
         public List<EnemyPatternStep> steps = new List<EnemyPatternStep>();
     }
 
-    // 적 행동 1가지 — 스킬 + 맵상 고정 타일 목록
-    // targetTiles: 예고 및 실제 타격 타일 (월드 좌표 절대값)
-    // 예) 6x6 맵에서 네 귀퉁이 2x2씩 = (0,0),(0,1),(1,0),(1,1) + ... 총 16칸
+    // 적 행동 1가지 — 모든 타입이 skill.targetPattern(GridPatternData)을 사용
+    //
+    // Fixed          : 예고 시점에 fixedForward 방향으로 패턴 계산 → 실행까지 변하지 않음
+    // Tracking       : 예고·실행 양쪽에서 가장 가까운 플레이어 방향으로 패턴 재계산
+    // RandomUnitTracking : 예고 시점에 랜덤 플레이어 지정 → 실행 직전 그 유닛의 현재 위치 1칸
     [Serializable]
     public class EnemyPatternStep
     {
-        [Tooltip("이 행동에 사용할 스킬 (데미지/힐 효과 참조)")]
+        [Tooltip("이 행동에 사용할 스킬 (데미지/힐 효과 참조)\n모든 타입에서 skill.targetPattern을 범위로 사용")]
         public SkillData skill;
 
         // [Tooltip("true: targetTiles를 맵 절대 좌표로 사용 (고정 예고 AoE)\nfalse: 스킬의 targetPattern을 시전자 기준으로 계산")]

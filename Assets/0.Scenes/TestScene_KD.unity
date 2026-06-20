@@ -1134,7 +1134,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 7.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1265,11 +1265,11 @@ MonoBehaviour:
   rosterManager: {fileID: 1047754880}
   gridManager: {fileID: 1047754881}
   skillActionRunner: {fileID: 1047754883}
-  deploymentRuleData: {fileID: 11400000, guid: a55b323690da77443b96cbacc758d31b, type: 2}
+  deploymentRuleData: {fileID: 11400000, guid: 2d20a924f1897cc4391359962110871c, type: 2}
   enemyUnitDatas:
   - {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
   enemyStartPositions:
-  - {x: 4, y: 4}
+  - {x: 7, y: 7}
   enemyPatterns:
   - {fileID: 11400000, guid: 502eb7cc480f06d4da3b2a267e68d99b, type: 2}
 --- !u!114 &1047754880
@@ -1292,6 +1292,10 @@ MonoBehaviour:
   - instanceId: 
     unitData: {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
     equippedOptionalSkill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
+    level: 1
+  - instanceId: 
+    unitData: {fileID: 11400000, guid: 9541b1b72b04fb94c94ecffd277ac39d, type: 2}
+    equippedOptionalSkill: {fileID: 11400000, guid: c51dd316cf5b5bf43bd31512dbed7073, type: 2}
     level: 1
   selectedParty: []
 --- !u!114 &1047754881
@@ -1634,7 +1638,7 @@ MonoBehaviour:
   floorCubePrefab: {fileID: 3524589421705389157, guid: 6b859aa1b722b6e4789089657f5e4f89, type: 3}
   cubeSpacing: 1
   mapFolderPath: Assets/1.Scripts/KO/Battle/MapData/
-  defaultMapName: basic_10x10
+  defaultMapName: 000
   loadFromJSON: 1
   autoFillAllySpawns: 1
   unitMarkerSize: {x: 0.6, y: 1, z: 0.6}
@@ -1705,7 +1709,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -400}
+  m_AnchoredPosition: {x: -788, y: -400}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1198665889

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -85,7 +86,7 @@ namespace KD
             SafetyType level = DangerLevelFromTileCount(currentIntent.warningTiles.Count);
             gridManager.HighlightDangerTiles(currentIntent.warningTiles, level);
 
-            Debug.Log($"[EnemyIntentController] {enemy.Data.unitName} 예고: {step.skill.skillName} / {currentIntent.warningTiles.Count}타일 ({level})");
+            Debug.Log($"[EnemyIntentController] {enemy.Data.unitName} 예고({step.stepType}): {step.skill.skillName} / {currentIntent.warningTiles.Count}타일 ({level})");
             return currentIntent;
         }
 
@@ -186,8 +187,7 @@ namespace KD
         }
 
         // 예고 타일 위에 있는 플레이어 유닛에 스킬 실행
-        // 적 광역 스킬의 apCost는 0으로 설정 권장 (여러 유닛 연속 타격 시 AP 부족 방지)
-        public void ExecuteCurrentIntent()
+        public void ExecuteCurrentIntent(IReadOnlyList<BattleUnit> playerUnits = null)
         {
             if (currentIntent == null) return;
 
@@ -213,6 +213,47 @@ namespace KD
             currentIntent = null;
 
             Debug.Log($"[EnemyIntentController] {caster.Data.unitName} → {skill.skillName} 실행 완료");
+        }
+
+        private static SafetyType DangerLevelFromTileCount(int count)
+        {
+            if (count <= 3)  return SafetyType.DangerS;
+            if (count <= 8)  return SafetyType.DangerM;
+            if (count <= 15) return SafetyType.DangerL;
+            return SafetyType.DangerXL;
+        }
+
+        private static BattleUnit PickRandomAlivePlayer(IReadOnlyList<BattleUnit> playerUnits)
+        {
+            if (playerUnits == null || playerUnits.Count == 0) return null;
+
+            var alive = new List<BattleUnit>();
+            foreach (BattleUnit p in playerUnits)
+                if (p != null && !p.IsDead) alive.Add(p);
+
+            return alive.Count == 0 ? null : alive[UnityEngine.Random.Range(0, alive.Count)];
+        }
+
+        private static Vector2Int GetDirectionToNearestPlayer(BattleUnit enemy, IReadOnlyList<BattleUnit> playerUnits)
+        {
+            if (playerUnits == null || playerUnits.Count == 0)
+                return Vector2Int.up;
+
+            BattleUnit nearest = null;
+            int minDist = int.MaxValue;
+
+            foreach (BattleUnit p in playerUnits)
+            {
+                if (p == null || p.IsDead) continue;
+                int dist = Math.Abs(p.CurrentTilePos.x - enemy.CurrentTilePos.x)
+                         + Math.Abs(p.CurrentTilePos.y - enemy.CurrentTilePos.y);
+                if (dist < minDist) { minDist = dist; nearest = p; }
+            }
+
+            if (nearest == null) return Vector2Int.up;
+
+            Vector2Int delta = nearest.CurrentTilePos - enemy.CurrentTilePos;
+            return new Vector2Int(Math.Sign(delta.x), Math.Sign(delta.y));
         }
     }
 }
