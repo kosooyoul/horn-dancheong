@@ -26,6 +26,7 @@ namespace KD
         private SkillData        _skill;
         private Vector2Int       _lastMouseTile;
         private List<Vector2Int> _currentRange = new List<Vector2Int>();
+        public IReadOnlyList<Vector2Int> CurrentRange => _currentRange;
 
         public SkillRangePreview(
             CombatGridQuery query,
