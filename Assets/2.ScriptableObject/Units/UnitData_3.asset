@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80e61fdbfa9880041ad8000a062a06d5, type: 3}
+  m_Name: UnitData_3
+  m_EditorClassIdentifier: Assembly-CSharp::KD.UnitData
+  unitId: 
+  unitName: "\uB098\uADF8\uB124"
+  description: 
+  icon: {fileID: 0}
+  prefab: {fileID: 4430476179508750244, guid: a486bfcc0a022495e9ccf7de67cbc89d, type: 3}
+  role: 0
+  attribute: 1
+  weaponType: 1
+  movementType: 0
+  moveAPCost: 30
+  baseStats:
+    agility: 1
+    spirit: 1
+    guard: 1
+    luck: 1
+  uniqueSkill1: {fileID: 11400000, guid: 559b88dccd54d4907be2309c86385e84, type: 2}
+  uniqueSkill2: {fileID: 0}

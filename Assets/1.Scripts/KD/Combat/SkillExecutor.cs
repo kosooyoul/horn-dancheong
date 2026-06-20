@@ -38,6 +38,9 @@ namespace KD
         }
 
         // 광역 대상 일괄 처리 — AP/쿨타임은 1회만 소모
+        // 광역 시전: 한 번의 시전으로 범위 내 여러 대상에게 효과를 적용한다.
+        // AP·쿨타임은 1회만 소모하므로, 대상마다 Execute를 반복 호출할 때 생기는
+        // "두 번째 대상부터 쿨타임/AP로 차단" 문제를 피한다. (적 광역 공격용)
         public static bool ExecuteArea(BattleUnit caster, List<BattleUnit> targets, SkillData skill)
         {
             if (caster == null || !caster.IsAlive)
@@ -81,6 +84,28 @@ namespace KD
                 caster.SetCooldown(skill.skillId, skill.cooldown);
 
             Debug.Log($"[SkillExecutor] {caster.Data.unitName} '{skill.skillName}' 광역 → {targets.Count}명에게 적용");
+
+            // < Note: from KO
+            int hitCount = 0;
+            if (targets != null)
+            {
+                foreach (BattleUnit target in targets)
+                {
+                    if (target == null || !target.IsAlive) continue;
+                    ExecuteEffect(caster, target, skill);
+                    hitCount++;
+                }
+            }
+
+            if (hitCount == 0)
+                return false;
+
+            caster.TrySpendAP(skill.apCost);
+
+            if (skill.cooldown > 0)
+                caster.SetCooldown(skill.skillId, skill.cooldown);
+            // > Note
+
             return true;
         }
 
