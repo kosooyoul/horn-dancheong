@@ -13,6 +13,25 @@ MonoBehaviour:
   m_Name: DeploymentRuleData_1
   m_EditorClassIdentifier: Assembly-CSharp::KD.DeploymentRuleData
   candidateDeployTiles:
-  - {x: 4, y: 4}
+  - {x: 0, y: 0}
+  - {x: 0, y: 1}
+  - {x: 0, y: 2}
+  - {x: 0, y: 3}
+  - {x: 0, y: 4}
+  - {x: 0, y: 5}
+  - {x: 0, y: 6}
+  - {x: 0, y: 7}
+  - {x: 0, y: 8}
+  - {x: 0, y: 9}
+  - {x: 1, y: 0}
+  - {x: 1, y: 1}
+  - {x: 1, y: 2}
+  - {x: 1, y: 3}
+  - {x: 1, y: 4}
+  - {x: 1, y: 5}
+  - {x: 1, y: 6}
+  - {x: 1, y: 7}
+  - {x: 1, y: 8}
+  - {x: 1, y: 9}
   forbiddenPatternFromEnemy: {fileID: 11400000, guid: f956f962c5378094a9106d136f3ba942, type: 2}
   maxDeployCount: 4

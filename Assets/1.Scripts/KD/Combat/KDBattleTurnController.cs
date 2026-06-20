@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -47,18 +48,81 @@ namespace KD
 
         private OwnedUnit selectedDeployUnit;
 
+        public OwnedUnit SelectedDeployUnit => selectedDeployUnit;
+
+        /// <summary>배치할 유닛이 선택/해제될 때 발생. null이면 선택 해제.</summary>
+        public event Action<OwnedUnit> OnDeployUnitSelected;
+
+        /// <summary>배치 상태(배치/취소)가 변경될 때 발생.</summary>
+        public event Action OnDeploymentChanged;
+
         /// <summary>배치 단계에서 배치할 OwnedUnit을 지정한다 (로스터 UI 버튼에서 호출).</summary>
         public void SelectDeployUnit(OwnedUnit unit)
         {
             selectedDeployUnit = unit;
+            OnDeployUnitSelected?.Invoke(unit);
+
+            if (unit != null)
+                battleManager.ShowDeploymentHighlights();
+            else
+                battleManager.HideDeploymentHighlights();
+
             Debug.Log($"[KDBattleTurnController] 배치 선택: {unit?.unitData.unitName ?? "(없음)"}");
+        }
+
+        /// <summary>
+        /// 현재 선택된 유닛을 화면 좌표 위치의 타일에 배치 시도.
+        /// DeploymentUnitSlotUI.OnEndDrag에서 호출한다.
+        /// </summary>
+        public bool TryDeploySelectedUnitAtScreenPosition(Vector2 screenPosition)
+        {
+            if (selectedDeployUnit == null) return false;
+            if (!TryGetGridUnderScreenPosition(screenPosition, out Vector2Int tile)) return false;
+
+            bool success = battleManager.OnDeploymentTileClicked(tile, selectedDeployUnit);
+            if (success) OnDeploymentChanged?.Invoke();
+            return success;
+        }
+
+        /// <summary>화면 좌표 → 그리드 좌표 변환. 타일이 유효하면 true 반환.</summary>
+        public bool TryGetGridUnderScreenPosition(Vector2 screenPosition, out Vector2Int grid)
+        {
+            grid = default;
+            Camera cam = GetBattleCamera();
+            if (cam == null || gridManager == null) return false;
+
+            Ray ray = cam.ScreenPointToRay(screenPosition);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
+            {
+                // 좌표는 항상 WorldToGrid로 계산 (GetComponentInParent 금지 — 공통 조상 오염 방지)
+                grid = gridManager.WorldToGrid(hit.point);
+                Debug.Log($"[KDBattleTurnController] Ray hit: '{hit.collider.gameObject.name}' at {hit.point} → grid={grid} valid={gridManager.IsValidTile(grid)}");
+
+                if (!gridManager.IsValidTile(grid)) return false;
+
+                // GridTile이 아직 없으면 mapProvider 경로로 올바른 오브젝트에 부착
+                gridManager.EnsureGridTile(grid);
+                return true;
+            }
+
+            // 콜라이더 없음: y=0 평면 교점
+            var ground = new Plane(Vector3.up, Vector3.zero);
+            if (ground.Raycast(ray, out float dist))
+            {
+                grid = gridManager.WorldToGrid(ray.GetPoint(dist));
+                Debug.Log($"[KDBattleTurnController] 평면 교점 → grid={grid} valid={gridManager.IsValidTile(grid)}");
+                return gridManager.IsValidTile(grid);
+            }
+
+            Debug.Log("[KDBattleTurnController] 레이 미스 — 카메라 방향 확인 필요");
+            return false;
         }
 
         // ── 행동 메뉴 상태 ────────────────────────────────────────────────
 
         private bool   isActionMenuOpen;
         private string pendingAction;
-        private Vector2Int actionMenuAnchorTile;
 
         // ── 마우스 호버 추적 ──────────────────────────────────────────────
 
@@ -71,10 +135,8 @@ namespace KD
         {
             if (gridManager == null || battleManager == null) return;
 
-            // 선택된 유닛의 마커가 이동 보간 중이면 입력 잠금
             if (IsSelectedUnitMoving()) return;
 
-            // 행동 메뉴 보류 처리
             if (isActionMenuOpen)
             {
                 if (pendingAction != null)
@@ -121,12 +183,20 @@ namespace KD
             if (mouse.leftButton.wasPressedThisFrame)
             {
                 if (TryGetGridUnderCursor(out Vector2Int tile))
-                    battleManager.OnDeploymentTileClicked(tile, selectedDeployUnit);
+                {
+                    Debug.Log($"[Deploy] 클릭 tile={tile} / 선택유닛={selectedDeployUnit?.unitData.unitName ?? "null"} / phase={battleManager.CurrentPhase}");
+                    bool success = battleManager.OnDeploymentTileClicked(tile, selectedDeployUnit);
+                    Debug.Log($"[Deploy] OnDeploymentTileClicked → {success}");
+                    if (success) OnDeploymentChanged?.Invoke();
+                }
             }
             else if (mouse.rightButton.wasPressedThisFrame)
             {
                 if (TryGetGridUnderCursor(out Vector2Int tile))
-                    battleManager.OnDeploymentTileClicked(tile, null); // null = 배치 취소
+                {
+                    bool removed = battleManager.OnDeploymentTileClicked(tile, null);
+                    if (removed) OnDeploymentChanged?.Invoke();
+                }
             }
         }
 
@@ -152,7 +222,6 @@ namespace KD
             }
             else
             {
-                // None 모드: 행동 메뉴가 비어 있으면 열지 않음. OnGUI 에서 항상 표시.
                 HandleKeyboardShortcuts();
             }
         }
@@ -217,30 +286,7 @@ namespace KD
         // ── Ray 캐스트 ────────────────────────────────────────────────────
 
         private bool TryGetGridUnderCursor(out Vector2Int grid)
-        {
-            grid = default;
-            Camera cam = GetBattleCamera();
-            Mouse  mouse = Mouse.current;
-            if (cam == null || mouse == null) return false;
-
-            Ray ray = cam.ScreenPointToRay(mouse.position.ReadValue());
-
-            if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
-            {
-                grid = gridManager.WorldToGrid(hit.point);
-                return gridManager.IsValidTile(grid);
-            }
-
-            // 콜라이더 없으면 y=0 평면으로 폴백
-            var ground = new Plane(Vector3.up, Vector3.zero);
-            if (ground.Raycast(ray, out float dist))
-            {
-                grid = gridManager.WorldToGrid(ray.GetPoint(dist));
-                return gridManager.IsValidTile(grid);
-            }
-
-            return false;
-        }
+            => TryGetGridUnderScreenPosition(Mouse.current?.position.ReadValue() ?? Vector2.zero, out grid);
 
         private Camera GetBattleCamera()
         {
@@ -283,7 +329,6 @@ namespace KD
             }
         }
 
-        // 배치 단계: 우상단에 확정 버튼 + 현재 선택 유닛 표시
         private void DrawDeploymentPanel()
         {
             var area = new Rect(Screen.width - 180f, 10f, 170f, 90f);
@@ -299,7 +344,6 @@ namespace KD
             GUILayout.EndArea();
         }
 
-        // 플레이어 턴 (None 모드): 이동/스킬/대기 행동 메뉴
         private void DrawActionMenu()
         {
             BattleUnit unit = battleManager.SelectedUnit;

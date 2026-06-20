@@ -1,9 +1,13 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace KD
 {
     // 스킬의 고정 설계도 — Inspector에서 설정, 전투 중 절대 수정 금지
     // 새 스킬 추가: Create > KD > Skill Data
+    //
+    // 데미지 공식: 최종 공격력 × skillCoefficient × 치명타 × 방어계수 × 회피계수 × 약점 × 연산보정(scale)
+    // 회복  공식: 회복력 × skillCoefficient × 연산보정(scale)
     [CreateAssetMenu(fileName = "SkillData_", menuName = "KD/Skill Data")]
     public class SkillData : ScriptableObject
     {
@@ -35,10 +39,11 @@ namespace KD
         public SkillEffectType effectType;
         [Tooltip("스킬 자체의 속성. AttributeCalculator에서 상성 계산에 사용")]
         public UnitAttribute attribute;
-        [Tooltip("기본 수치 (데미지 or 회복량의 고정값)")]
-        public int baseValue = 10;
-        [Tooltip("시전자의 spirit 스탯에 곱하는 계수. finalValue = baseValue + spirit * multiplier")]
-        public float spiritMultiplier = 1.0f;
+        [Tooltip("스킬 계수. 데미지: 최종 공격력 × 이 값 / 회복: 회복력 × 이 값\n1.0 = 100%, 1.5 = 150%")]
+        [FormerlySerializedAs("spiritMultiplier")]
+        public float skillCoefficient = 1.0f;
+        [Tooltip("연산 보정 단계. 소=×1.5 / 중=×2.0 / 대=×2.5 / 특대=×4.0")]
+        public Scale scale;
 
 #if UNITY_EDITOR
         private void OnValidate()
@@ -54,8 +59,7 @@ namespace KD
 
             apCost           = Mathf.Clamp(apCost, 1, 100);
             cooldown         = Mathf.Max(0, cooldown);
-            baseValue        = Mathf.Max(0, baseValue);
-            spiritMultiplier = Mathf.Max(0f, spiritMultiplier);
+            skillCoefficient = Mathf.Max(0f, skillCoefficient);
         }
 #endif
     }
