@@ -249,12 +249,28 @@ namespace KD
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null) return;
 
+            BattleUnit unit = battleManager.SelectedUnit;
+            if (unit == null) return;
+
+            // 이동 단축키 - AP 확인
             if (keyboard.digit1Key.wasPressedThisFrame || keyboard.mKey.wasPressedThisFrame)
-                battleManager.SelectMoveAction();
+            {
+                if (unit.HasEnoughAP(unit.Data.moveAPCost))
+                    battleManager.SelectMoveAction();
+                else
+                    Debug.Log($"[KDBattleTurnController] 이동 불가: AP 부족 (필요: {unit.Data.moveAPCost}, 현재: {unit.CurrentAP})");
+            }
 
+            // 스킬 단축키 - AP와 사용 가능한 스킬 확인
             if (keyboard.digit2Key.wasPressedThisFrame || keyboard.kKey.wasPressedThisFrame)
-                SelectFirstAvailableSkill();
+            {
+                if (HasAnyUsableSkillWithEnoughAP(unit))
+                    SelectFirstAvailableSkill();
+                else
+                    Debug.Log("[KDBattleTurnController] 스킬 사용 불가: 사용 가능한 스킬이 없거나 AP 부족");
+            }
 
+            // 대기 단축키 - 항상 사용 가능
             if (keyboard.wKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)
                 battleManager.WaitSelectedUnit();
         }
@@ -263,9 +279,32 @@ namespace KD
         {
             BattleUnit unit = battleManager.SelectedUnit;
             if (unit == null) return;
+            
             List<SkillData> usable = unit.GetUsableSkills();
-            if (usable.Count > 0)
-                battleManager.SelectSkillAction(usable[0]);
+            foreach (SkillData skill in usable)
+            {
+                if (unit.HasEnoughAP(skill.apCost))
+                {
+                    battleManager.SelectSkillAction(skill);
+                    return;
+                }
+            }
+            
+            Debug.Log("[KDBattleTurnController] 충분한 AP를 가진 스킬이 없습니다.");
+        }
+
+        /// <summary>유닛이 충분한 AP로 사용할 수 있는 스킬이 있는지 확인</summary>
+        private bool HasAnyUsableSkillWithEnoughAP(BattleUnit unit)
+        {
+            if (unit == null) return false;
+            
+            List<SkillData> usableSkills = unit.GetUsableSkills();
+            foreach (SkillData skill in usableSkills)
+            {
+                if (unit.HasEnoughAP(skill.apCost))
+                    return true;
+            }
+            return false;
         }
 
         // ── 마우스 호버 (스킬 범위 미리보기) ──────────────────────────────
@@ -356,11 +395,26 @@ namespace KD
             GUILayout.BeginArea(area, GUI.skin.box);
             GUILayout.Label($"<b>{unit.Data.unitName}</b>  AP:{unit.CurrentAP}", RichStyle());
 
-            if (GUILayout.Button("이동 [1/M]"))  pendingAction = "이동";
-            if (GUILayout.Button("스킬 [2/K]"))  pendingAction = "스킬";
+            // 이동 버튼 - UnitData.moveAPCost 확인
+            bool canMove = unit.HasEnoughAP(unit.Data.moveAPCost);
+            GUI.enabled = canMove;
+            string moveText = canMove ? "이동 [1/M]" : $"이동 [1/M] (AP {unit.Data.moveAPCost} 필요)";
+            if (GUILayout.Button(moveText))  pendingAction = "이동";
+
+            // 스킬 버튼 - 사용 가능한 스킬이 있는지 확인
+            bool hasUsableSkill = HasAnyUsableSkillWithEnoughAP(unit);
+            GUI.enabled = hasUsableSkill;
+            string skillText = hasUsableSkill ? "스킬 [2/K]" : "스킬 [2/K] (AP 부족)";
+            if (GUILayout.Button(skillText))  pendingAction = "스킬";
+
+            // 대기 버튼 - 항상 활성화
+            GUI.enabled = true;
             if (GUILayout.Button("대기 [W]"))    pendingAction = "대기";
+            
+            // 취소 버튼 - 항상 활성화
             if (GUILayout.Button("취소 [Esc]"))  pendingAction = "취소";
 
+            GUI.enabled = true; // GUI 상태 복원
             GUILayout.EndArea();
         }
 
