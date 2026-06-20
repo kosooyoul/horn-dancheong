@@ -25,6 +25,12 @@ namespace KD
 
         [Header("UI References")]
         [SerializeField] private HornDancheong.Seongwoo.UI.CombatInteractionUIManager combatUIManager;
+        [SerializeField] private HornDancheong.Seongwoo.UI.InitiativeManager initiativeManager;
+
+        public bool IsInitiativeAnimating => initiativeManager != null && initiativeManager.IsAnimating;
+
+        [Header("Victory Settings")]
+        [SerializeField] private int victoryDialogueIndex = 1;
 
         [Header("Deployment")]
         [SerializeField] private DeploymentRuleData deploymentRuleData;
@@ -50,6 +56,8 @@ namespace KD
 
         private List<BattleUnit> turnOrder     = new List<BattleUnit>();
         private int              turnIndex     = 0;
+        private int              roundCount    = 0;
+        private Coroutine        _enemyTurnCoroutine;
 
         private BattleUnit       selectedUnit;
         private SkillData        selectedSkill;
@@ -90,6 +98,10 @@ namespace KD
 
         private void Start()
         {
+            if (initiativeManager == null)
+            {
+                initiativeManager = FindObjectOfType<HornDancheong.Seongwoo.UI.InitiativeManager>();
+            }
             InitializeBattle();
         }
 
@@ -223,6 +235,19 @@ namespace KD
             for (int i = 0; i < turnOrder.Count; i++)
                 Debug.Log($"  {i + 1}. {turnOrder[i].Data.unitName} (initiative: {turnOrder[i].Stats.initiative})");
 
+            if (initiativeManager != null)
+            {
+                var adapters = new List<HornDancheong.Seongwoo.UI.ICharacterBattleInfo>();
+                foreach (var unit in turnOrder)
+                {
+                    adapters.Add(new HornDancheong.Seongwoo.UI.BattleUnitAdapter(unit, unit.TeamId == 0));
+                }
+                initiativeManager.InitializeBattleUI(adapters, sortByInitiative: false);
+
+                roundCount = 1;
+                initiativeManager.ShowTurnIndicator(roundCount);
+            }
+
             ProcessCurrentTurn();
         }
 
@@ -258,49 +283,57 @@ namespace KD
             {
                 // 적 턴 — 딜레이 후 실행
                 currentPhase = BattlePhase.EnemyPhase;
-                StartCoroutine(RunEnemyTurnDelayed(current));
+                if (_enemyTurnCoroutine != null)
+                {
+                    StopCoroutine(_enemyTurnCoroutine);
+                }
+                _enemyTurnCoroutine = StartCoroutine(EnemyTurnRoutine(current));
             }
         }
 
-        private IEnumerator RunEnemyTurnDelayed(BattleUnit enemy)
+        private System.Collections.IEnumerator EnemyTurnRoutine(BattleUnit enemy)
         {
-            yield return new WaitForSeconds(enemyTurnDelay);
-            RunEnemyTurn(enemy);
-        }
+            // 1. 적 턴 개시 후 1초 대기
+            yield return new WaitForSeconds(1.0f);
 
-        // ── 적 턴 처리 ────────────────────────────────────────────────────
-
-        /// <summary>
-        /// 적 1체의 턴 처리.
-        ///   1) 지난 턴에 예고해 둔 행동이 있으면 지금 실제로 실행(타격)한다.
-        ///   2) 다음 턴에 실행할 행동을 새로 예고한다. (이번 턴엔 타격하지 않음)
-        ///   3) 살아있는 모든 적의 예고를 바닥에 danger 하이라이트로 다시 그린다.
-        /// 따라서 보스 첫 턴에는 예고만 하고, 그 다음 보스 턴부터 예고대로 타격한다.
-        /// </summary>
-        private void RunEnemyTurn(BattleUnit enemy)
-        {
             int idx = enemyUnits.IndexOf(enemy);
-            if (idx < 0) { EndCurrentTurn(); return; }
+            if (idx < 0)
+            {
+                EndCurrentTurn();
+                yield break;
+            }
 
             EnemyIntentController controller = intentControllers[idx];
 
-            // 1. 지난 턴 예고 실행 (없으면 — 예: 첫 턴 — 건너뜀)
+            // 2. 지난 턴 예고 실행
             if (controller.CurrentIntent != null)
             {
+                bool hasVfx = false;
                 if (skillActionRunner != null
                     && controller.TryGetExecuteData(playerUnits, out BattleUnit caster, out List<BattleUnit> targets, out List<Vector2Int> tiles, out SkillData skill))
                 {
-                    // VFX + 피해: 완료 콜백에서 턴 후처리
+                    hasVfx = true;
+                    // VFX 실행 후 완료되면 HP 업데이트 및 다음 처리
                     skillActionRunner.StartUseSkill(caster, targets, tiles, skill,
-                        () => ContinueEnemyTurn(enemy, idx));
-                    return;
+                        () => {
+                            UpdateInitiativeUI();
+                            ContinueEnemyTurn(enemy, idx);
+                        });
                 }
 
-                // SkillActionRunner 없음 — VFX 없이 직접 실행
-                controller.ExecuteCurrentIntent(playerUnits);
+                if (!hasVfx)
+                {
+                    controller.ExecuteCurrentIntent(playerUnits);
+                    UpdateInitiativeUI();
+                    ContinueEnemyTurn(enemy, idx);
+                }
             }
-
-            ContinueEnemyTurn(enemy, idx);
+            else
+            {
+                // 첫 턴 등 예고가 없는 경우에도 즉시 넘어가지 않고 1초 추가 대기 후 다음 예고 준비 및 턴 종료
+                yield return new WaitForSeconds(1.0f);
+                ContinueEnemyTurn(enemy, idx);
+            }
         }
 
         // VFX 완료 후 (또는 첫 턴 / 폴백 경로) 예고 준비 및 턴 종료
@@ -534,6 +567,7 @@ namespace KD
         private void OnSkillComplete()
         {
             Debug.Log("[TacticalBattleManager] 스킬 완료");
+            UpdateInitiativeUI();
             EndCurrentTurn();
         }
 
@@ -572,8 +606,27 @@ namespace KD
 
             if (CheckBattleEnd()) return;
 
+            if (initiativeManager != null)
+            {
+                initiativeManager.NextTurn();
+            }
+
             turnIndex++;
-            ProcessCurrentTurn();
+            if (turnIndex >= turnOrder.Count)
+            {
+                StartCoroutine(RoundResetDelayRoutine());
+            }
+            else
+            {
+                ProcessCurrentTurn();
+            }
+        }
+
+        private System.Collections.IEnumerator RoundResetDelayRoutine()
+        {
+            // NextTurn()의 슬라이드 아웃 애니메이션(0.35초)이 완료될 때까지 대기
+            yield return new WaitForSeconds(0.35f);
+            StartNewRound();
         }
 
         private void StartNewRound()
@@ -581,6 +634,20 @@ namespace KD
             Debug.Log("[TacticalBattleManager] 라운드 종료 → 새 라운드");
             turnOrder = TurnOrderManager.BuildTurnOrder(allUnits);
             turnIndex = 0;
+
+            if (initiativeManager != null)
+            {
+                var adapters = new List<HornDancheong.Seongwoo.UI.ICharacterBattleInfo>();
+                foreach (var unit in turnOrder)
+                {
+                    adapters.Add(new HornDancheong.Seongwoo.UI.BattleUnitAdapter(unit, unit.TeamId == 0));
+                }
+                initiativeManager.UpdateTurnOrder(adapters);
+
+                roundCount++;
+                initiativeManager.ShowTurnIndicator(roundCount);
+            }
+
             ProcessCurrentTurn();
         }
 
@@ -598,12 +665,31 @@ namespace KD
             {
                 currentPhase = BattlePhase.BattleEnd;
                 Debug.Log("[TacticalBattleManager] 전투 종료 — 패배");
+
+                if (HornDancheong.Seongwoo.UI.UIManager.Instance != null)
+                {
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_CombatInteraction);
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_InitiativeTrack);
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_BossHP);
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.ShowPanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_MainMenu);
+                }
+
+                ResetBattle();
                 return true;
             }
             if (allEnemiesDead)
             {
                 currentPhase = BattlePhase.BattleEnd;
                 Debug.Log("[TacticalBattleManager] 전투 종료 — 승리");
+
+                if (HornDancheong.Seongwoo.UI.UIManager.Instance != null)
+                {
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_CombatInteraction);
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_InitiativeTrack);
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_BossHP);
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.ShowPanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_Dialogue, victoryDialogueIndex);
+                }
+
                 return true;
             }
             return false;
@@ -656,6 +742,72 @@ namespace KD
         public void ExecuteWait()
         {
             WaitSelectedUnit();
+        }
+
+        private void UpdateInitiativeUI()
+        {
+            if (initiativeManager == null) return;
+
+            foreach (var unit in allUnits)
+            {
+                if (unit == null) continue;
+
+                if (unit.IsDead)
+                {
+                    initiativeManager.RemoveCharacter(unit.Data.unitId);
+                    if (gridManager != null)
+                    {
+                        gridManager.SetUnitVisualActive(unit, false);
+                    }
+                }
+                else
+                {
+                    initiativeManager.UpdateCharacterHp(unit.Data.unitId, (float)unit.CurrentHP, (float)unit.Stats.maxHP);
+                }
+            }
+        }
+
+        public void ResetBattle()
+        {
+            Debug.Log("[TacticalBattleManager] 전투 초기화 및 리셋");
+
+            // 1. 적 턴 코루틴 중지
+            if (_enemyTurnCoroutine != null)
+            {
+                StopCoroutine(_enemyTurnCoroutine);
+                _enemyTurnCoroutine = null;
+            }
+
+            // 2. 이니셔티브 트랙 리스트 정리
+            if (initiativeManager != null)
+            {
+                initiativeManager.InitializeBattleUI(new List<HornDancheong.Seongwoo.UI.ICharacterBattleInfo>(), false);
+            }
+
+            // 3. 그리드 유닛 및 비주얼 청소
+            if (gridManager != null)
+            {
+                gridManager.ClearUnits();
+                gridManager.ClearHighlight();
+                gridManager.ClearDeploymentHighlight();
+                gridManager.ClearAllUnitGhosts();
+            }
+
+            // 4. 가변 턴 변수 및 런타임 유닛 리스트 리셋
+            playerUnits.Clear();
+            enemyUnits.Clear();
+            allUnits.Clear();
+            turnOrder.Clear();
+            turnIndex = 0;
+            roundCount = 0;
+
+            selectedUnit = null;
+            selectedSkill = null;
+            currentActionMode = BattleActionMode.None;
+            currentMoveOptions.Clear();
+
+            // 5. 배치 단계 상태로 초기화
+            InitializeBattle();
         }
     }
 }

@@ -341,6 +341,19 @@ namespace KD
             return visual.GetComponent<UnitMover>();
         }
 
+        /// <summary>유닛 비주얼의 Active 상태를 설정한다.</summary>
+        public void SetUnitVisualActive(BattleUnit unit, bool active)
+        {
+            if (unit == null) return;
+            if (visualByUnit.TryGetValue(unit, out GameObject visual))
+            {
+                if (visual != null && visual.activeSelf != active)
+                {
+                    visual.SetActive(active);
+                }
+            }
+        }
+
         /// <summary>유닛을 특정 방향으로 회전시킨다.</summary>
         public void RotateUnitTowards(BattleUnit unit, Vector3 direction)
         {

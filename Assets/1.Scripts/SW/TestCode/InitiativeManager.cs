@@ -135,13 +135,34 @@ namespace HornDancheong.Seongwoo.UI
         /// </summary>
         public void UpdateTurnOrder(IEnumerable<ICharacterBattleInfo> characters)
         {
+            var newCharacters = characters.Where(c => c != null).ToList();
+
+            // 순서 변경 감지: 현재 리스트의 캐릭터 ID 순서와 새로운 캐릭터 ID 순서가 100% 일치하는지 비교
+            bool isIdentical = _panelsList.Count == newCharacters.Count;
+            if (isIdentical)
+            {
+                for (int i = 0; i < _panelsList.Count; i++)
+                {
+                    if (_panelsList[i].CharacterId != newCharacters[i].Id)
+                    {
+                        isIdentical = false;
+                        break;
+                    }
+                }
+            }
+
+            // 멤버 구성과 정렬 순서가 100% 동일하면 굳이 재정렬 연출을 돌리지 않고 즉시 반환
+            if (isIdentical)
+            {
+                return;
+            }
+
             if (_activeAnimationCoroutine != null)
             {
                 StopCoroutine(_activeAnimationCoroutine);
                 ForceApplyTargets();
             }
 
-            var newCharacters = characters.Where(c => c != null).ToList();
             var newIds = new HashSet<string>(newCharacters.Select(c => c.Id));
 
             // 1. 더이상 존재하지 않는 캐릭터 UI 제거
