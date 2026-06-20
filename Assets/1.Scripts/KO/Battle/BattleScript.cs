@@ -1,8 +1,18 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using HornDancheong.Seongwoo.UI;
+
+// 적 행동 패턴 정의
+[System.Serializable]
+public enum EnemyBehaviorType
+{
+    Stationary = 0, // 제자리 고정 - 공격 범위 내의 적에게만 반응
+    Defensive = 1,  // 이지적 - 공격받을 때나 아군이 근처에 올 때 반응
+    Aggressive = 2  // 호전적 - 적극적으로 아군을 찾아 공격
+}
 
 [System.Serializable]
 public class MapData
@@ -78,6 +88,36 @@ public class ObjectCollection
     public ObjectInfo[] objects;
 }
 
+// 스킬 시스템 관련 클래스들
+[System.Serializable]
+public class SkillRange
+{
+    public int[][] pattern;       // 2차원 배열 (0: 영향 없음, 1: 영향 있음)
+    public int[] actorPosition;   // [x, y] 액터 위치 (pattern 배열 내에서)
+}
+
+[System.Serializable]
+public class SkillDefinition
+{
+    public int id;
+    public string name;
+    public string description;
+    public string skillType;        // "damage", "heal", "buff"
+    public string targetType;       // "enemy", "ally", "area", "self"
+    public int mpCost;
+    public int basePower;          // 기본 위력/회복량
+    public SkillRange range;
+}
+
+[System.Serializable]
+public class SkillCollection
+{
+    public string name;
+    public string description;
+    public string version;
+    public SkillDefinition[] skills;
+}
+
 // 유닛 기본 스탯 — KD.UnitBaseStats와 동일한 4개 원시 스탯 (추후 StatCalculator로 매핑)
 [System.Serializable]
 public class UnitDefaultStats
@@ -99,6 +139,8 @@ public class UnitDefinition
     public string colorHex;   // 박스 마커 색상 (#RRGGBB)
     public string prefabPath; // Resources 프리팹 경로 (비우면 박스 사용)
     public UnitDefaultStats defaultStats; // 기본 스탯
+    public EnemyBehaviorType behaviorType = EnemyBehaviorType.Defensive; // 적 행동 패턴 (적군만 사용)
+    public int detectionRange = 3; // 탐지 범위 (적군만 사용)
 }
 
 [System.Serializable]
@@ -174,6 +216,292 @@ public class BattleUnitEntry : ICharacterBattleInfo
     public string DisplayName => definition != null && !string.IsNullOrWhiteSpace(definition.name)
         ? definition.name
         : "Unit";
+    
+    // 적 AI용 추가 프로퍼티
+    public EnemyBehaviorType BehaviorType => definition?.behaviorType ?? EnemyBehaviorType.Defensive;
+    public int DetectionRange => definition?.detectionRange ?? 3;
+
+    // 표시 이름 별칭 (스킬 로그 등에서 사용)
+    public string UnitName => DisplayName;
+
+    // 최대 체력 — guard 기반 (KD.StatCalculator와 동일한 공식: 50 + guard * 10)
+    public int MaxHP => definition != null && definition.defaultStats != null
+        ? 50 + definition.defaultStats.guard * 10
+        : 0;
+
+    // 런타임 체력 상태 — 음수면 미초기화로 보고 최대 체력으로 취급
+    private int currentHP = -1;
+
+    public int CurrentHP
+    {
+        get => currentHP < 0 ? MaxHP : currentHP;
+        set => currentHP = Mathf.Clamp(value, 0, MaxHP);
+    }
+}
+
+// 적 AI 행동 결정 시스템
+public static class EnemyAI
+{
+    // 적 유닛의 다음 행동을 결정한다
+    public static EnemyAction DecideAction(BattleUnitEntry enemy, BattleScript battleScript)
+    {
+        if (enemy == null || !enemy.isEnemy || enemy.definition == null)
+        {
+            return new EnemyAction { actionType = EnemyActionType.Wait };
+        }
+
+        List<BattleUnitEntry> nearbyAllies = FindNearbyAllies(enemy, battleScript);
+        BattleUnitEntry closestAlly = FindClosestAlly(enemy, battleScript);
+
+        switch (enemy.BehaviorType)
+        {
+            case EnemyBehaviorType.Stationary:
+                return DecideStationaryAction(enemy, nearbyAllies, battleScript);
+            
+            case EnemyBehaviorType.Defensive:
+                return DecideDefensiveAction(enemy, nearbyAllies, closestAlly, battleScript);
+            
+            case EnemyBehaviorType.Aggressive:
+                return DecideAggressiveAction(enemy, nearbyAllies, closestAlly, battleScript);
+            
+            default:
+                return new EnemyAction { actionType = EnemyActionType.Wait };
+        }
+    }
+
+    // 제자리 고정: 공격 범위 내의 적에게만 반응
+    private static EnemyAction DecideStationaryAction(BattleUnitEntry enemy, List<BattleUnitEntry> nearbyAllies, BattleScript battleScript)
+    {
+        // 인접한 아군이 있으면 공격, 없으면 대기
+        BattleUnitEntry adjacentAlly = FindAdjacentAlly(enemy, nearbyAllies);
+        if (adjacentAlly != null)
+        {
+            return new EnemyAction 
+            { 
+                actionType = EnemyActionType.Attack, 
+                target = adjacentAlly.grid 
+            };
+        }
+        
+        return new EnemyAction { actionType = EnemyActionType.Wait };
+    }
+
+    // 이지적: 공격받을 때나 아군이 근처에 올 때 반응
+    private static EnemyAction DecideDefensiveAction(BattleUnitEntry enemy, List<BattleUnitEntry> nearbyAllies, BattleUnitEntry closestAlly, BattleScript battleScript)
+    {
+        // 인접한 아군이 있으면 공격
+        BattleUnitEntry adjacentAlly = FindAdjacentAlly(enemy, nearbyAllies);
+        if (adjacentAlly != null)
+        {
+            return new EnemyAction 
+            { 
+                actionType = EnemyActionType.Attack, 
+                target = adjacentAlly.grid 
+            };
+        }
+
+        // 탐지 범위 내에 아군이 있으면 가까워지기
+        if (nearbyAllies.Count > 0 && closestAlly != null)
+        {
+            Vector2Int bestMovePos = GetBestMoveTowardsTarget(enemy, closestAlly.grid, battleScript);
+            if (bestMovePos != Vector2Int.zero)
+            {
+                return new EnemyAction 
+                { 
+                    actionType = EnemyActionType.Move, 
+                    target = bestMovePos 
+                };
+            }
+        }
+
+        return new EnemyAction { actionType = EnemyActionType.Wait };
+    }
+
+    // 호전적: 적극적으로 아군을 찾아 공격
+    private static EnemyAction DecideAggressiveAction(BattleUnitEntry enemy, List<BattleUnitEntry> nearbyAllies, BattleUnitEntry closestAlly, BattleScript battleScript)
+    {
+        // 인접한 아군이 있으면 공격
+        BattleUnitEntry adjacentAlly = FindAdjacentAlly(enemy, nearbyAllies);
+        if (adjacentAlly != null)
+        {
+            return new EnemyAction 
+            { 
+                actionType = EnemyActionType.Attack, 
+                target = adjacentAlly.grid 
+            };
+        }
+
+        // 가장 가까운 아군을 향해 이동
+        if (closestAlly != null)
+        {
+            Vector2Int bestMovePos = GetBestMoveTowardsTarget(enemy, closestAlly.grid, battleScript);
+            if (bestMovePos != Vector2Int.zero)
+            {
+                return new EnemyAction 
+                { 
+                    actionType = EnemyActionType.Move, 
+                    target = bestMovePos 
+                };
+            }
+        }
+
+        return new EnemyAction { actionType = EnemyActionType.Wait };
+    }
+
+    // 탐지 범위 내의 아군 유닛들을 찾는다
+    private static List<BattleUnitEntry> FindNearbyAllies(BattleUnitEntry enemy, BattleScript battleScript)
+    {
+        var nearbyAllies = new List<BattleUnitEntry>();
+        var allUnits = battleScript.GetTurnOrder();
+
+        foreach (var unit in allUnits)
+        {
+            if (!unit.isEnemy && ManhattanDistance(enemy.grid, unit.grid) <= enemy.DetectionRange)
+            {
+                nearbyAllies.Add(unit);
+            }
+        }
+
+        return nearbyAllies;
+    }
+
+    // 가장 가까운 아군 유닛을 찾는다
+    private static BattleUnitEntry FindClosestAlly(BattleUnitEntry enemy, BattleScript battleScript)
+    {
+        var allUnits = battleScript.GetTurnOrder();
+        BattleUnitEntry closest = null;
+        int minDistance = int.MaxValue;
+
+        foreach (var unit in allUnits)
+        {
+            if (!unit.isEnemy)
+            {
+                int distance = ManhattanDistance(enemy.grid, unit.grid);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    closest = unit;
+                }
+            }
+        }
+
+        return closest;
+    }
+
+    // 인접한 아군 유닛을 찾는다
+    private static BattleUnitEntry FindAdjacentAlly(BattleUnitEntry enemy, List<BattleUnitEntry> nearbyAllies)
+    {
+        foreach (var ally in nearbyAllies)
+        {
+            if (ManhattanDistance(enemy.grid, ally.grid) == 1)
+            {
+                return ally;
+            }
+        }
+        return null;
+    }
+
+    // 목표를 향해 최적의 위치로 이동할 좌표를 결정한다 (최대 이동력 활용)
+    private static Vector2Int GetBestMoveTowardsTarget(BattleUnitEntry enemy, Vector2Int targetPos, BattleScript battleScript)
+    {
+        Vector2Int turnOrigin = battleScript.GetCurrentTurnOrigin();
+        int maxMoveRange = enemy.MoveRange;
+        
+        // BFS로 도달 가능한 모든 칸을 찾기
+        var reachablePositions = GetReachablePositions(enemy, battleScript, maxMoveRange, turnOrigin);
+        
+        if (reachablePositions.Count == 0)
+            return Vector2Int.zero; // 이동할 수 없음
+            
+        // 목표에 가장 가까운 위치 찾기
+        Vector2Int bestPosition = enemy.grid;
+        int bestDistance = ManhattanDistance(enemy.grid, targetPos);
+        
+        foreach (Vector2Int pos in reachablePositions)
+        {
+            int distance = ManhattanDistance(pos, targetPos);
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestPosition = pos;
+            }
+        }
+        
+        // 현재 위치와 같으면 이동하지 않음
+        return bestPosition == enemy.grid ? Vector2Int.zero : bestPosition;
+    }
+    
+    // BFS로 이동 범위 내의 모든 도달 가능한 위치를 찾기
+    public static List<Vector2Int> GetReachablePositions(BattleUnitEntry enemy, BattleScript battleScript, int maxMoveRange, Vector2Int origin)
+    {
+        var reachable = new List<Vector2Int>();
+        var visited = new HashSet<Vector2Int>();
+        var queue = new Queue<(Vector2Int pos, int distance)>();
+        
+        Vector2Int start = enemy.grid;
+        queue.Enqueue((start, 0));
+        visited.Add(start);
+        
+        Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+        
+        while (queue.Count > 0)
+        {
+            var (current, distance) = queue.Dequeue();
+            
+            foreach (Vector2Int dir in directions)
+            {
+                Vector2Int next = current + dir;
+                
+                if (visited.Contains(next))
+                    continue;
+                    
+                int nextDistance = distance + 1;
+                
+                // 최대 이동 범위 초과 확인
+                if (ManhattanDistance(next, origin) > maxMoveRange)
+                    continue;
+                    
+                // 이동 가능한 칸인지 확인
+                if (!battleScript.IsWalkable(next.x, next.y))
+                    continue;
+                    
+                // 다른 유닛이 있는지 확인
+                if (battleScript.IsTileOccupied(next))
+                    continue;
+                
+                visited.Add(next);
+                reachable.Add(next);
+                
+                if (nextDistance < maxMoveRange)
+                {
+                    queue.Enqueue((next, nextDistance));
+                }
+            }
+        }
+        
+        return reachable;
+    }
+
+    private static int ManhattanDistance(Vector2Int a, Vector2Int b)
+    {
+        return Mathf.Abs(a.x - b.x) + Mathf.Abs(a.y - b.y);
+    }
+}
+
+// 적 행동 타입
+public enum EnemyActionType
+{
+    Wait,    // 대기
+    Move,    // 이동
+    Attack   // 공격
+}
+
+// 적 행동 정보
+[System.Serializable]
+public struct EnemyAction
+{
+    public EnemyActionType actionType;
+    public Vector2Int target; // 이동 목표 또는 공격 대상 위치
 }
 
 public class BattleScript : MonoBehaviour
@@ -236,6 +564,18 @@ public class BattleScript : MonoBehaviour
     private Dictionary<int, UnitDefinition> allyDefinitions;
     private Dictionary<int, UnitDefinition> enemyDefinitions;
     
+    // 스킬 정의 (SKILLS.json)
+    private Dictionary<int, SkillDefinition> skillDefinitions;
+    
+    // 스킬 UI 관련 변수들
+    private bool isSkillMenuOpen = false;
+    private bool isSkillRangePreview = false;
+    private SkillDefinition selectedSkill = null;
+    private Vector2Int skillCasterPosition;
+    private List<Vector2Int> skillTargetPositions = new List<Vector2Int>();
+    // 이번 스킬 플로우(공격 메뉴로 열린 한 번의 흐름)에서 실제로 스킬을 사용했는지 — 턴 종료 판단용
+    private bool skillUsedThisFlow = false;
+    
     // 유닛 배치 런타임 상태
     private Transform unitParent;
     private List<GameObject> enemyUnits;
@@ -265,6 +605,7 @@ public class BattleScript : MonoBehaviour
 
         LoadTileAndObjectDefinitions();
         LoadUnitDefinitions();
+        LoadSkillDefinitions();
         LoadMapData();
         CreateBattleMap();
         PlaceUnits();
@@ -275,6 +616,38 @@ public class BattleScript : MonoBehaviour
     {
         allyDefinitions = LoadUnitDefinitionFile("ALLYS.json");
         enemyDefinitions = LoadUnitDefinitionFile("ENEMIES.json");
+    }
+    
+    // SKILLS.json에서 스킬 정의 로딩
+    private void LoadSkillDefinitions()
+    {
+        skillDefinitions = new Dictionary<int, SkillDefinition>();
+        string filePath = Path.Combine(Application.dataPath, "1.Scripts/KO/Battle/SkillData/SKILLS.json");
+        
+        if (!File.Exists(filePath))
+        {
+            Debug.LogWarning($"[BattleScript] 스킬 정의 파일을 찾을 수 없습니다: {filePath}");
+            return;
+        }
+        
+        try
+        {
+            string json = File.ReadAllText(filePath);
+            SkillCollection collection = JsonUtility.FromJson<SkillCollection>(json);
+            
+            if (collection?.skills != null)
+            {
+                foreach (var skill in collection.skills)
+                {
+                    skillDefinitions[skill.id] = skill;
+                }
+                Debug.Log($"[BattleScript] {collection.skills.Length}개 스킬 정의 로딩 완료");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[BattleScript] 스킬 정의 파일 로딩 실패: {ex.Message}");
+        }
     }
 
     private Dictionary<int, UnitDefinition> LoadUnitDefinitionFile(string fileName)
@@ -453,7 +826,22 @@ public class BattleScript : MonoBehaviour
 
     void Update()
     {
-        
+        // 프로젝트가 새 Input System 패키지(activeInputHandler=1)로 설정돼 있어 Keyboard.current를 사용한다.
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null) return;
+
+        // 스킬 범위 미리보기 중 확인/취소 처리
+        if (isSkillRangePreview)
+        {
+            if (keyboard.enterKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)
+            {
+                ConfirmSkillUse();
+            }
+            else if (keyboard.escapeKey.wasPressedThisFrame)
+            {
+                CancelSkillUse();
+            }
+        }
     }
     
     // 맵 칩 번호에서 타일 ID 추출 (0x0000FF 부분)
@@ -969,6 +1357,125 @@ public class BattleScript : MonoBehaviour
         return currentTurnOrigin;
     }
 
+    // ── 적 AI 실행 ────────────────────────────────────────────────────
+
+    // 현재 턴 유닛이 적이면 AI로 행동을 실행한다
+    public bool ExecuteEnemyAI()
+    {
+        BattleUnitEntry currentUnit = GetCurrentTurnUnit();
+        if (currentUnit == null || !currentUnit.isEnemy)
+        {
+            return false;
+        }
+
+        Debug.Log($"[BattleScript] {currentUnit.DisplayName} AI 행동 시작 (패턴: {currentUnit.BehaviorType})");
+
+        EnemyAction action = EnemyAI.DecideAction(currentUnit, this);
+        return ExecuteEnemyAction(currentUnit, action);
+    }
+
+    // 적의 행동을 실행한다
+    private bool ExecuteEnemyAction(BattleUnitEntry enemy, EnemyAction action)
+    {
+        switch (action.actionType)
+        {
+            case EnemyActionType.Move:
+                Debug.Log($"[BattleScript] {enemy.DisplayName} 이동: ({enemy.grid.x}, {enemy.grid.y}) → ({action.target.x}, {action.target.y})");
+                // 경로를 따라 이동 (여러 칸 가능)
+                return MoveEnemyToTarget(enemy, action.target);
+
+            case EnemyActionType.Attack:
+                Debug.Log($"[BattleScript] {enemy.DisplayName} 공격: ({action.target.x}, {action.target.y})");
+                return ExecuteEnemyAttack(enemy, action.target);
+
+            case EnemyActionType.Wait:
+            default:
+                Debug.Log($"[BattleScript] {enemy.DisplayName} 대기");
+                return true;
+        }
+    }
+
+    // 적 유닛을 목표 위치까지 경로를 따라 이동시킨다
+    private bool MoveEnemyToTarget(BattleUnitEntry enemy, Vector2Int target)
+    {
+        if (enemy == null || target == enemy.grid)
+            return false;
+
+        // 도달 가능한지 먼저 확인
+        Vector2Int turnOrigin = GetCurrentTurnOrigin();
+        var reachablePositions = EnemyAI.GetReachablePositions(enemy, this, enemy.MoveRange, turnOrigin);
+        
+        if (!reachablePositions.Contains(target))
+        {
+            Debug.LogWarning($"[BattleScript] {enemy.DisplayName}이(가) ({target.x}, {target.y})로 이동할 수 없습니다.");
+            return false;
+        }
+
+        // 경로 계산 및 이동 (기존의 BFS 경로 찾기 로직 활용)
+        Dictionary<Vector2Int, Vector2Int> cameFrom = ComputeReachable(enemy);
+        if (!cameFrom.ContainsKey(target))
+        {
+            // 직접 이동 시도 (한 칸인 경우)
+            return MoveUnit(enemy, target);
+        }
+
+        // 목표에서 시작 칸까지 부모를 거슬러 올라가 경로를 복원
+        var path = new List<Vector2Int>();
+        Vector2Int step = target;
+        while (step != enemy.grid && cameFrom.ContainsKey(step))
+        {
+            path.Add(step);
+            step = cameFrom[step];
+        }
+        path.Reverse();
+
+        // 경로 칸을 차례대로 이동 — 플레이어와 동일하게 UnitMover 큐로 부드럽게 보간 이동
+        foreach (Vector2Int tile in path)
+        {
+            if (!MoveUnit(enemy, tile))
+            {
+                Debug.LogWarning($"[BattleScript] {enemy.DisplayName} 경로 이동 실패: ({tile.x}, {tile.y})");
+                break;
+            }
+        }
+
+        return true;
+    }
+
+    // 적의 공격을 실행한다 (현재는 로그만 출력, 추후 확장 가능)
+    private bool ExecuteEnemyAttack(BattleUnitEntry attacker, Vector2Int targetPos)
+    {
+        // 공격 대상 찾기
+        BattleUnitEntry target = null;
+        foreach (var unit in battleUnits)
+        {
+            if (unit.grid == targetPos)
+            {
+                target = unit;
+                break;
+            }
+        }
+
+        if (target != null)
+        {
+            Debug.Log($"[BattleScript] {attacker.DisplayName}이(가) {target.DisplayName}을(를) 공격했습니다!");
+            // 여기에 실제 공격 로직 추가 가능 (데미지 계산, 체력 감소 등)
+            return true;
+        }
+        else
+        {
+            Debug.LogWarning($"[BattleScript] 공격 대상을 찾을 수 없습니다: ({targetPos.x}, {targetPos.y})");
+            return false;
+        }
+    }
+
+    // 현재 턴 유닛이 적인지 확인
+    public bool IsCurrentTurnEnemy()
+    {
+        BattleUnitEntry currentUnit = GetCurrentTurnUnit();
+        return currentUnit != null && currentUnit.isEnemy;
+    }
+
     // 현재 턴 유닛이 원점에서 추가로 더 멀어질 수 있는 칸 수 (mov - 원점까지의 거리)
     public int GetCurrentTurnMovesRemaining()
     {
@@ -1181,6 +1688,331 @@ public class BattleScript : MonoBehaviour
         if (enemyDefinitions != null && enemyDefinitions.TryGetValue(id, out UnitDefinition def)) return def;
         return null;
     }
+    
+    public SkillDefinition GetSkillDefinition(int id)
+    {
+        if (skillDefinitions != null && skillDefinitions.TryGetValue(id, out SkillDefinition def)) return def;
+        return null;
+    }
+    
+    // 모든 스킬 정의 반환 (스킬 메뉴용)
+    public Dictionary<int, SkillDefinition> GetAllSkillDefinitions()
+    {
+        return skillDefinitions ?? new Dictionary<int, SkillDefinition>();
+    }
+    
+    // 스킬(공격) UI가 떠 있는지 여부 — 행동 메뉴의 "공격" 흐름 진행 상태 판단용
+    public bool IsSkillUIActive => isSkillMenuOpen || isSkillRangePreview;
+
+    // 행동 메뉴의 "공격"에서 호출 — 지정한 시전자 위치 기준으로 스킬 선택 메뉴를 연다.
+    public void OpenSkillMenu(Vector2Int casterPos)
+    {
+        skillCasterPosition = casterPos;
+        skillUsedThisFlow = false;
+        ClearSkillSelection();
+        isSkillMenuOpen = true;
+        Debug.Log($"[SkillSystem] 스킬 메뉴 열림 (시전자 ({casterPos.x}, {casterPos.y}))");
+    }
+
+    // 스킬 UI를 모두 닫는다 (스킬을 쓰지 않고 빠져나갈 때).
+    public void CloseSkillUI()
+    {
+        ClearSkillSelection();
+        isSkillMenuOpen = false;
+        Debug.Log("[SkillSystem] 스킬 메뉴 닫힘");
+    }
+
+    // 이번 흐름에서 스킬을 실제로 사용했는지 확인하고 플래그를 소비한다.
+    public bool ConsumeSkillUsedFlag()
+    {
+        bool used = skillUsedThisFlow;
+        skillUsedThisFlow = false;
+        return used;
+    }
+    
+    // 스킬 선택 및 범위 미리보기 시작
+    public void SelectSkill(int skillId, Vector2Int casterPos)
+    {
+        selectedSkill = GetSkillDefinition(skillId);
+        if (selectedSkill == null)
+        {
+            Debug.LogWarning($"[SkillSystem] 스킬 ID {skillId}를 찾을 수 없습니다.");
+            return;
+        }
+        
+        skillCasterPosition = casterPos;
+        isSkillRangePreview = true;
+        isSkillMenuOpen = false;
+        
+        // 스킬 영향 범위 계산
+        CalculateSkillTargets();
+        
+        Debug.Log($"[SkillSystem] 스킬 '{selectedSkill.name}' 선택됨. 범위 미리보기 시작.");
+    }
+    
+    // 스킬 영향 범위 계산
+    private void CalculateSkillTargets()
+    {
+        skillTargetPositions.Clear();
+        
+        if (selectedSkill?.range?.pattern == null)
+        {
+            Debug.LogWarning("[SkillSystem] 스킬 범위 패턴이 없습니다.");
+            return;
+        }
+        
+        var pattern = selectedSkill.range.pattern;
+        var actorPos = selectedSkill.range.actorPosition;
+        
+        if (actorPos == null || actorPos.Length != 2)
+        {
+            Debug.LogWarning("[SkillSystem] 잘못된 액터 위치 정보입니다.");
+            return;
+        }
+        
+        int actorX = actorPos[0];
+        int actorY = actorPos[1];
+        
+        // 패턴을 월드 좌표로 변환
+        for (int patternY = 0; patternY < pattern.Length; patternY++)
+        {
+            var row = pattern[patternY];
+            if (row == null) continue;
+            
+            for (int patternX = 0; patternX < row.Length; patternX++)
+            {
+                if (row[patternX] == 1)
+                {
+                    // 패턴 좌표를 월드 좌표로 변환
+                    int worldX = skillCasterPosition.x + (patternX - actorX);
+                    int worldY = skillCasterPosition.y + (patternY - actorY);
+                    
+                    // 맵 범위 내인지 확인
+                    if (IsValidPosition(worldX, worldY))
+                    {
+                        skillTargetPositions.Add(new Vector2Int(worldX, worldY));
+                    }
+                }
+            }
+        }
+        
+        Debug.Log($"[SkillSystem] {skillTargetPositions.Count}개 타겟 위치 계산됨.");
+    }
+    
+    // 스킬 사용 확인
+    public void ConfirmSkillUse()
+    {
+        if (selectedSkill == null)
+        {
+            Debug.LogWarning("[SkillSystem] 선택된 스킬이 없습니다.");
+            return;
+        }
+        
+        Debug.Log($"[SkillSystem] 스킬 '{selectedSkill.name}' 사용! 타겟 수: {skillTargetPositions.Count}");
+        
+        // 실제 스킬 효과 적용
+        ExecuteSkill();
+        
+        // 스킬 사용 후 정리 — 사용 완료를 표시해 행동 메뉴 흐름이 턴을 넘기도록 한다.
+        ClearSkillSelection();
+        isSkillMenuOpen = false;
+        skillUsedThisFlow = true;
+    }
+    
+    // 스킬 사용 취소
+    public void CancelSkillUse()
+    {
+        if (isSkillRangePreview)
+        {
+            Debug.Log("[SkillSystem] 스킬 사용 취소됨.");
+        }
+        
+        ClearSkillSelection();
+        isSkillMenuOpen = true; // 스킬 메뉴로 다시 돌아가기
+    }
+    
+    // 스킬 선택 상태 정리
+    private void ClearSkillSelection()
+    {
+        selectedSkill = null;
+        isSkillRangePreview = false;
+        skillTargetPositions.Clear();
+    }
+    
+    // 스킬 실제 실행
+    private void ExecuteSkill()
+    {
+        if (selectedSkill == null) return;
+        
+        foreach (var targetPos in skillTargetPositions)
+        {
+            // 타겟 위치에 있는 유닛 찾기
+            var targetUnit = GetUnitAt(targetPos.x, targetPos.y);
+            if (targetUnit != null)
+            {
+                ApplySkillEffect(targetUnit);
+            }
+        }
+    }
+    
+    // 스킬 효과 적용 (단순화)
+    private void ApplySkillEffect(BattleUnitEntry target)
+    {
+        if (selectedSkill == null || target == null) return;
+        
+        switch (selectedSkill.skillType)
+        {
+            case "damage":
+                target.CurrentHP = Mathf.Max(0, target.CurrentHP - selectedSkill.basePower);
+                Debug.Log($"[SkillSystem] {target.UnitName}에게 {selectedSkill.basePower} 데미지!");
+                break;
+                
+            case "heal":
+                target.CurrentHP = Mathf.Min(target.MaxHP, target.CurrentHP + selectedSkill.basePower);
+                Debug.Log($"[SkillSystem] {target.UnitName} 체력 {selectedSkill.basePower} 회복!");
+                break;
+        }
+    }
+    
+    // 스킬 시스템 GUI
+    void OnGUI()
+    {
+        DrawSkillUI();
+    }
+    
+    private void DrawSkillUI()
+    {
+        // 스킬 메뉴 표시
+        if (isSkillMenuOpen)
+        {
+            DrawSkillMenu();
+        }
+        
+        // 스킬 범위 미리보기 표시
+        if (isSkillRangePreview)
+        {
+            DrawSkillPreview();
+        }
+        
+        // 스킬 시스템 도움말
+        DrawSkillHelpText();
+    }
+    
+    private void DrawSkillMenu()
+    {
+        float menuWidth = 300f;
+        float menuHeight = 400f;
+        float menuX = (Screen.width - menuWidth) / 2;
+        float menuY = (Screen.height - menuHeight) / 2;
+        
+        GUI.Box(new Rect(menuX, menuY, menuWidth, menuHeight), "스킬 선택");
+        
+        float buttonY = menuY + 30;
+        float buttonWidth = menuWidth - 20;
+        float buttonHeight = 30;
+        
+        foreach (var kvp in GetAllSkillDefinitions())
+        {
+            var skill = kvp.Value;
+            string buttonText = $"{skill.name} (MP: {skill.mpCost})";
+            
+            if (GUI.Button(new Rect(menuX + 10, buttonY, buttonWidth, buttonHeight), buttonText))
+            {
+                // 행동 메뉴에서 전달받은 현재 유닛 위치를 시전자 위치로 사용
+                SelectSkill(skill.id, skillCasterPosition);
+            }
+            
+            buttonY += buttonHeight + 5;
+            
+            // 메뉴 영역을 벗어나면 중단
+            if (buttonY + buttonHeight > menuY + menuHeight - 20)
+                break;
+        }
+        
+        // 닫기 버튼 — 스킬을 쓰지 않고 행동 메뉴로 되돌아간다.
+        if (GUI.Button(new Rect(menuX + 10, menuY + menuHeight - 40, buttonWidth, 30), "닫기"))
+        {
+            CloseSkillUI();
+        }
+    }
+    
+    private void DrawSkillPreview()
+    {
+        if (selectedSkill == null) return;
+        
+        // 상단에 스킬 정보 표시
+        float infoWidth = 400f;
+        float infoHeight = 120f;
+        float infoX = (Screen.width - infoWidth) / 2;
+        float infoY = 20;
+        
+        GUI.Box(new Rect(infoX, infoY, infoWidth, infoHeight), "");
+        
+        GUI.Label(new Rect(infoX + 10, infoY + 10, infoWidth - 20, 20), 
+                 $"스킬: {selectedSkill.name}");
+        GUI.Label(new Rect(infoX + 10, infoY + 30, infoWidth - 20, 20), 
+                 $"설명: {selectedSkill.description}");
+        GUI.Label(new Rect(infoX + 10, infoY + 50, infoWidth - 20, 20), 
+                 $"MP 소모: {selectedSkill.mpCost}");
+        GUI.Label(new Rect(infoX + 10, infoY + 70, infoWidth - 20, 20), 
+                 $"타겟 수: {skillTargetPositions.Count}");
+        
+        // 확인/취소 버튼
+        float buttonY = infoY + infoHeight + 10;
+        if (GUI.Button(new Rect(infoX, buttonY, 100, 30), "확인 (Enter)"))
+        {
+            ConfirmSkillUse();
+        }
+        
+        if (GUI.Button(new Rect(infoX + 110, buttonY, 100, 30), "취소 (Esc)"))
+        {
+            CancelSkillUse();
+        }
+    }
+    
+    private void DrawSkillHelpText()
+    {
+        // 스킬 범위 미리보기 중에만 조작 도움말을 표시한다.
+        if (!isSkillRangePreview) return;
+
+        float helpWidth = 200f;
+        float helpHeight = 40f;
+        float helpX = Screen.width - helpWidth - 20;
+        float helpY = Screen.height - helpHeight - 20;
+
+        GUI.Box(new Rect(helpX, helpY, helpWidth, helpHeight), "");
+        GUI.Label(new Rect(helpX + 10, helpY + 10, helpWidth - 20, 20), "Enter: 확인, Esc: 취소");
+    }
+    
+    // 스킬 범위 시각화 (씬 뷰에서 확인 가능)
+    void OnDrawGizmos()
+    {
+        if (!isSkillRangePreview || skillTargetPositions == null || skillTargetPositions.Count == 0)
+            return;
+            
+        // 스킬 시전자 위치 (파란색)
+        Gizmos.color = Color.blue;
+        Vector3 casterWorldPos = new Vector3(skillCasterPosition.x, 0.1f, skillCasterPosition.y);
+        Gizmos.DrawCube(casterWorldPos, Vector3.one * 0.8f);
+        
+        // 스킬 영향 범위 (빨간색)
+        Gizmos.color = Color.red;
+        foreach (var targetPos in skillTargetPositions)
+        {
+            Vector3 worldPos = new Vector3(targetPos.x, 0.1f, targetPos.y);
+            Gizmos.DrawCube(worldPos, Vector3.one * 0.6f);
+        }
+        
+        // 선택된 스킬 정보를 씬뷰에 표시
+        if (selectedSkill != null)
+        {
+            Gizmos.color = Color.white;
+            Vector3 labelPos = casterWorldPos + Vector3.up * 2;
+#if UNITY_EDITOR
+            UnityEditor.Handles.Label(labelPos, $"스킬: {selectedSkill.name}\n타겟: {skillTargetPositions.Count}개");
+#endif
+        }
+    }
 
     // 좌표에 유닛 마커 생성 — definition이 있으면 정의 색상/이름/프리팹 사용, 없으면 기본 박스
     private GameObject SpawnUnitMarker(Vector2Int grid, bool isEnemy, UnitDefinition definition)
@@ -1287,6 +2119,22 @@ public class BattleScript : MonoBehaviour
     public bool IsTileOccupied(Vector2Int tilePos)
     {
         return occupiedTiles != null && occupiedTiles.ContainsKey(tilePos);
+    }
+
+    // 특정 좌표에 위치한 배틀 유닛을 반환한다 (없으면 null)
+    public BattleUnitEntry GetUnitAt(int x, int y)
+    {
+        if (battleUnits == null)
+            return null;
+
+        Vector2Int target = new Vector2Int(x, y);
+        foreach (BattleUnitEntry unit in battleUnits)
+        {
+            if (unit != null && unit.grid == target)
+                return unit;
+        }
+
+        return null;
     }
 
     public IReadOnlyList<GameObject> GetEnemyUnits() => enemyUnits;

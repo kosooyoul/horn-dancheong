@@ -31,6 +31,11 @@ public class BattleTurnController : MonoBehaviour
 
     private BattleUnitEntry lastReportedUnit;
 
+    // 적 AI 실행용 타이머
+    private float enemyActionDelay = 1.0f; // 적 행동 간 대기 시간 (초)
+    private float enemyActionTimer = 0f;
+    private bool isEnemyActing = false; // 적 행동(이동 보간 포함)이 진행 중인지 — 중복 실행 방지
+
     // 이동 범위 강조 상태 — 색을 바꾼 타일의 렌더러와 원래 색을 보관해 두었다가 복원한다.
     private readonly Dictionary<Renderer, Color> highlightedTiles = new Dictionary<Renderer, Color>();
     // 강조가 그려진 시점의 유닛/위치 — 바뀌면 다시 계산한다.
@@ -44,6 +49,8 @@ public class BattleTurnController : MonoBehaviour
     private bool isWaitingForMove;
     // 제자리(이동 안 함)를 선택했는지 — true면 메뉴에 "휴식"을 추가한다.
     private bool actionMenuIncludesRest;
+    // "공격"으로 연 스킬(공격) UI 흐름이 진행 중인지 — 끝나면 결과에 따라 턴 종료/행동 메뉴 복귀.
+    private bool isSkillFlowActive;
     // 선택한 목적지 칸 — 강조 표시와 메뉴 위치 계산에 사용한다.
     private Vector2Int actionDestination;
     // OnGUI 버튼 클릭을 다음 Update에서 처리하기 위한 보류 행동 (GUILayout 깨짐 방지)
@@ -62,6 +69,27 @@ public class BattleTurnController : MonoBehaviour
     private void Update()
     {
         if (battleScript == null) return;
+
+        // "공격"으로 연 스킬 UI가 진행 중이면 입력을 막고, 종료 시 결과에 따라 분기한다.
+        if (isSkillFlowActive)
+        {
+            if (!battleScript.IsSkillUIActive)
+            {
+                isSkillFlowActive = false;
+
+                if (battleScript.ConsumeSkillUsedFlag())
+                {
+                    // 스킬을 실제로 사용했으면 턴을 넘긴다.
+                    AdvanceTurnAndResetSelection();
+                }
+                else
+                {
+                    // 스킬을 쓰지 않고 빠져나왔으면 행동 메뉴로 되돌아간다.
+                    OpenActionMenu(actionDestination, actionMenuIncludesRest);
+                }
+            }
+            return;
+        }
 
         // 행동 메뉴가 열려 있으면 이동 입력을 막고, 보류된 메뉴 선택만 처리한다.
         if (isActionMenuOpen)
@@ -86,6 +114,13 @@ public class BattleTurnController : MonoBehaviour
             return;
         }
 
+        // 현재 턴이 적 유닛이면 AI로 자동 행동 실행
+        if (battleScript.IsCurrentTurnEnemy())
+        {
+            HandleEnemyTurn();
+            return;
+        }
+
         Vector2Int direction = ReadDirectionInput();
         if (direction != Vector2Int.zero)
         {
@@ -106,6 +141,44 @@ public class BattleTurnController : MonoBehaviour
         {
             UpdateReachableHighlight();
         }
+    }
+
+    // ── 적 AI 처리 ──────────────────────────────────────────────────────
+
+    // 적 유닛의 턴을 처리한다
+    private void HandleEnemyTurn()
+    {
+        // 이미 적 행동(이동 보간 포함)이 진행 중이면 새 행동을 시작하지 않는다.
+        if (isEnemyActing) return;
+
+        enemyActionTimer += Time.deltaTime;
+
+        // 대기 시간이 지나면 AI 행동 실행
+        if (enemyActionTimer >= enemyActionDelay)
+        {
+            enemyActionTimer = 0f;
+            isEnemyActing = true;
+            StartCoroutine(ExecuteEnemyTurnRoutine());
+        }
+    }
+
+    // 적 AI 행동을 실행하고, 이동 보간이 끝나기를 기다린 뒤 턴을 넘기는 코루틴
+    private System.Collections.IEnumerator ExecuteEnemyTurnRoutine()
+    {
+        bool actionExecuted = battleScript.ExecuteEnemyAI();
+
+        if (actionExecuted)
+        {
+            // 플레이어와 동일하게 이동 보간이 끝날 때까지 대기한다.
+            while (IsCurrentUnitMoving())
+            {
+                yield return null;
+            }
+            yield return new WaitForSeconds(0.5f); // 도착 후 잠시 대기
+        }
+
+        isEnemyActing = false;
+        AdvanceTurnAndResetSelection();
     }
 
     private void OnDisable()
@@ -288,6 +361,15 @@ public class BattleTurnController : MonoBehaviour
         string unitName = current != null ? current.DisplayName : "(없음)";
         Debug.Log($"[BattleTurnController] {unitName} 행동 선택: {action}");
 
+        // "공격"은 스킬 선택 메뉴를 연다(스킬 = 공격으로 통합). 흐름이 끝나면 Update에서 턴 처리.
+        if (action == "공격" && current != null)
+        {
+            isActionMenuOpen = false; // actionMenuIncludesRest는 취소 시 복귀를 위해 유지
+            isSkillFlowActive = true;
+            battleScript.OpenSkillMenu(current.grid);
+            return;
+        }
+
         isActionMenuOpen = false;
         actionMenuIncludesRest = false;
         AdvanceTurnAndResetSelection();
@@ -366,8 +448,8 @@ public class BattleTurnController : MonoBehaviour
     {
         if (!isActionMenuOpen) return;
 
-        // 공격/스킬/대기 (+휴식) + 취소
-        int buttonCount = (actionMenuIncludesRest ? 4 : 3) + 1;
+        // 공격/대기 (+휴식) + 취소
+        int buttonCount = (actionMenuIncludesRest ? 3 : 2) + 1;
         float panelHeight = 44f + buttonCount * 30f;
         Vector2 panelPosition = GetActionMenuScreenPosition(panelHeight);
 
@@ -376,7 +458,6 @@ public class BattleTurnController : MonoBehaviour
         GUILayout.Label("<b>행동 선택</b>", RichLabelStyle());
 
         if (GUILayout.Button("공격")) pendingAction = "공격";
-        if (GUILayout.Button("스킬")) pendingAction = "스킬";
         if (GUILayout.Button("대기")) pendingAction = "대기";
         if (actionMenuIncludesRest && GUILayout.Button("휴식")) pendingAction = "휴식";
         if (GUILayout.Button("취소")) pendingAction = "취소";
