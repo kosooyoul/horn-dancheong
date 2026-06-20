@@ -110,7 +110,6 @@ namespace KD
             if (ground.Raycast(ray, out float dist))
             {
                 grid = gridManager.WorldToGrid(ray.GetPoint(dist));
-                Debug.Log($"[KDBattleTurnController] 평면 교점 → grid={grid} valid={gridManager.IsValidTile(grid)}");
                 return gridManager.IsValidTile(grid);
             }
 
