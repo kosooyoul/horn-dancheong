@@ -15,7 +15,7 @@ MonoBehaviour:
   unitId: 
   unitName: "\uC2E0\uC720\uD558"
   description: 
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ff1fa3c62b0e9b8499090405681435d6, type: 3}
   prefab: {fileID: 4430476179508750244, guid: a486bfcc0a022495e9ccf7de67cbc89d, type: 3}
   role: 3
   attribute: 2

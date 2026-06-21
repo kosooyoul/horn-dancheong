@@ -2955,8 +2955,8 @@ MonoBehaviour:
   spSlider: {fileID: 1091451563}
   spText: {fileID: 0}
   nameText: {fileID: 0}
-  characterPortrait: {fileID: 0}
-  grayscaleMaterial: {fileID: 0}
+  characterPortrait: {fileID: 355240660}
+  grayscaleMaterial: {fileID: 2100000, guid: 89b706d05913b5b409b23ca5dc5339c6, type: 2}
   customHoverArea: {fileID: 355240657}
   hoverAlpha: 0.2
   normalAlpha: 1
@@ -7311,14 +7311,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7c1ed7868660cf4dab452266ed07d20, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KD.CharacterFixedStatUI
-  targetCharacterName: "\uD55C\uB3C4\uC724"
+  targetCharacterName: "\uD604\uB3C4\uC724"
   hpSlider: {fileID: 1238160125}
   hpText: {fileID: 0}
   spSlider: {fileID: 1754157797}
   spText: {fileID: 0}
   nameText: {fileID: 0}
-  characterPortrait: {fileID: 0}
-  grayscaleMaterial: {fileID: 0}
+  characterPortrait: {fileID: 1046589882}
+  grayscaleMaterial: {fileID: 2100000, guid: 89b706d05913b5b409b23ca5dc5339c6, type: 2}
   customHoverArea: {fileID: 1046589881}
   hoverAlpha: 0.2
   normalAlpha: 1
@@ -12207,8 +12207,8 @@ MonoBehaviour:
   spSlider: {fileID: 1006438172}
   spText: {fileID: 0}
   nameText: {fileID: 0}
-  characterPortrait: {fileID: 0}
-  grayscaleMaterial: {fileID: 0}
+  characterPortrait: {fileID: 1937125079}
+  grayscaleMaterial: {fileID: 2100000, guid: 89b706d05913b5b409b23ca5dc5339c6, type: 2}
   customHoverArea: {fileID: 1937125078}
   hoverAlpha: 0.2
   normalAlpha: 1

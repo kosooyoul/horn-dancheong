@@ -79,6 +79,12 @@ namespace HornDancheong.Seongwoo.UI
         {
             if (portraitImage == null) return;
 
+            if (!data.IsPC)
+            {
+                portraitImage.gameObject.SetActive(false);
+                return;
+            }
+
             if (data.PortraitSprite != null)
             {
                 portraitImage.sprite = data.PortraitSprite;

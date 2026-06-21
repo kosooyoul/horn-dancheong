@@ -28,7 +28,17 @@ namespace HornDancheong.Seongwoo.UI
         
         // 만약 Resources 폴더 경로가 필요하다면 사용 가능하나, 기본적으로 UnitData에 할당된 icon Sprite를 사용하도록 연동합니다.
         public string PortraitPath => string.Empty;
-        public Sprite PortraitSprite => _unit.Data.icon;
+        public Sprite PortraitSprite
+        {
+            get
+            {
+                if (!_isPC)
+                {
+                    return null;
+                }
+                return _unit.Data.icon;
+            }
+        }
         
         public float CurrentHp => _unit.CurrentHP;
         public float MaxHp => _unit.Stats.maxHP;

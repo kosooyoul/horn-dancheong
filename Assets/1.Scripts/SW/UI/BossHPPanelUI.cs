@@ -73,7 +73,7 @@ namespace HornDancheong.Seongwoo.UI
 
             float currentHp = bossUnit.CurrentHP;
             float maxHp = bossUnit.Stats.maxHP;
-            string bossName = bossUnit.Data != null ? bossUnit.Data.unitName : "Enemy";
+            string bossName = "도깨비";
 
             // 값 변화가 없다면 UI 갱신을 생략 (성능 최적화)
             if (isInitialized && 
