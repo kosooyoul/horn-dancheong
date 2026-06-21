@@ -232,8 +232,8 @@ public class BattleScript : MonoBehaviour
     private Dictionary<int, ObjectInfo> objectDefinitions;
     
     // 유닛 종류 정의 (ALLYS.json / ENEMIES.json)
-    private Dictionary<int, UnitDefinition> allyDefinitions;
-    private Dictionary<int, UnitDefinition> enemyDefinitions;
+    // private Dictionary<int, UnitDefinition> allyDefinitions;
+    // private Dictionary<int, UnitDefinition> enemyDefinitions;
     
     // 유닛 배치 런타임 상태
     private Transform unitParent;
@@ -263,8 +263,8 @@ public class BattleScript : MonoBehaviour
     // ALLYS.json / ENEMIES.json에서 유닛 종류 정의 로딩
     private void LoadUnitDefinitions()
     {
-        allyDefinitions = LoadUnitDefinitionFile("ALLYS.json");
-        enemyDefinitions = LoadUnitDefinitionFile("ENEMIES.json");
+        // allyDefinitions = LoadUnitDefinitionFile("");
+        // enemyDefinitions = LoadUnitDefinitionFile("");
     }
 
     private Dictionary<int, UnitDefinition> LoadUnitDefinitionFile(string fileName)
@@ -774,13 +774,13 @@ public class BattleScript : MonoBehaviour
     // 유닛 정의 조회
     public UnitDefinition GetAllyDefinition(int id)
     {
-        if (allyDefinitions != null && allyDefinitions.TryGetValue(id, out UnitDefinition def)) return def;
+        // if (allyDefinitions != null && allyDefinitions.TryGetValue(id, out UnitDefinition def)) return def;
         return null;
     }
 
     public UnitDefinition GetEnemyDefinition(int id)
     {
-        if (enemyDefinitions != null && enemyDefinitions.TryGetValue(id, out UnitDefinition def)) return def;
+        // if (enemyDefinitions != null && enemyDefinitions.TryGetValue(id, out UnitDefinition def)) return def;
         return null;
     }
 
@@ -852,34 +852,35 @@ public class BattleScript : MonoBehaviour
     // 플레이어가 빈 아군 슬롯에 유닛을 배치할 때 호출 — ALLYS.json의 id 참조
     public GameObject PlaceAllyAtSlot(Vector2Int slot, int allyId)
     {
-        if (!allySpawnSlots.Contains(slot))
-        {
-            Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})는 아군 스폰 슬롯이 아닙니다.");
-            return null;
-        }
+        throw new System.NotImplementedException();
+        // if (!allySpawnSlots.Contains(slot))
+        // {
+        //     Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})는 아군 스폰 슬롯이 아닙니다.");
+        //     return null;
+        // }
 
-        if (!IsWalkable(slot.x, slot.y))
-        {
-            Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})에 장애물이 있어 배치할 수 없습니다.");
-            return null;
-        }
+        // if (!IsWalkable(slot.x, slot.y))
+        // {
+        //     Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})에 장애물이 있어 배치할 수 없습니다.");
+        //     return null;
+        // }
 
-        if (IsTileOccupied(slot))
-        {
-            Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})에는 이미 유닛이 있습니다.");
-            return null;
-        }
+        // if (IsTileOccupied(slot))
+        // {
+        //     Debug.LogWarning($"[BattleScript] ({slot.x}, {slot.y})에는 이미 유닛이 있습니다.");
+        //     return null;
+        // }
 
-        UnitDefinition definition = GetAllyDefinition(allyId);
-        if (definition == null)
-        {
-            Debug.LogWarning($"[BattleScript] 아군 id {allyId}에 대한 정의를 ALLYS.json에서 찾을 수 없습니다.");
-            return null;
-        }
+        // UnitDefinition definition = GetAllyDefinition(allyId);
+        // if (definition == null)
+        // {
+        //     Debug.LogWarning($"[BattleScript] 아군 id {allyId}에 대한 정의를 ALLYS.json에서 찾을 수 없습니다.");
+        //     return null;
+        // }
 
-        GameObject marker = SpawnUnitMarker(slot, false, definition);
-        allyUnits.Add(marker);
-        return marker;
+        // GameObject marker = SpawnUnitMarker(slot, false, definition);
+        // allyUnits.Add(marker);
+        // return marker;
     }
 
     // 해당 타일에 유닛이 존재하는지 확인
