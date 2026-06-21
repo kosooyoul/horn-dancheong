@@ -100,25 +100,25 @@ public class MapTester : MonoBehaviour
         }
     }
 
-    void OnGUI()
-    {
-        if (availableMaps == null || availableMaps.Count == 0) return;
-        
-        GUILayout.BeginArea(new Rect(10, 10, 300, 150));
-        GUILayout.Box("맵 테스터");
-        
-        MapData currentMap = battleScript.GetCurrentMapData();
-        if (currentMap != null)
-        {
-            GUILayout.Label($"현재 맵: {currentMap.mapName}");
-            GUILayout.Label($"설명: {currentMap.description}");
-            GUILayout.Label($"크기: {currentMap.width}x{currentMap.height}");
-        }
-        
-        GUILayout.Space(10);
-        GUILayout.Label($"[{nextMapKey}] 다음 맵");
-        GUILayout.Label($"[{prevMapKey}] 이전 맵");
-        
-        GUILayout.EndArea();
-    }
+    // void OnGUI()
+    // {
+    //     if (availableMaps == null || availableMaps.Count == 0) return;
+    //
+    //     GUILayout.BeginArea(new Rect(10, 10, 300, 150));
+    //     GUILayout.Box("맵 테스터");
+    //
+    //     MapData currentMap = battleScript.GetCurrentMapData();
+    //     if (currentMap != null)
+    //     {
+    //         GUILayout.Label($"현재 맵: {currentMap.mapName}");
+    //         GUILayout.Label($"설명: {currentMap.description}");
+    //         GUILayout.Label($"크기: {currentMap.width}x{currentMap.height}");
+    //     }
+    //
+    //     GUILayout.Space(10);
+    //     GUILayout.Label($"[{nextMapKey}] 다음 맵");
+    //     GUILayout.Label($"[{prevMapKey}] 이전 맵");
+    //
+    //     GUILayout.EndArea();
+    // }
 }

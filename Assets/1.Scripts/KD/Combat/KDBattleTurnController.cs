@@ -371,94 +371,94 @@ namespace KD
 
         // ── OnGUI ─────────────────────────────────────────────────────────
 
-        private void OnGUI()
-        {
-            if (battleManager == null) return;
-
-            switch (battleManager.CurrentPhase)
-            {
-                case BattlePhase.Deployment:
-                    DrawDeploymentPanel();
-                    break;
-                case BattlePhase.PlayerPhase:
-                    if (battleManager.CurrentActionMode == BattleActionMode.None)
-                        DrawActionMenu();
-                    break;
-            }
-        }
-
-        private void DrawDeploymentPanel()
-        {
-            var area = new Rect(Screen.width - 180f, 10f, 170f, 90f);
-            GUILayout.BeginArea(area, GUI.skin.box);
-            GUILayout.Label("<b>배치 단계</b>", RichStyle());
-
-            string unitName = selectedDeployUnit?.unitData.unitName ?? "(선택 없음)";
-            GUILayout.Label($"선택: {unitName}");
-
-            if (GUILayout.Button("배치 확정 [Enter]"))
-                pendingAction = "배치확정";
-
-            GUILayout.EndArea();
-        }
-
-        private void DrawActionMenu()
-        {
-            BattleUnit unit = battleManager.SelectedUnit;
-            if (unit == null) return;
-
-            float panelHeight = 44f + 3 * 30f;
-            Vector2 pos = GetMenuScreenPosition(panelHeight);
-            var area = new Rect(pos.x, pos.y, actionMenuWidth, panelHeight);
-
-            GUILayout.BeginArea(area, GUI.skin.box);
-            GUILayout.Label($"<b>{unit.Data.unitName}</b>  AP:{unit.CurrentAP}", RichStyle());
-
-            // 이동 버튼 - UnitData.moveAPCost 확인
-            bool canMove = unit.HasEnoughAP(unit.Data.moveAPCost);
-            GUI.enabled = canMove;
-            string moveText = canMove ? "이동 [1/M]" : $"이동 [1/M] (AP {unit.Data.moveAPCost} 필요)";
-            if (GUILayout.Button(moveText))  pendingAction = "이동";
-
-            // 스킬 버튼 - 사용 가능한 스킬이 있는지 확인
-            bool hasUsableSkill = HasAnyUsableSkillWithEnoughAP(unit);
-            GUI.enabled = hasUsableSkill;
-            string skillText = hasUsableSkill ? "스킬 [2/K]" : "스킬 [2/K] (AP 부족)";
-            if (GUILayout.Button(skillText))  pendingAction = "스킬";
-
-            // 대기 버튼 - 항상 활성화
-            GUI.enabled = true;
-            if (GUILayout.Button("대기 [W]"))    pendingAction = "대기";
-
-            GUI.enabled = true; // GUI 상태 복원
-            GUILayout.EndArea();
-        }
-
-        private Vector2 GetMenuScreenPosition(float panelHeight)
-        {
-            Camera cam = GetBattleCamera();
-            if (cam != null && gridManager != null && battleManager.SelectedUnit != null)
-            {
-                Vector2Int tile  = battleManager.SelectedUnit.CurrentTilePos;
-                Vector3 world    = gridManager.GridToWorld(tile);
-                Vector3 screen   = cam.WorldToScreenPoint(world);
-
-                if (screen.z > 0f)
-                {
-                    float x = Mathf.Clamp(screen.x + 30f, 0f, Screen.width - actionMenuWidth);
-                    float y = Mathf.Clamp(Screen.height - screen.y - panelHeight * 0.5f, 0f, Screen.height - panelHeight);
-                    return new Vector2(x, y);
-                }
-            }
-            return new Vector2(Screen.width - actionMenuWidth - 10f, 10f);
-        }
-
-        private static GUIStyle cachedRichStyle;
-        private static GUIStyle RichStyle()
-        {
-            if (cachedRichStyle == null)
-                cachedRichStyle = new GUIStyle(GUI.skin.label) { richText = true };
-            return cachedRichStyle;
-        }
+        // private void OnGUI()
+        // {
+        //     if (battleManager == null) return;
+        //
+        //     switch (battleManager.CurrentPhase)
+        //     {
+        //         case BattlePhase.Deployment:
+        //             DrawDeploymentPanel();
+        //             break;
+        //         case BattlePhase.PlayerPhase:
+        //             if (battleManager.CurrentActionMode == BattleActionMode.None)
+        //                 DrawActionMenu();
+        //             break;
+        //     }
+        // }
+        //
+        // private void DrawDeploymentPanel()
+        // {
+        //     var area = new Rect(Screen.width - 180f, 10f, 170f, 90f);
+        //     GUILayout.BeginArea(area, GUI.skin.box);
+        //     GUILayout.Label("<b>배치 단계</b>", RichStyle());
+        //
+        //     string unitName = selectedDeployUnit?.unitData.unitName ?? "(선택 없음)";
+        //     GUILayout.Label($"선택: {unitName}");
+        //
+        //     if (GUILayout.Button("배치 확정 [Enter]"))
+        //         pendingAction = "배치확정";
+        //
+        //     GUILayout.EndArea();
+        // }
+        //
+        // private void DrawActionMenu()
+        // {
+        //     BattleUnit unit = battleManager.SelectedUnit;
+        //     if (unit == null) return;
+        //
+        //     float panelHeight = 44f + 3 * 30f;
+        //     Vector2 pos = GetMenuScreenPosition(panelHeight);
+        //     var area = new Rect(pos.x, pos.y, actionMenuWidth, panelHeight);
+        //
+        //     GUILayout.BeginArea(area, GUI.skin.box);
+        //     GUILayout.Label($"<b>{unit.Data.unitName}</b>  AP:{unit.CurrentAP}", RichStyle());
+        //
+        //     // 이동 버튼 - UnitData.moveAPCost 확인
+        //     bool canMove = unit.HasEnoughAP(unit.Data.moveAPCost);
+        //     GUI.enabled = canMove;
+        //     string moveText = canMove ? "이동 [1/M]" : $"이동 [1/M] (AP {unit.Data.moveAPCost} 필요)";
+        //     if (GUILayout.Button(moveText))  pendingAction = "이동";
+        //
+        //     // 스킬 버튼 - 사용 가능한 스킬이 있는지 확인
+        //     bool hasUsableSkill = HasAnyUsableSkillWithEnoughAP(unit);
+        //     GUI.enabled = hasUsableSkill;
+        //     string skillText = hasUsableSkill ? "스킬 [2/K]" : "스킬 [2/K] (AP 부족)";
+        //     if (GUILayout.Button(skillText))  pendingAction = "스킬";
+        //
+        //     // 대기 버튼 - 항상 활성화
+        //     GUI.enabled = true;
+        //     if (GUILayout.Button("대기 [W]"))    pendingAction = "대기";
+        //
+        //     GUI.enabled = true; // GUI 상태 복원
+        //     GUILayout.EndArea();
+        // }
+        //
+        // private Vector2 GetMenuScreenPosition(float panelHeight)
+        // {
+        //     Camera cam = GetBattleCamera();
+        //     if (cam != null && gridManager != null && battleManager.SelectedUnit != null)
+        //     {
+        //         Vector2Int tile  = battleManager.SelectedUnit.CurrentTilePos;
+        //         Vector3 world    = gridManager.GridToWorld(tile);
+        //         Vector3 screen   = cam.WorldToScreenPoint(world);
+        //
+        //         if (screen.z > 0f)
+        //         {
+        //             float x = Mathf.Clamp(screen.x + 30f, 0f, Screen.width - actionMenuWidth);
+        //             float y = Mathf.Clamp(Screen.height - screen.y - panelHeight * 0.5f, 0f, Screen.height - panelHeight);
+        //             return new Vector2(x, y);
+        //         }
+        //     }
+        //     return new Vector2(Screen.width - actionMenuWidth - 10f, 10f);
+        // }
+        //
+        // private static GUIStyle cachedRichStyle;
+        // private static GUIStyle RichStyle()
+        // {
+        //     if (cachedRichStyle == null)
+        //         cachedRichStyle = new GUIStyle(GUI.skin.label) { richText = true };
+        //     return cachedRichStyle;
+        // }
     }
 }

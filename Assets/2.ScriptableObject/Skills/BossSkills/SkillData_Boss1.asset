@@ -41,7 +41,7 @@ MonoBehaviour:
   projectileSpeed: 8
   projectileArc: 0
   projectileArcHeight: 1.5
-  useCameraShake: 0
+  useCameraShake: 1
   shakeDuration: 0.2
   shakeMagnitude: 0.15
   vfxLifetime: 1
