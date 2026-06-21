@@ -12,8 +12,19 @@ namespace HornDancheong.Seongwoo.UI
         private readonly BattleUnit _unit;
         private readonly bool _isPC;
 
-        public string Id => _unit.Data.unitId;
-        public string CharacterName => _unit.Data.unitName;
+        public string Id => _unit.InstanceId;
+
+        public string CharacterName
+        {
+            get
+            {
+                if (!_isPC)
+                {
+                    return "도깨비";
+                }
+                return _unit.Data.unitName;
+            }
+        }
         
         // 만약 Resources 폴더 경로가 필요하다면 사용 가능하나, 기본적으로 UnitData에 할당된 icon Sprite를 사용하도록 연동합니다.
         public string PortraitPath => string.Empty;

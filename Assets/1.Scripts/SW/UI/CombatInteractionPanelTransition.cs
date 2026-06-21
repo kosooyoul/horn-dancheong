@@ -91,6 +91,7 @@ namespace HornDancheong.Seongwoo.UI
         
         private bool _isInitialized = false;
         private bool _isPlayerTurnActive = false;
+        private bool _managersSearched = false;
 
         /// <summary>
         /// 현재 플레이어 턴이 활성화된 상태인지 여부를 반환합니다.
@@ -102,7 +103,6 @@ namespace HornDancheong.Seongwoo.UI
         private void Awake()
         {
             _rectTransform = GetComponent<RectTransform>();
-            Initialize();
         }
 
         private void Start()
@@ -201,6 +201,10 @@ namespace HornDancheong.Seongwoo.UI
 
             if (battleManager != null)
             {
+                if (battleManager.IsInitiativeAnimating)
+                {
+                    return false;
+                }
                 return battleManager.CurrentPhase == BattlePhase.PlayerPhase &&
                        battleManager.SelectedUnit != null &&
                        battleManager.CurrentActionMode == BattleActionMode.None;

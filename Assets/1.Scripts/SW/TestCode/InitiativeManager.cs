@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 namespace HornDancheong.Seongwoo.UI
@@ -22,12 +23,25 @@ namespace HornDancheong.Seongwoo.UI
         // 정렬 순서를 유지하여 absolute 좌표 이동을 관리하는 내부 리스트
         private readonly List<CharacterPanelUI> _panelsList = new List<CharacterPanelUI>();
 
+        [Header("Turn Text Settings")]
+        [SerializeField] private TMP_Text _turnText;
+        [SerializeField] private float _textFadeDuration = 0.5f;
+        [SerializeField] private float _textDisplayDuration = 1.0f;
+
         private RectTransform _rectTransform;
         private Coroutine _activeAnimationCoroutine;
+        private Coroutine _turnTextCoroutine;
+
+        public bool IsAnimating => _activeAnimationCoroutine != null;
 
         private void Awake()
         {
             _rectTransform = GetComponent<RectTransform>();
+            if (_turnText != null)
+            {
+                _turnText.color = new Color(_turnText.color.r, _turnText.color.g, _turnText.color.b, 0f);
+                _turnText.gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
@@ -121,13 +135,34 @@ namespace HornDancheong.Seongwoo.UI
         /// </summary>
         public void UpdateTurnOrder(IEnumerable<ICharacterBattleInfo> characters)
         {
+            var newCharacters = characters.Where(c => c != null).ToList();
+
+            // 순서 변경 감지: 현재 리스트의 캐릭터 ID 순서와 새로운 캐릭터 ID 순서가 100% 일치하는지 비교
+            bool isIdentical = _panelsList.Count == newCharacters.Count;
+            if (isIdentical)
+            {
+                for (int i = 0; i < _panelsList.Count; i++)
+                {
+                    if (_panelsList[i].CharacterId != newCharacters[i].Id)
+                    {
+                        isIdentical = false;
+                        break;
+                    }
+                }
+            }
+
+            // 멤버 구성과 정렬 순서가 100% 동일하면 굳이 재정렬 연출을 돌리지 않고 즉시 반환
+            if (isIdentical)
+            {
+                return;
+            }
+
             if (_activeAnimationCoroutine != null)
             {
                 StopCoroutine(_activeAnimationCoroutine);
                 ForceApplyTargets();
             }
 
-            var newCharacters = characters.Where(c => c != null).ToList();
             var newIds = new HashSet<string>(newCharacters.Select(c => c.Id));
 
             // 1. 더이상 존재하지 않는 캐릭터 UI 제거
@@ -457,7 +492,7 @@ namespace HornDancheong.Seongwoo.UI
         /// </summary>
         public void NextTurn()
         {
-            if (_panelsList.Count <= 1) return;
+            if (_panelsList.Count <= 0) return;
 
             // 실행 중인 애니메이션이 있으면 즉시 종료하고 최종 강제 정렬
             if (_activeAnimationCoroutine != null)
@@ -620,6 +655,51 @@ namespace HornDancheong.Seongwoo.UI
             {
                 Destroy(child.gameObject);
             }
+        }
+
+        public void ShowTurnIndicator(int turnNumber)
+        {
+            if (_turnText == null) return;
+
+            if (_turnTextCoroutine != null)
+            {
+                StopCoroutine(_turnTextCoroutine);
+            }
+            _turnTextCoroutine = StartCoroutine(TurnTextFadeCoroutine(turnNumber));
+        }
+
+        private IEnumerator TurnTextFadeCoroutine(int turnNumber)
+        {
+            _turnText.text = $"{turnNumber}번째 턴";
+            _turnText.gameObject.SetActive(true);
+
+            // Fade In
+            float elapsed = 0f;
+            while (elapsed < _textFadeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float alpha = Mathf.Clamp01(elapsed / _textFadeDuration);
+                _turnText.color = new Color(_turnText.color.r, _turnText.color.g, _turnText.color.b, alpha);
+                yield return null;
+            }
+            _turnText.color = new Color(_turnText.color.r, _turnText.color.g, _turnText.color.b, 1f);
+
+            // 대기
+            yield return new WaitForSeconds(_textDisplayDuration);
+
+            // Fade Out
+            elapsed = 0f;
+            while (elapsed < _textFadeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float alpha = Mathf.Clamp01(1f - (elapsed / _textFadeDuration));
+                _turnText.color = new Color(_turnText.color.r, _turnText.color.g, _turnText.color.b, alpha);
+                yield return null;
+            }
+            _turnText.color = new Color(_turnText.color.r, _turnText.color.g, _turnText.color.b, 0f);
+            _turnText.gameObject.SetActive(false);
+
+            _turnTextCoroutine = null;
         }
     }
 }

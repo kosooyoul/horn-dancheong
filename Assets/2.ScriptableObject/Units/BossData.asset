@@ -23,7 +23,7 @@ MonoBehaviour:
   movementType: 0
   moveAPCost: 0
   baseStats:
-    agility: 5
+    agility: 6
     spirit: 5
     guard: 5
     luck: 5
