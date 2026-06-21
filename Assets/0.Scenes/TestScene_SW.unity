@@ -2116,11 +2116,11 @@ MonoBehaviour:
   ownedUnits:
   - instanceId: 
     unitData: {fileID: 11400000, guid: 258a8454f9a0d594694a1fe63dfc0812, type: 2}
-    equippedOptionalSkill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
+    equippedOptionalSkill: {fileID: 0}
     level: 1
   - instanceId: 
     unitData: {fileID: 11400000, guid: 85166c5a722b2934998a2175943c0288, type: 2}
-    equippedOptionalSkill: {fileID: 11400000, guid: d8bada2a70f249a4f92283f91affe4ea, type: 2}
+    equippedOptionalSkill: {fileID: 0}
     level: 1
   - instanceId: 
     unitData: {fileID: 11400000, guid: 9541b1b72b04fb94c94ecffd277ac39d, type: 2}
@@ -2938,7 +2938,6 @@ GameObject:
   m_Component:
   - component: {fileID: 355240657}
   - component: {fileID: 355240661}
-  - component: {fileID: 355240660}
   - component: {fileID: 355240659}
   - component: {fileID: 355240658}
   m_Layer: 5
@@ -2986,7 +2985,7 @@ MonoBehaviour:
   spSlider: {fileID: 1091451563}
   spText: {fileID: 0}
   nameText: {fileID: 0}
-  characterPortrait: {fileID: 355240660}
+  characterPortrait: {fileID: 0}
   grayscaleMaterial: {fileID: 2100000, guid: 89b706d05913b5b409b23ca5dc5339c6, type: 2}
   customHoverArea: {fileID: 355240657}
   hoverAlpha: 0.2
@@ -3005,36 +3004,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &355240660
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 355240656}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 0
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &355240661
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7259,7 +7228,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1046589881}
   - component: {fileID: 1046589883}
-  - component: {fileID: 1046589882}
   - component: {fileID: 1046589885}
   - component: {fileID: 1046589884}
   m_Layer: 5
@@ -7289,36 +7257,6 @@ RectTransform:
   m_AnchoredPosition: {x: 16, y: -220}
   m_SizeDelta: {x: 180, y: 220}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &1046589882
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1046589880}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 0
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1046589883
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7345,7 +7283,7 @@ MonoBehaviour:
   spSlider: {fileID: 1754157797}
   spText: {fileID: 0}
   nameText: {fileID: 0}
-  characterPortrait: {fileID: 1046589882}
+  characterPortrait: {fileID: 0}
   grayscaleMaterial: {fileID: 2100000, guid: 89b706d05913b5b409b23ca5dc5339c6, type: 2}
   customHoverArea: {fileID: 1046589881}
   hoverAlpha: 0.2
@@ -12149,7 +12087,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1937125078}
   - component: {fileID: 1937125080}
-  - component: {fileID: 1937125079}
   - component: {fileID: 1937125082}
   - component: {fileID: 1937125081}
   m_Layer: 5
@@ -12179,36 +12116,6 @@ RectTransform:
   m_AnchoredPosition: {x: 215.66667, y: -220}
   m_SizeDelta: {x: 180, y: 220}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &1937125079
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1937125077}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 0
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1937125080
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -12235,7 +12142,7 @@ MonoBehaviour:
   spSlider: {fileID: 1006438172}
   spText: {fileID: 0}
   nameText: {fileID: 0}
-  characterPortrait: {fileID: 1937125079}
+  characterPortrait: {fileID: 0}
   grayscaleMaterial: {fileID: 2100000, guid: 89b706d05913b5b409b23ca5dc5339c6, type: 2}
   customHoverArea: {fileID: 1937125078}
   hoverAlpha: 0.2
