@@ -68,6 +68,20 @@ namespace KD
 
         // ── 외부 조회용 프로퍼티 ─────────────────────────────────────────
 
+        public event System.Action OnTurnUpdated;
+
+        public BattleUnit GetUnitByName(string unitName)
+        {
+            if (string.IsNullOrEmpty(unitName)) return null;
+            return allUnits.Find(u => u.Data != null && u.Data.unitName == unitName);
+        }
+
+        public BattleUnit GetFirstEnemyUnit()
+        {
+            if (enemyUnits == null || enemyUnits.Count == 0) return null;
+            return enemyUnits.Find(u => u != null && !u.IsDead);
+        }
+
         public BattlePhase      CurrentPhase      => currentPhase;
         public BattleActionMode CurrentActionMode => currentActionMode;
         public BattleUnit       SelectedUnit      => selectedUnit;
@@ -228,6 +242,14 @@ namespace KD
 
         private void StartBattlePhase()
         {
+            if (HornDancheong.Seongwoo.UI.UIManager.Instance != null)
+            {
+                HornDancheong.Seongwoo.UI.UIManager.Instance.ShowPanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_InitiativeTrack);
+                HornDancheong.Seongwoo.UI.UIManager.Instance.ShowPanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_CombatInteraction);
+                HornDancheong.Seongwoo.UI.UIManager.Instance.ShowPanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_CharacterFixedStatUI);
+                HornDancheong.Seongwoo.UI.UIManager.Instance.ShowPanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_BossHP);
+            }
+
             turnOrder = TurnOrderManager.BuildTurnOrder(allUnits);
             turnIndex = 0;
 
@@ -264,6 +286,9 @@ namespace KD
             }
 
             BattleUnit current = turnOrder[turnIndex];
+
+            // 턴이 실질적으로 업데이트되었음을 알림
+            OnTurnUpdated?.Invoke();
 
             if (current.TeamId == 0)
             {
@@ -671,6 +696,7 @@ namespace KD
                     HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_CombatInteraction);
                     HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_InitiativeTrack);
                     HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_BossHP);
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_CharacterFixedStatUI);
                     HornDancheong.Seongwoo.UI.UIManager.Instance.ShowPanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_MainMenu);
                 }
 
@@ -687,6 +713,7 @@ namespace KD
                     HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_CombatInteraction);
                     HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_InitiativeTrack);
                     HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_BossHP);
+                    HornDancheong.Seongwoo.UI.UIManager.Instance.HidePanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_CharacterFixedStatUI);
                     HornDancheong.Seongwoo.UI.UIManager.Instance.ShowPanel(HornDancheong.Seongwoo.UI.UIPanelType.Panel_Dialogue, victoryDialogueIndex);
                 }
 

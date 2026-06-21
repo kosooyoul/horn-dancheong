@@ -27,89 +27,68 @@ namespace HornDancheong.Seongwoo.UI
         [Tooltip("보스의 체력 비율을 표시할 텍스트 (예: 50 / 100) (옵션)")]
         [SerializeField] private TMP_Text hpRatioText;
 
-        // ====================================================================
-        // [연결 준비] 적 캐릭터(보스) 데이터소스 참조
-        // 실제 프로젝트 구조 및 전투 매니저에 맞춰 적합한 방식을 활성화하여 사용하세요.
-        // ====================================================================
+        private TacticalBattleManager battleManager;
 
-        // 1. KD.BattleUnit 형식의 적 캐릭터 참조
-        private BattleUnit _bossBattleUnit;
+        // 캐싱된 상태 값 (이전 데이터와 같을 경우 UI 갱신을 생략하여 최적화)
+        private float lastHP = -1f;
+        private float lastMaxHP = -1f;
+        private string lastBossName = "";
+        private bool isInitialized = false;
 
-        // 2. BattleUnitEntry 형식의 적 캐릭터 참조 (BattleScript 등 전역 사용 시)
-        private BattleUnitEntry _bossBattleUnitEntry;
-
-        // 3. ICharacterBattleInfo 인터페이스 형식의 캐릭터 정보 참조 (추상화 레이어 사용 시)
-        private ICharacterBattleInfo _bossBattleInfo;
-
-        /// <summary>
-        /// KD.BattleUnit 타입의 적 캐릭터를 보스로 등록하고 UI를 갱신합니다.
-        /// </summary>
-        public void SetBossCharacter(BattleUnit unit)
+        private void Start()
         {
-            _bossBattleUnit = unit;
-            _bossBattleUnitEntry = null;
-            _bossBattleInfo = null;
+            // 씬 내의 TacticalBattleManager 탐색 및 턴 이벤트 바인딩
+            battleManager = FindObjectOfType<TacticalBattleManager>();
+            if (battleManager != null)
+            {
+                battleManager.OnTurnUpdated += AutoRefreshBossUI;
+            }
 
-            UpdateBossUI();
+            // 초기 자동 갱신 시도
+            AutoRefreshBossUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (battleManager != null)
+            {
+                battleManager.OnTurnUpdated -= AutoRefreshBossUI;
+            }
         }
 
         /// <summary>
-        /// BattleUnitEntry 타입의 적 캐릭터를 보스로 등록하고 UI를 갱신합니다.
+        /// 턴이 변경될 때 자동으로 감지되는 첫 번째 적의 체력과 이름을 갱신합니다.
         /// </summary>
-        public void SetBossCharacter(BattleUnitEntry entry)
+        public void AutoRefreshBossUI()
         {
-            _bossBattleUnit = null;
-            _bossBattleUnitEntry = entry;
-            _bossBattleInfo = null;
+            if (battleManager == null) return;
 
-            UpdateBossUI();
-        }
-
-        /// <summary>
-        /// ICharacterBattleInfo 타입의 보스 정보를 등록하고 UI를 갱신합니다.
-        /// </summary>
-        public void SetBossCharacter(ICharacterBattleInfo info)
-        {
-            _bossBattleUnit = null;
-            _bossBattleUnitEntry = null;
-            _bossBattleInfo = info;
-
-            UpdateBossUI();
-        }
-
-        /// <summary>
-        /// 연결된 보스의 상태(체력 및 이름)를 불러와 UI를 실시간으로 갱신합니다.
-        /// </summary>
-        public void UpdateBossUI()
-        {
-            string bossName = "Boss";
-            float currentHp = 0f;
-            float maxHp = 1f; // 0으로 나누기 방지용
-
-            if (_bossBattleUnit != null)
+            // 전투에 참여 중인 첫 번째 살아있는 적 탐색
+            BattleUnit bossUnit = battleManager.GetFirstEnemyUnit();
+            if (bossUnit == null)
             {
-                bossName = _bossBattleUnit.Data != null ? _bossBattleUnit.Data.unitName : "Boss";
-                currentHp = _bossBattleUnit.CurrentHP;
-                maxHp = _bossBattleUnit.Stats.maxHP;
-            }
-            else if (_bossBattleUnitEntry != null)
-            {
-                bossName = _bossBattleUnitEntry.DisplayName;
-                currentHp = _bossBattleUnitEntry.CurrentHP;
-                maxHp = _bossBattleUnitEntry.MaxHP;
-            }
-            else if (_bossBattleInfo != null)
-            {
-                bossName = _bossBattleInfo.CharacterName;
-                currentHp = _bossBattleInfo.CurrentHp;
-                maxHp = _bossBattleInfo.MaxHp;
-            }
-            else
-            {
-                // 데이터 소스가 연결되지 않은 경우 임시 데이터 또는 에디터 테스트 데이터를 사용할 수 있습니다.
-                // Debug.LogWarning("[BossHPPanelUI] Boss Character is not assigned yet.");
+                // 감지되는 적이 없거나 사망한 경우 리턴 (또는 연동하지 않음)
                 return;
             }
+
+            float currentHp = bossUnit.CurrentHP;
+            float maxHp = bossUnit.Stats.maxHP;
+            string bossName = bossUnit.Data != null ? bossUnit.Data.unitName : "Enemy";
+
+            // 값 변화가 없다면 UI 갱신을 생략 (성능 최적화)
+            if (isInitialized && 
+                Mathf.Approximately(lastHP, currentHp) && 
+                Mathf.Approximately(lastMaxHP, maxHp) && 
+                lastBossName == bossName)
+            {
+                return;
+            }
+
+            // 값 갱신
+            lastHP = currentHp;
+            lastMaxHP = maxHp;
+            lastBossName = bossName;
+            isInitialized = true;
 
             // 1. 이름 갱신
             if (bossNameText != null)
@@ -117,7 +96,7 @@ namespace HornDancheong.Seongwoo.UI
                 bossNameText.text = bossName;
             }
 
-            // 2. 슬라이더 바 (BossSliderBar/BossHPBar) 값 갱신
+            // 2. 슬라이더 바 값 갱신
             if (bossSliderBar != null)
             {
                 bossSliderBar.maxValue = maxHp;

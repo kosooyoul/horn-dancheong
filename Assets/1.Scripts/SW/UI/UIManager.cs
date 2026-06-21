@@ -95,6 +95,20 @@ namespace HornDancheong.Seongwoo.UI
                 {
                     panelGo.SetActive(true);
                 }
+
+                // 특정 패널 활성화 시 연동 처리
+                if (panelType == UIPanelType.Panel_MainMenu)
+                {
+                    HidePanel(UIPanelType.Panel_CombatInteraction);
+                    HidePanel(UIPanelType.Panel_InitiativeTrack);
+                    HidePanel(UIPanelType.Panel_BossHP);
+                    HidePanel(UIPanelType.Panel_CharacterFixedStatUI);
+                }
+                else if (panelType == UIPanelType.Panel_CombatInteraction)
+                {
+                    ShowPanel(UIPanelType.Panel_CharacterFixedStatUI);
+                    ShowPanel(UIPanelType.Panel_BossHP);
+                }
             }
             else
             {

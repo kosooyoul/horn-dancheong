@@ -12,6 +12,7 @@ namespace HornDancheong.Seongwoo.UI
         Panel_InitiativeTrack,
         Panel_Batch,
         Panel_EscMenu,
-        Panel_BossHP
+        Panel_BossHP,
+        Panel_CharacterFixedStatUI
     }
 }

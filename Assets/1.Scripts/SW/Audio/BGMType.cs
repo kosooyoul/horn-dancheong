@@ -4,6 +4,11 @@ namespace HornDancheong.Audio
     public enum BGMType
     {
         None = 0,
-        Tides_of_Time = 1,
+        BGM_Bright2 = 1,
+        BGM_Bright3 = 2,
+        BGM_Bright4 = 3,
+        BGM_Danger4 = 4,
+        BGM_Peace3 = 5,
+        BGM_Peace4 = 6,
     }
 }
